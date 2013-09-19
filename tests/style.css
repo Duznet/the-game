@@ -1,0 +1,19 @@
+body {
+    background-color: #eee;
+    font-family: sans-serif;
+    font-size: 1.2em;
+}
+
+#content {
+    margin-left: 20%;
+    margin-right: 20%;
+}
+
+.ok {
+    background-color: #a1d35f;
+}
+
+.failed {
+    background-color: #ba6f64;
+}
+
