@@ -11,7 +11,7 @@ class UserController(BasicController):
 
     def signup(self):
         try:
-            self.users.new(login = self.json['login'], password = self.json['password'], sid = 'asda')
+            self.users.new(login = self.json['login'], password = self.json['password'])
         except CommitException:
             return jsonify({"result" : "userExists"})
         return jsonify({"result" : "ok"})
@@ -32,6 +32,15 @@ class UserController(BasicController):
             user = user.items()[0]
             user.sid = ""
             user.save
+            return jsonify({"result" : "ok"})
+        else:
+            return jsonify({"result" : "badSid"})
+
+    def sendMessage(self):
+        user = self.users.filter(sid = self.json['sid'])
+        if user.count() == 1:
+            user = user.items()[0]
+            user.new_message(self.json['text'])
             return jsonify({"result" : "ok"})
         else:
             return jsonify({"result" : "badSid"})
