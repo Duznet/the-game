@@ -1,11 +1,11 @@
-var tests = [
+tests = [
 
     {
         name: "Unknown action",
         input: {
             action: "aw##$#$!@",
             params: {}
-        }
+        },
         expected: {
             result: "unknownAction"
         }
@@ -22,6 +22,7 @@ var tests = [
         },
         expected: {
             result: "ok"
+        }
     },
 
     {

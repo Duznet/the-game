@@ -5,7 +5,7 @@ function runTests () {
         $.ajax({
             type: "POST",
             url: "http://localhost:5000",
-            data: JSON.stringify(input),
+            data: JSON.stringify(test.input),
             dataType: "json",
             contentType: "application/json",
             success: function (data) {
