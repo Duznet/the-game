@@ -1,4 +1,4 @@
-from flask import jsonify
+import json
 from datetime import datetime
 from basic_controller import BasicController
 
@@ -11,4 +11,4 @@ class MessageController(BasicController):
     def getMessages(self):
         timestamp = datetime(json['since'])
         messages = self.messages.filter(timestamp__ge = timestamp)
-        return jsonify(map((lambda x: { "time" : x.timestamp, "text" : x.text, "login" : x.user.login}), messages.items()))
+        return json.dumps(map((lambda x: { "time" : x.timestamp, "text" : x.text, "login" : x.user.login}), messages.items()))

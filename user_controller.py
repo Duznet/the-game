@@ -1,7 +1,7 @@
 from basic_controller import BasicController
 from datetime import datetime
 from stdnet.utils.exceptions import CommitException
-from flask import jsonify
+import json
 
 class UserController(BasicController):
     """Controller for creating and authenticating users"""
@@ -13,8 +13,8 @@ class UserController(BasicController):
         try:
             self.users.new(login = self.json['login'], password = self.json['password'])
         except CommitException:
-            return jsonify({"result" : "userExists"})
-        return jsonify({"result" : "ok"})
+            return json.dumps({"result" : "userExists"})
+        return json.dumps({"result" : "ok"})
 
     def signin(self):
         user = self.users.filter(login = self.json['login'], password = self.json['password'])
@@ -22,9 +22,9 @@ class UserController(BasicController):
             user = user.items()[0]
             user.sid = user.login + user.password + str(datetime.now())
             user.save
-            return jsonify({"result" : "ok", "sid" : user.sid})
+            return json.dumps({"result" : "ok", "sid" : user.sid})
         else:
-            return jsonify({"result" : "incorrect"})
+            return json.dumps({"result" : "incorrect"})
 
     def signout(self):
         user = self.users.filter(sid = self.json['sid'])
@@ -32,15 +32,15 @@ class UserController(BasicController):
             user = user.items()[0]
             user.sid = ""
             user.save
-            return jsonify({"result" : "ok"})
+            return json.dumps({"result" : "ok"})
         else:
-            return jsonify({"result" : "badSid"})
+            return json.dumps({"result" : "badSid"})
 
     def sendMessage(self):
         user = self.users.filter(sid = self.json['sid'])
         if user.count() == 1:
             user = user.items()[0]
             user.new_message(self.json['text'])
-            return jsonify({"result" : "ok"})
+            return json.dumps({"result" : "ok"})
         else:
-            return jsonify({"result" : "badSid"})
+            return json.dumps({"result" : "badSid"})

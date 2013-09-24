@@ -2,35 +2,44 @@ import os
 from stdnet import odm
 from user_controller import UserController
 from message_controller import MessageController
-from flask import Flask, redirect, render_template, request, json, jsonify
+import json
 from redis import Redis
 from user import User
 from message import Message
-
-app = Flask(__name__)
-app.debug = True
+from tornado import ioloop, web, autoreload
 
 models = odm.Router('redis://127.0.0.1:6379')
 models.register(User)
 models.register(Message)
 
-controllers = {
-    'signup' : UserController,
-    'signin' : UserController,
-    'signout' : UserController,
-    'sendMessage' : UserController,
-    'getMessages' : MessageController,
-}
+controllers = [UserController, MessageController]
+controller_by_action = {key: value for value in controllers for key in dir(value)}
 
-@app.route('/', methods = ["GET", "POST"])
-def index():
-    if request.method == "GET":
-        return render_template('index.html')
-    else:
-        data = json.loads(str(request.json).replace("'", '"'))
-        action = data['action']
-        controller = controllers[action](data['params'], models)
-        return getattr(controller, action)()
+class MainHandler(web.RequestHandler):
+    """Main application requests handler"""
+
+    def get(self):
+        self.render("templates/index.html")
+
+    def post(self):
+        data = self.request.body.decode("utf-8", "replace")
+
+        data = json.loads((data))
+        try:
+            action = data['action']
+            controller = controller_by_action[action](data['params'], models)
+        except KeyError:
+            self.write('{"result" : "unknownAction"}')
+            return
+
+        self.write(getattr(controller, action)())
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    application = web.Application([
+        (r'/static/(.*)', web.StaticFileHandler, {'path': 'static'}),
+        (r"/", MainHandler),
+    ])
+    application.listen(5000)
+    ioloop = ioloop.IOLoop.instance()
+    autoreload.start(ioloop)
+    ioloop.start()
