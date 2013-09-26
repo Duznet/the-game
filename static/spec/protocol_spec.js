@@ -117,7 +117,7 @@ describe("Protocol supporting server", function () {
 
                 var firstText = "Hello, second";
                 var secondText = "Hi, first";
-                expect(sendMessage(firstUser.sid, "", fisrtText).result).toBe("ok");
+                expect(sendMessage(firstUser.sid, "", firstText).result).toBe("ok");
                 expect(sendMessage(secondUser.sid, "", secondText).result).toBe("ok");
 
                 var getMessagesResponse = getMessages(firstUser.sid, "", 0);
@@ -135,5 +135,6 @@ describe("Protocol supporting server", function () {
             });
         });
     });
+
 
 });
