@@ -57,4 +57,37 @@ var getMessages = function (sid, game, since) {
         game: game,
         since: since
     };
+    return getResponse("getMessages", params);
+};
+
+var createGame = function (sid, name, map, maxPlayers) {
+    params = {
+        sid: sid,
+        name: name,
+        map: map,
+        maxPlayers: maxPlayers
+    };
+    return getResponse("createGame", params);
 }
+
+var getGames(sid) {
+    params = {
+        sid: sid
+    };
+    return getResponse("getGames", params);
+};
+
+var joinGame(sid, game) {
+    params = {
+        sid: sid,
+        game: game
+    };
+    return getResponse("joinGame", params);
+};
+
+var leaveGame(sid) {
+    params = {
+        sid: sid
+    };
+    return getResponse("leaveGame", params);
+};
