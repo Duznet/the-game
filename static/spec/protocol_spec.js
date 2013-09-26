@@ -93,7 +93,9 @@ describe("Protocol supporting server", function () {
 
     describe("Signin action", function () {
 
-        req.action = "signin";
+        beforeEach(function () {
+            req.action = "signin";
+        });
 
         it("should provide response with the sid after signin in", function () {
             var preReqLogin = "signin_test_login";
@@ -198,7 +200,7 @@ describe("Protocol supporting server", function () {
 
         it("should provide 'badSid' result if sid is empty" , function () {
             req.params.sid = "";
-            expect(getResponse(req).result).toBe("ok");
+            expect(getResponse(req).result).toBe("badSid");
         });
 
         it("should provide 'badSid' result if sid could not be found" , function () {
@@ -206,5 +208,4 @@ describe("Protocol supporting server", function () {
             expect(getResponse(req).result).toBe("ok");
         });
     });
-
 });
