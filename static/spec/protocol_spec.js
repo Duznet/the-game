@@ -208,4 +208,105 @@ describe("Protocol supporting server", function () {
             expect(getResponse(req).result).toBe("ok");
         });
     });
+
+    describe("sendMessage action", function () {
+
+        beforeEach(function () {
+            req.action = "sendMessage";
+        });
+
+        it("should allow user to send text to chat using the sid", function () {
+            var userLogin = "send_message_login";
+            var userPassword = "send_message_pass";
+            var signupRequest = {
+                action: "signup",
+                params: {
+                    login: userLogin,
+                    password: userPassword
+                }
+            };
+            expect(getResponse(signupRequest).result).toBe("ok");
+            var signinRequest = {
+                action: "signin",
+                params: {
+                    login: userLogin,
+                    password: userPassword
+                }
+            };
+            var signinResponse = getResponse(signinRequest);
+            expect(signinResponse.result).toBe("ok");
+            var userSid = signinResponse.sid;
+
+            req.params = {
+                sid: userSid,
+                game: "",
+                text: "Hello"
+            };
+            expect(getResponse(req).result).toBe("ok");
+        });
+
+        it("should provide 'badSid' result if user with that sid was not found", function () {
+            req.params = {
+                sid: "^&%DF&TSDFH",
+                game: "",
+                text: "Hello"
+            };
+        });
+    });
+
+    describe("getMessages action", function () {
+
+        beforeEach(function () {
+            req.action = "getMessages";
+        });
+
+        it("should allow user to get messages using the sid", function () {
+           var userLogin = "get_messages_login";
+           var userPassword = "get_messages_pass";
+           var signupRequest = {
+               action: "signup",
+               params: {
+                   login: userLogin,
+                   password: userPassword
+               }
+           };
+           expect(getResponse(signupRequest).result).toBe("ok");
+           var signinRequest = {
+               action: "signin",
+               params: {
+                   login: userLogin,
+                   password: userPassword
+               }
+           };
+           var signinResponse = getResponse(signinRequest);
+           expect(signinResponse.result).toBe("ok");
+           var userSid = signinResponse.sid;
+
+           var messagesCount = 3;
+           for (var i = 0; i < messagesCount; i++) {
+                var curReq = {
+                    action: "sendMessage",
+                    params: {
+                        sid: userSid,
+                        game: "",
+                        text: i + "hi"
+                    }
+                };
+           };
+
+           req.params = {
+               sid: userSid,
+               game: "",
+               since: 0
+           };
+
+           res = getResponse(req);
+           expect(res.result).toBe("ok");
+           for (var i = res.messages.length - 1; i >= res.messages.length - messagesCount; i--) {
+               expect(res.messages[i].time).toBeGreaterThan(res.messages[i - 1].time);
+           };
+        });
+    });
+
+
 });
