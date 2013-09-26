@@ -70,14 +70,14 @@ var createGame = function (sid, name, map, maxPlayers) {
     return getResponse("createGame", params);
 }
 
-var getGames(sid) {
+var getGames = function (sid) {
     params = {
         sid: sid
     };
     return getResponse("getGames", params);
 };
 
-var joinGame(sid, game) {
+var joinGame = function (sid, game) {
     params = {
         sid: sid,
         game: game
@@ -85,7 +85,7 @@ var joinGame(sid, game) {
     return getResponse("joinGame", params);
 };
 
-var leaveGame(sid) {
+var leaveGame = function (sid) {
     params = {
         sid: sid
     };
