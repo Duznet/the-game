@@ -11,4 +11,4 @@ class MessageController(BasicController):
     def getMessages(self):
         timestamp = datetime(json['since'])
         messages = self.messages.filter(timestamp__ge = timestamp)
-        return json.dumps(map((lambda x: { "time" : x.timestamp, "text" : x.text, "login" : x.user.login}), messages.items()))
+        return json.dumps([{ "time": msg.timestamp, "text": msg.text, "login": msg.user.login} for msg in messages.items()])

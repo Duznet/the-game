@@ -3,17 +3,20 @@ from stdnet import odm
 from game_exception import GameException
 from user_controller import UserController
 from message_controller import MessageController
+from game_controller import GameController
 import json
 from redis import Redis
 from user import User
+from game import Game
 from message import Message
 from tornado import ioloop, web, autoreload
 
 models = odm.Router('redis://127.0.0.1:6379')
 models.register(User)
 models.register(Message)
+models.register(Game)
 
-controllers = [UserController, MessageController]
+controllers = [UserController, MessageController, GameController]
 controller_by_action = {key: value for value in controllers for key in dir(value)}
 
 class MainHandler(web.RequestHandler):

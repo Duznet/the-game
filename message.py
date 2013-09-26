@@ -6,7 +6,7 @@ class Message(odm.StdModel):
 
     text = odm.CharField()
     timestamp = odm.DateTimeField(default = datetime.now)
-    user = odm.ForeignKey("User")
+    user = odm.ForeignKey('User')
 
     class Meta:
         ordering = "-timestamp"

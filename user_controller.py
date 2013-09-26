@@ -2,6 +2,7 @@ from basic_controller import BasicController
 from datetime import datetime
 from stdnet.utils.exceptions import CommitException
 from game_exception import *
+from game import Game
 import json
 
 class UserController(BasicController):
@@ -29,7 +30,11 @@ class UserController(BasicController):
         return json.dumps({"result" : "ok"})
 
     def signin(self):
-        user = self.users.filter(login = self.json['login'], password = self.json['password'])
+        try:
+            user = self.users.filter(login = self.json['login'], password = self.json['password'])
+        except KeyError:
+            raise Incorrect()
+
         if user.count() != 1:
             raise Incorrect()
         user = user.items()[0]
@@ -38,31 +43,22 @@ class UserController(BasicController):
         return json.dumps({"result" : "ok", "sid" : user.sid})
 
     def signout(self):
-        try:
-            user = self.users.filter(sid = self.json['sid'])
-        except KeyError:
-            raise BadSid()
-
-        if user.count() != 1:
-            raise BadSid()
-        user = user.items()[0]
+        user = self.user_by_sid()
         user.sid = ''
         user.save
         return json.dumps({"result" : "ok"})
 
     def sendMessage(self):
-        user = self.users.filter(sid = self.json['sid'])
-        if user.count() != 1:
-            raise BadSid()
-        user = user.items()[0]
+        user = self.user_by_sid()
         user.new_message(self.json['text'])
         return json.dumps({"result" : "ok"})
 
-    def createGame(self):
-        user = self.users.filter(sid = self.json['sid'])
-        if user.count() != 1:
-            raise BadSid()
+    def joinGame(self):
+        user = self.user_by_sid()
+        user.join_game(id = self.json['id'])
+        return json.dumps({"result" : "ok"})
 
-        user = user.items()[0]
-        user.new_game(map = self.json['map'], name =  self.json['name'], max_players = self.json['maxPlayers'])
+    def leaveGame(self):
+        user = self.user_by_sid()
+        user.leave_game(self.json['id'])
         return json.dumps({"result" : "ok"})
