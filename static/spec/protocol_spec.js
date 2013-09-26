@@ -205,7 +205,7 @@ describe("Protocol supporting server", function () {
 
         it("should provide 'badSid' result if sid could not be found" , function () {
             req.params.sid = "sidNotFound123";
-            expect(getResponse(req).result).toBe("ok");
+            expect(getResponse(req).result).toBe("badSid");
         });
     });
 
