@@ -27,7 +27,7 @@ class UserExists(GameException):
 
 
 class BadSid(GameException):
-    """There is no user with current sid"""
+    """There is no user with this sid"""
 
     def msg(self):
         return '{"result" : "badSid"}'
@@ -39,3 +39,10 @@ class Incorrect(GameException):
 
     def msg(self):
         return '{"result" : "incorrect"}'
+
+
+class BadGameId(GameException):
+    """There is no game with this id"""
+
+    def msg(self):
+        return '{"result" : "badGameId"}'

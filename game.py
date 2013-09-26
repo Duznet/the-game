@@ -4,5 +4,5 @@ class Game(odm.StdModel):
 
     name = odm.SymbolField(unique = True)
     map = odm.SymbolField()
-    max_players = odm.SymbolField()
-    user = odm.ForeignKey("User")
+    max_players = odm.IntegerField()
+    status = odm.SymbolField()
