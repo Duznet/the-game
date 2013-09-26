@@ -1,5 +1,6 @@
 import os
 from stdnet import odm
+from game_exception import GameException
 from user_controller import UserController
 from message_controller import MessageController
 import json
@@ -19,20 +20,24 @@ class MainHandler(web.RequestHandler):
     """Main application requests handler"""
 
     def get(self):
-        self.render("templates/index.html")
+        self.render("templates/spec_runner.html")
 
     def post(self):
         data = self.request.body.decode("utf-8", "replace")
 
-        data = json.loads((data))
         try:
+            data = json.loads((data))
             action = data['action']
             controller = controller_by_action[action](data['params'], models)
-        except KeyError:
+        except (KeyError, ValueError):
             self.write('{"result" : "unknownAction"}')
             return
 
-        self.write(getattr(controller, action)())
+        try:
+            self.write(getattr(controller, action)())
+        except GameException as e:
+            self.write(e.msg())
+
 
 if __name__ == '__main__':
     application = web.Application([
