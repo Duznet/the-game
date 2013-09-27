@@ -1,7 +1,7 @@
 describe("Protocol supporting server", function () {
 
     it("should response with 'unknownAction' result if it could not recognize action", function () {
-        expect(getResponse({action: "asdkhasdasd"}).result).toBe("unknownAction");
+        expect(getResponse("asdkhasdasd").result).toBe("unknownAction");
     });
 
     describe("Signup action", function () {
