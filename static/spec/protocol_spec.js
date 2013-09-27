@@ -39,8 +39,7 @@ describe("Protocol supporting server", function () {
 
             expect(got.result).toBe("ok");
             expect(got.sid).toBeDefined();
-            expect(got.sid.length).toBeGreaterThan(0);
-            expect(got.sid).toMatch(/^[a-zA-z0-9]*$/);
+            expect(got.sid).toMatch(/^[a-zA-z0-9]+$/);
         });
 
         it("should provide 'incorrect' result if user with requested login doesn't exists", function () {
