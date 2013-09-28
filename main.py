@@ -25,12 +25,17 @@ class MainHandler(web.RequestHandler):
     def get(self):
         self.render("templates/spec_runner.html")
 
+    def options(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type, X-Requested-With")
+        self.write("")
+
     def post(self):
         data = self.request.body.decode("utf-8", "replace")
 
         try:
-            data = json.loads((data))
-            action = data['action']
+            data = json.loads(data)
+            action = str(data['action'])
             controller = controller_by_action[action](data['params'], models)
         except (KeyError, ValueError):
             self.write('{"result" : "unknownAction"}')
