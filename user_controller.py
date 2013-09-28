@@ -2,8 +2,8 @@ from basic_controller import BasicController
 from datetime import datetime
 from stdnet.utils.exceptions import CommitException
 from game_exception import *
-from game import Game
 import json
+import hashlib
 
 class UserController(BasicController):
     """Controller for creating and authenticating users"""
@@ -14,6 +14,10 @@ class UserController(BasicController):
     def __init__(self, json, models):
         super(UserController, self).__init__(json)
         self.users = models.user
+        self.messages = models.message
+
+    def _encode(self, password):
+        return hashlib.sha1(password.encode("utf-8")).hexdigest()
 
     def signup(self):
         try:
@@ -23,7 +27,7 @@ class UserController(BasicController):
             if len(self.json['password']) < self.MIN_PASSWORD_SYMBOLS:
                 raise BadPassword()
 
-            self.users.new(login = self.json['login'], password = self.json['password'])
+            self.users.new(login = self.json['login'], password = self._encode(str(self.json['password'])))
         except CommitException:
             raise UserExists()
 
@@ -31,14 +35,14 @@ class UserController(BasicController):
 
     def signin(self):
         try:
-            user = self.users.filter(login = self.json['login'], password = self.json['password'])
+            user = self.users.filter(login = self.json['login'], password = self._encode(str(self.json['password'])))
         except KeyError:
             raise Incorrect()
 
         if user.count() != 1:
             raise Incorrect()
         user = user.items()[0]
-        user.sid = user.login + user.password + str(datetime.now())
+        user.sid = self._encode(user.login + user.password + str(datetime.now().timestamp()))
         user.save()
         return json.dumps({"result" : "ok", "sid" : user.sid})
 
@@ -50,7 +54,7 @@ class UserController(BasicController):
 
     def sendMessage(self):
         user = self.user_by_sid()
-        user.new_message(self.json['text'])
+        user.new_message(self.json['text'], self.messages)
         return json.dumps({"result" : "ok"})
 
     def joinGame(self):
