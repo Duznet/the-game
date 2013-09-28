@@ -1,6 +1,6 @@
 from stdnet import odm
-from message import Message
 from game import Game
+from datetime import datetime
 
 class User(odm.StdModel):
     """User model"""
@@ -10,8 +10,8 @@ class User(odm.StdModel):
     sid = odm.SymbolField(index = True, required = False)
     game = odm.ForeignKey(Game, required = False, related_name = "users")
 
-    def new_message(self, text):
-        return Message(text = text, user = self).save()
+    def new_message(self, text, message):
+        return message.new(text = text, timestamp = datetime.utcnow().timestamp(), user = self)
 
     def join_game(self, id):
         game = odm.session.query(Game).filter(id = id)

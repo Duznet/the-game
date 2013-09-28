@@ -1,3 +1,5 @@
+from game_exception import BadSid
+
 class BasicController:
     """Controller base class"""
     def __init__(self, json):
