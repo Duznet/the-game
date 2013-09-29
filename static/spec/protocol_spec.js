@@ -132,14 +132,14 @@ describe("Protocol supporting server", function () {
                 expect(secondMessage.login).toBe(secondAuthor.login);
                 expect(secondMessage.text).toBe(secondText);
             });
-        });
 
-        it("should provide 'badSid' result if user with that sid was not found", function () {
-            expect(getMessages(firstUser.sid + "#W*&^W#$", "", 0).result).toBe("badSid");
-        });
+            it("should provide 'badSid' result if user with that sid was not found", function () {
+                expect(getMessages(firstUser.sid + "#W*&^W#$", "", 0).result).toBe("badSid");
+            });
 
-        it("should provide 'badGame' result if game with that id was not found", function () {
-            expect(getMessages(firstUser.sid, "#$(*&", 0).result).toBe("badGame");
+            it("should provide 'badGame' result if game with that id was not found", function () {
+                expect(getMessages(firstUser.sid, "#$(*&", 0).result).toBe("badGame");
+            });
         });
     });
 });
