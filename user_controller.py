@@ -54,7 +54,7 @@ class UserController(BasicController):
 
     def sendMessage(self):
         user = self.user_by_sid()
-        user.new_message(self.json['text'], self.messages)
+        user.new_message(self.json['text'], self.json['game'], self.messages)
         return json.dumps({"result" : "ok"})
 
     def joinGame(self):

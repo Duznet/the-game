@@ -1,6 +1,7 @@
 from stdnet import odm
 from game import Game
 from datetime import datetime
+from game_exception import BadGameId
 
 class User(odm.StdModel):
     """User model"""
@@ -8,10 +9,17 @@ class User(odm.StdModel):
     login = odm.SymbolField(unique = True)
     password = odm.SymbolField()
     sid = odm.SymbolField(index = True, required = False)
-    game = odm.ForeignKey(Game, required = False, related_name = "users")
+    game = odm.ForeignKey(Game, index = True, required = False, related_name = "users")
 
-    def new_message(self, text, message):
-        return message.new(text = text, timestamp = datetime.utcnow().timestamp(), user = self)
+    def new_message(self, text, game_id, message):
+        try:
+            if len(game_id) == 0:
+                return message.new(text = text, timestamp = datetime.utcnow().timestamp(), user = self)
+
+            game = odm.session.query(Game).filter(id = int(game_id))
+            return message.new(text = text, timestamp = datetime.utcnow().timestamp(), user = self, game = game)
+        except ValueError:
+            raise BadGameId()
 
     def join_game(self, id):
         game = odm.session.query(Game).filter(id = id)

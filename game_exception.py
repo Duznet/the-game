@@ -46,3 +46,10 @@ class BadGameId(GameException):
 
     def msg(self):
         return '{"result" : "badGameId"}'
+
+
+class BadTimestamp(GameException):
+    """Timestamp is uncorrect"""
+
+    def msg(self):
+        return '{"result" : "badTimestamp"}'
