@@ -1,14 +1,13 @@
 from basic_controller import BasicController
 from datetime import datetime
 from stdnet.utils.exceptions import CommitException
-from game_exception import *
+from game_exception import Incorrect, UserExists, BadPassword
 import json
 import hashlib
 
 class UserController(BasicController):
     """Controller for creating and authenticating users"""
-    MIN_LOGIN_SYMBOLS = 4
-    MAX_LOGIN_SYMBOLS = 40
+
     MIN_PASSWORD_SYMBOLS = 4
 
     def __init__(self, json, models):
@@ -16,18 +15,12 @@ class UserController(BasicController):
         self.users = models.user
         self.messages = models.message
 
-    def _encode(self, password):
-        return hashlib.sha1(password.encode("utf-8")).hexdigest()
-
     def signup(self):
         try:
-            if len(str(self.json['login'])) < self.MIN_LOGIN_SYMBOLS or len(str(self.json['login'])) > self.MAX_LOGIN_SYMBOLS:
-                raise BadLogin()
-
             if len(str(self.json['password'])) < self.MIN_PASSWORD_SYMBOLS:
                 raise BadPassword()
 
-            self.users.new(login = str(self.json['login']), password = self._encode(str(self.json['password'])))
+            self.users.new(login = str(self.json['login']), password = self.users.encode(str(self.json['password'])))
         except CommitException:
             raise UserExists()
 
@@ -35,21 +28,19 @@ class UserController(BasicController):
 
     def signin(self):
         try:
-            user = self.users.filter(login = str(self.json['login']), password = self._encode(str(self.json['password'])))
+            user = self.users.filter(login = str(self.json['login']), password = self.users.encode(str(self.json['password'])))
         except KeyError:
             raise Incorrect()
 
         if user.count() != 1:
             raise Incorrect()
         user = user.items()[0]
-        user.sid = self._encode(user.login + user.password + str(datetime.now().timestamp()))
-        user.save()
+        user.authenticate()
         return json.dumps({"result" : "ok", "sid" : user.sid})
 
     def signout(self):
         user = self._user_by_sid()
-        user.sid = ''
-        user.save
+        user.signout()
         return json.dumps({"result" : "ok"})
 
     def sendMessage(self):
@@ -64,5 +55,5 @@ class UserController(BasicController):
 
     def leaveGame(self):
         user = self._user_by_sid()
-        user.leave_game(str(self.json['id']))
+        user.leave_game()
         return json.dumps({"result" : "ok"})

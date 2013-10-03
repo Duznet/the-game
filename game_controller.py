@@ -1,4 +1,5 @@
 from basic_controller import BasicController
+from stdnet import odm
 import json
 
 class GameController(BasicController):
@@ -7,10 +8,18 @@ class GameController(BasicController):
     def __init__(self, json, models):
         super(GameController, self).__init__(json)
         self.games = models.game
+        self.maps = models.map
 
     def createGame(self):
         user = self._user_by_sid()
-        games.new(map = str(self.json['map']), name =  str(self.json['name']), max_players = str(self.json['maxPlayers']))
+        try:
+            maps = self.maps.filter(name = str(self.json['map']))
+            if maps.count() != 1:
+                raise BadGameName()
+
+            games.new(map = maps.items[0], name =  str(self.json['name']), max_players = str(self.json['maxPlayers']))
+        except odm.utils.exceptions.CommitExceptions:
+            raise BadGameName()
         return json.dumps({"result" : "ok"})
 
     def getGames(self):

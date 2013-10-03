@@ -47,6 +47,48 @@ class BadGame(GameException):
     def msg(self):
         return '{"result" : "badGame"}'
 
+class BadGameName(GameException):
+    """Game name is incorrect"""
+
+    def msg(self):
+        return '{"result" : "badName"}'
+
+class BadMapName(GameException):
+    """Map name is incorrect"""
+
+    def msg(self):
+        return '{"result" : "badMap"}'
+
+class BadMaxPlayers(GameException):
+    """Maximum players count is incorrect"""
+
+    def msg(self):
+        return '{"result" : "badMaxPlayers"}'
+
+class GameExists(GameException):
+    """Game already exists"""
+
+    def msg(self):
+        return '{"result" : "gameExists"}'
+
+class AlreadyInGame(GameException):
+    """User is already in game"""
+
+    def msg(self):
+        return '{"result" : "AlreadyInGame"}'
+
+class GameFull(GameException):
+    """Game is full"""
+
+    def msg(self):
+        return '{"result" : "gameFull"}'
+
+class NotInGame(GameException):
+    """User is not in game"""
+
+    def msg(self):
+        return '{"result" : "notInGame"}'
+
 
 class BadSince(GameException):
     """Timestamp is uncorrect"""

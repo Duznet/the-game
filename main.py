@@ -12,9 +12,12 @@ from message import Message
 from tornado import ioloop, web, autoreload
 
 models = odm.Router('redis://127.0.0.1:6379')
-models.register(User)
-models.register(Message)
-models.register(Game)
+
+model_classes = [User, Message, Game]
+for model in model_classes:
+    models.register(model)
+    if hasattr(model, "pre_commit"):
+        models.pre_commit.connect(getattr(model, "pre_commit"), sender=model)
 
 controllers = [UserController, MessageController, GameController]
 controller_by_action = {key: value for value in controllers for key in dir(value)}
