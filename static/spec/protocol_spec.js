@@ -208,8 +208,8 @@ describe("Protocol supporting server", function () {
         signup(joiningUser.login, joiningUser.password);
 
         beforeEach(function () {
-            hostUser.sid = signin(hostUser.login, hostUser.password);
-            joiningUser.sid = signin(joiningUser.login, joiningUser.password);
+            hostUser.sid = signin(hostUser.login, hostUser.password).sid;
+            joiningUser.sid = signin(joiningUser.login, joiningUser.password).sid;
         });
 
         afterEach(function () {
