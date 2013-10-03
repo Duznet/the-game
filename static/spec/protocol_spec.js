@@ -194,7 +194,7 @@ describe("Protocol supporting server", function () {
             map: ["."]
         };
 
-        uploadMap(testMap.name, testMap.maxPlayers, testMap.map);
+        uploadMap(testMap2.name, testMap2.maxPlayers, testMap2.map);
 
         signup(hostUser.login, hostUser.password);
         signup(joiningUser.login, joiningUser.password);
