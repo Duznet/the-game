@@ -20,74 +20,65 @@ var getResponse = function (action, pararms = {}) {
 };
 
 var signup = function (login, password) {
-    params = {
+    return getResponse("signup", {
         login: login,
         password: password
-    };
-    return getResponse("signup", params);
+    });
 };
 
 var signin = function (login, password) {
-    params = {
+    return getResponse("signin", {
         login: login,
         password: password
-    };
-    return getResponse("signin", params);
+    });
 }
 
 var signout = function (sid) {
-    params = {
+    return getResponse("signout", {
         sid: sid
-    };
-    return getResponse("signout", params);
+    });
 };
 
 var sendMessage = function (sid, game, text) {
-    params = {
+    return getResponse("sendMessage", {
         sid: sid,
         game: game,
         text: text
-    };
-    return getResponse("sendMessage", params);
+    });
 };
 
 var getMessages = function (sid, game, since) {
-    params = {
+    return getResponse("getMessages", {
         sid: sid,
         game: game,
         since: since
-    };
-    return getResponse("getMessages", params);
+    });
 };
 
 var createGame = function (sid, name, map, maxPlayers) {
-    params = {
+    return getResponse("createGame", {
         sid: sid,
         name: name,
         map: map,
         maxPlayers: maxPlayers
-    };
-    return getResponse("createGame", params);
+    });
 }
 
 var getGames = function (sid) {
-    params = {
+    return getResponse("getGames", {
         sid: sid
-    };
-    return getResponse("getGames", params);
+    });
 };
 
 var joinGame = function (sid, game) {
-    params = {
+    return getResponse("joinGame", {
         sid: sid,
         game: game
-    };
-    return getResponse("joinGame", params);
+    });
 };
 
 var leaveGame = function (sid) {
-    params = {
+    return getResponse("leaveGame", {
         sid: sid
-    };
-    return getResponse("leaveGame", params);
+    });
 };
