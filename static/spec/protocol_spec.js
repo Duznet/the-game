@@ -169,6 +169,14 @@ describe("Protocol supporting server", function () {
         });
     });
 
+    describe("uploadMap action", function () {
+
+        it("should allow users to create maps", function () {
+            expect(uploadMap("testUploadedMap", ["."]).result).toBe("ok");
+        });
+
+    });
+
     describe("Game controlling", function () {
 
         var hostUser = {
@@ -209,13 +217,6 @@ describe("Protocol supporting server", function () {
             leaveGame(joiningUser.sid);
         })
 
-        describe("uploadMap action", function () {
-
-            it("should allow users to create maps", function () {
-                expect(uploadMap("testUploadedMap", ["."]).result).toBe("ok");
-            });
-
-        });
 
         describe("createGame action", function () {
 
