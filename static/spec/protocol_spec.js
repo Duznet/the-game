@@ -1,6 +1,6 @@
 describe("Protocol supporting server", function () {
 
-    it("should response with 'unknownAction' result if it could not recognize action", function () {
+    it("should respond with 'unknownAction' if it could not recognize action", function () {
         expect(getResponse("asdkhasdasd").result).toBe("unknownAction");
     });
 
@@ -9,29 +9,29 @@ describe("Protocol supporting server", function () {
             expect(signup("signup_test_login", "signup_test_password").result).toBe("ok");
         });
 
-        it("should provide 'userExists' result if this user already exists", function () {
+        it("should respond with 'userExists' if this user already exists", function () {
             expect(signup("existing_user", "existing_password").result).toBe("ok");
             expect(signup("existing_user", "existing_password").result).toBe("userExists");
             expect(signup("existing_user", "sdkfjhsdfkjhsdf").result).toBe("userExists");
         });
 
-        it("should provide 'badLogin' result if login is shorter than 4 symbols", function () {
+        it("should respond with 'badLogin' if login was shorter than 4 symbols", function () {
             expect(signup("1", "short_test_password").result).toBe("badLogin");
         });
 
-        it("should provide 'badLogin' result if login is longer than 40 symbols", function () {
+        it("should respond with 'badLogin' if login was longer than 40 symbols", function () {
             expect(signup("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "long_test_password").result)
                 .toBe("badLogin");
         });
 
-        it("should provide 'badPassword' result if password is shorter than 4 symbols", function () {
+        it("should respond with 'badPassword' if password was shorter than 4 symbols", function () {
             expect(signup("short_pass_login", "1").result).toBe("badPassword");
         });
     });
 
     describe("Signin action", function () {
 
-        it("should provide response with the sid after correct signin request", function () {
+        it("should respond with sid after the correct signin request", function () {
             var userLogin = "signin_test_login";
             var userPass = "signin_test_pass";
             expect(signup(userLogin, userPass).result).toBe("ok");
@@ -42,7 +42,7 @@ describe("Protocol supporting server", function () {
             expect(got.sid).toMatch(/^[a-zA-z0-9]+$/);
         });
 
-        it("should provide 'incorrect' result if user with requested login doesn't exists", function () {
+        it("should respond with 'incorrect' if user with requested login doesn't exists", function () {
             var userLogin = "signin_incorrect_l_test_login";
             var userPass = "signin_incorrect_l_test_pass";
 
@@ -51,7 +51,7 @@ describe("Protocol supporting server", function () {
             expect(signin(userLogin, userPass + "no").result).toBe("incorrect");
         });
 
-        it("should provide 'incorrect' result if login and password don't match", function () {
+        it("should respond with 'incorrect' if login and password don't match", function () {
             var userLogin = "signin_incorrect_p_test_login";
             var userPass = "signin_incorrect_p_test_pass";
 
@@ -101,18 +101,18 @@ describe("Protocol supporting server", function () {
 
         describe("sendMessage action", function () {
 
-            it("should allow user to send text to chat using the sid", function () {
+            it("should allow user to send text to chat using sid", function () {
                 expect(sendMessage(firstUser.sid, "", "Hello").result).toBe("ok");
             });
 
-            it("should provide 'badSid' result if user with that sid was not found", function () {
+            it("should respond with 'badSid' if user with that sid was not found", function () {
                 expect(sendMessage("^&%DF&TSDFH", "", "Hello").result).toBe("badSid");
             });
         });
 
         describe("getMessages action", function () {
 
-            it("should allow user to get messages using the sid", function () {
+            it("should allow user to get messages using sid", function () {
 
                 var firstText = "Hello, second";
                 var secondText = "Hi, first";
@@ -133,11 +133,11 @@ describe("Protocol supporting server", function () {
                 expect(secondMessage.text).toBe(secondText);
             });
 
-            it("should provide 'badSid' result if user with that sid was not found", function () {
+            it("should respond with 'badSid' if user with that sid was not found", function () {
                 expect(getMessages(firstUser.sid + "#W*&^W#$", "", 0).result).toBe("badSid");
             });
 
-            it("should provide 'badGame' result if game with that id was not found", function () {
+            it("should respond with 'badGame' if game with that id was not found", function () {
                 expect(getMessages(firstUser.sid, "#$(*&", 0).result).toBe("badGame");
             });
         });
