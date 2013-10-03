@@ -24,6 +24,7 @@ class User(odm.StdModel):
     def authenticate(self):
         self.sid = self.encode(self.login + self.password + str(datetime.now().timestamp()))
         self.save()
+        return self.sid
 
     def signout(self):
         self.sid = ''

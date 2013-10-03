@@ -10,6 +10,7 @@ class GameController(BasicController):
         super(GameController, self).__init__(json)
         self.games = models.game
         self.maps = models.map
+        self.users = models.user
 
     def createGame(self):
         user = self._user_by_sid()
