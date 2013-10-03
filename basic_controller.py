@@ -5,9 +5,9 @@ class BasicController:
     def __init__(self, json):
         self.json = json
 
-    def user_by_sid(self):
+    def _user_by_sid(self):
         try:
-            user = self.users.filter(sid = self.json['sid'])
+            user = self.users.filter(sid = str(self.json['sid']))
         except KeyError:
             raise BadSid()
 

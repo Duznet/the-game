@@ -21,13 +21,13 @@ class UserController(BasicController):
 
     def signup(self):
         try:
-            if len(self.json['login']) < self.MIN_LOGIN_SYMBOLS or len(self.json['login']) > self.MAX_LOGIN_SYMBOLS:
+            if len(str(self.json['login'])) < self.MIN_LOGIN_SYMBOLS or len(str(self.json['login'])) > self.MAX_LOGIN_SYMBOLS:
                 raise BadLogin()
 
-            if len(self.json['password']) < self.MIN_PASSWORD_SYMBOLS:
+            if len(str(self.json['password'])) < self.MIN_PASSWORD_SYMBOLS:
                 raise BadPassword()
 
-            self.users.new(login = self.json['login'], password = self._encode(str(self.json['password'])))
+            self.users.new(login = str(self.json['login']), password = self._encode(str(self.json['password'])))
         except CommitException:
             raise UserExists()
 
@@ -35,7 +35,7 @@ class UserController(BasicController):
 
     def signin(self):
         try:
-            user = self.users.filter(login = self.json['login'], password = self._encode(str(self.json['password'])))
+            user = self.users.filter(login = str(self.json['login']), password = self._encode(str(self.json['password'])))
         except KeyError:
             raise Incorrect()
 
@@ -47,22 +47,22 @@ class UserController(BasicController):
         return json.dumps({"result" : "ok", "sid" : user.sid})
 
     def signout(self):
-        user = self.user_by_sid()
+        user = self._user_by_sid()
         user.sid = ''
         user.save
         return json.dumps({"result" : "ok"})
 
     def sendMessage(self):
-        user = self.user_by_sid()
-        user.new_message(self.json['text'], self.json['game'], self.messages)
+        user = self._user_by_sid()
+        user.new_message(str(self.json['text']), str(self.json['game']), self.messages)
         return json.dumps({"result" : "ok"})
 
     def joinGame(self):
-        user = self.user_by_sid()
-        user.join_game(id = self.json['id'])
+        user = self._user_by_sid()
+        user.join_game(id = str(self.json['id']))
         return json.dumps({"result" : "ok"})
 
     def leaveGame(self):
-        user = self.user_by_sid()
-        user.leave_game(self.json['id'])
+        user = self._user_by_sid()
+        user.leave_game(str(self.json['id']))
         return json.dumps({"result" : "ok"})

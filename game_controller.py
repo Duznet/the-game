@@ -9,8 +9,8 @@ class GameController(BasicController):
         self.games = models.game
 
     def createGame(self):
-        user = self.user_by_sid()
-        games.new(map = self.json['map'], name =  self.json['name'], max_players = self.json['maxPlayers'])
+        user = self._user_by_sid()
+        games.new(map = str(self.json['map']), name =  str(self.json['name']), max_players = str(self.json['maxPlayers']))
         return json.dumps({"result" : "ok"})
 
     def getGames(self):

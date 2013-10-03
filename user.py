@@ -1,7 +1,7 @@
 from stdnet import odm
 from game import Game
 from datetime import datetime
-from game_exception import BadGameId
+from game_exception import BadGame
 
 class User(odm.StdModel):
     """User model"""
@@ -19,12 +19,12 @@ class User(odm.StdModel):
             game = odm.session.query(Game).filter(id = int(game_id))
             return message.new(text = text, timestamp = datetime.utcnow().timestamp(), user = self, game = game)
         except ValueError:
-            raise BadGameId()
+            raise BadGame()
 
     def join_game(self, id):
         game = odm.session.query(Game).filter(id = id)
         if game.count() != 1:
-            raise BadGameId()
+            raise BadGame()
         game = game.items()[0]
 
         self.game = game
@@ -34,7 +34,7 @@ class User(odm.StdModel):
     def leave_game(self, id):
         game = odm.session.query(Game).filter(id = id)
         if game.count() != 1:
-            raise BadGameId()
+            raise BadGame()
 
         game.delete()
         self.save()
