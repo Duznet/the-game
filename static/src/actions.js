@@ -82,3 +82,11 @@ var leaveGame = function (sid) {
         sid: sid
     });
 };
+
+var uploadMap = function (name, maxPlayers, map = []) {
+    return getResponse("uploadMap", {
+        name: name,
+        maxPlayers: maxPlayers,
+        map: map
+    });
+};

@@ -168,4 +168,38 @@ describe("Protocol supporting server", function () {
             });
         });
     });
+
+    describe("Game controlling", function () {
+
+        var hostUser = {
+            login: "host_user",
+            password: "host_pass"
+        };
+
+        var joiningUser = {
+            login: "joiner_login",
+            password: "joiner_pass"
+        };
+
+        var testMap = {
+            name: "testMap",
+            maxPlayers: 4,
+            map: ["..", ".."]
+        };
+        uploadMap(testMap.name, testMap.maxPlayers, testMap.map);
+
+        signup(hostUser.login, hostUser.password);
+        signup(joiningUser.login, joiningUser.password);
+
+        beforeEach(function () {
+            hostUser.sid = signin(hostUser.login, hostUser.password);
+            joiningUser.sid = signin(joiningUser.login, joiningUser.password);
+        });
+
+        describe("uploadMap action", function () {
+            it("should allow users to create maps", function () {
+                expect(uploadMap("testUploadedMap", ["."]).result).toBe("ok");
+            });
+        });
+    });
 });
