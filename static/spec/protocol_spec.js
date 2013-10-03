@@ -172,7 +172,7 @@ describe("Protocol supporting server", function () {
     describe("uploadMap action", function () {
 
         it("should allow users to create maps", function () {
-            expect(uploadMap("testUploadedMap", ["."]).result).toBe("ok");
+            expect(uploadMap("testUploadedMap", 16, ["."]).result).toBe("ok");
         });
 
     });
