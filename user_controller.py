@@ -35,8 +35,7 @@ class UserController(BasicController):
         if user.count() != 1:
             raise Incorrect()
         user = user.items()[0]
-        user.authenticate()
-        return json.dumps({"result" : "ok", "sid" : user.sid})
+        return json.dumps({"result" : "ok", "sid" : user.authenticate()})
 
     def signout(self):
         user = self._user_by_sid()
