@@ -1,5 +1,6 @@
 from basic_controller import BasicController
 from stdnet import odm
+from stdnet.utils.exceptions import CommitException
 import json
 
 class GameController(BasicController):
@@ -18,7 +19,7 @@ class GameController(BasicController):
                 raise BadGameName()
 
             games.new(map = maps.items[0], name =  str(self.json['name']), max_players = int(str(self.json['maxPlayers'])))
-        except odm.utils.exceptions.CommitExceptions:
+        except CommitException:
             raise BadGameName()
         except ValueError:
             raise BadMaxPlayers()
