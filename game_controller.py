@@ -17,9 +17,11 @@ class GameController(BasicController):
             if maps.count() != 1:
                 raise BadGameName()
 
-            games.new(map = maps.items[0], name =  str(self.json['name']), max_players = str(self.json['maxPlayers']))
+            games.new(map = maps.items[0], name =  str(self.json['name']), max_players = int(str(self.json['maxPlayers'])))
         except odm.utils.exceptions.CommitExceptions:
             raise BadGameName()
+        except ValueError:
+            raise BadMaxPlayers()
         return json.dumps({"result" : "ok"})
 
     def getGames(self):
