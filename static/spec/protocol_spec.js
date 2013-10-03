@@ -4,7 +4,12 @@ describe("Protocol supporting server", function () {
         expect(getResponse("asdkhasdasd").result).toBe("unknownAction");
     });
 
+    it("should respond with 'unknownAction' if the action field was empty", function () {
+        expect(getResponse("").result).toBe("unknownAction");
+    });
+
     describe("Signup action", function () {
+
         it("should require login and password", function () {
             expect(signup("signup_test_login", "signup_test_password").result).toBe("ok");
         });
@@ -26,6 +31,10 @@ describe("Protocol supporting server", function () {
 
         it("should respond with 'badPassword' if password was shorter than 4 symbols", function () {
             expect(signup("short_pass_login", "1").result).toBe("badPassword");
+        });
+
+        it("should respond with 'badLogin' or 'badPassword' if login and password were incorrect", function () {
+            expect(signup("sh", "sh").result).toMatch(/badPassword|badLogin/);
         });
     });
 
@@ -58,6 +67,10 @@ describe("Protocol supporting server", function () {
             expect(signup(userLogin, userPass).result).toBe("ok");
             expect(signin(userLogin, userPass + "no").result).toBe("incorrect");
         });
+
+        it("should respond with 'incorrect' if login was empty", function () {
+            expect(signin("", "123").result).toBe("incorrect");
+        });
     });
 
     describe("Signout action", function () {
@@ -71,12 +84,21 @@ describe("Protocol supporting server", function () {
             expect(signout(signinResponse.sid).result).toBe("ok");
         });
 
-        it("should provide 'badSid' result if sid is empty" , function () {
+        it("should respond with 'badSid' if sid was empty" , function () {
             expect(signout("").result).toBe("badSid");
         });
 
-        it("should provide 'badSid' result if sid could not be found" , function () {
+        it("should respond with 'badSid' if sid could not be found" , function () {
             expect(signout("sidNotFound123").result).toBe("badSid");
+        });
+
+        it("should respond with 'badSid' if user was not signed in", function () {
+            var userLogin = "singed_out_user";
+            var userPassword = "signed_out_pass";
+            signup(userLogin, userPassword);
+            var sid = signin(userLogin, userPassword).sid;
+            expect(signout(sid).result).toBe("ok");
+            expect(signout(sid).result).toBe("badSid");
         });
     });
 
@@ -139,6 +161,10 @@ describe("Protocol supporting server", function () {
 
             it("should respond with 'badGame' if game with that id was not found", function () {
                 expect(getMessages(firstUser.sid, "#$(*&", 0).result).toBe("badGame");
+            });
+
+            it("should respond with 'badSince' if the 'since' timestamp was not cool", function () {
+                expect(getMessages(firstUser.sid, "" , "suddenly not time").result).toBe("badSince");
             });
         });
     });

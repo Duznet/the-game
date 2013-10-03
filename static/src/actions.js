@@ -1,4 +1,4 @@
-var getResponse = function (action, pararms = {}) {
+var getResponse = function (action, params = {}) {
     var responseData = null;
 
     $.ajax({
