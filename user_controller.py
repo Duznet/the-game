@@ -14,6 +14,7 @@ class UserController(BasicController):
         super(UserController, self).__init__(json)
         self.users = models.user
         self.messages = models.message
+        self.games = models.game
 
     def signup(self):
         try:
@@ -49,10 +50,10 @@ class UserController(BasicController):
 
     def joinGame(self):
         user = self._user_by_sid()
-        user.join_game(id = str(self.json['id']))
+        user.join_game(id = str(self.json['id']), games = self.games)
         return json.dumps({"result" : "ok"})
 
     def leaveGame(self):
         user = self._user_by_sid()
-        user.leave_game()
+        user.leave_game(games = self.games)
         return json.dumps({"result" : "ok"})
