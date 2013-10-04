@@ -40,8 +40,8 @@ class User(odm.StdModel):
         except ValueError:
             raise BadGame()
 
-    def join_game(self, id, games):
-        game = games.filter(id = id)
+    def join_game(self, id):
+        game = odm.session.query(Game).filter(id = id)
         if game.count() != 1:
             raise BadGame()
 
@@ -57,7 +57,7 @@ class User(odm.StdModel):
         self.save()
         return game
 
-    def leave_game(self, games):
+    def leave_game(self):
         if not self.game:
             raise NotInGame()
 

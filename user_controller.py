@@ -50,10 +50,10 @@ class UserController(BasicController):
 
     def joinGame(self):
         user = self._user_by_sid()
-        user.join_game(id = str(self.json['id']), games = self.games)
+        user.join_game(id = str(self.json['id']))
         return json.dumps({"result" : "ok"})
 
     def leaveGame(self):
         user = self._user_by_sid()
-        user.leave_game(games = self.games)
+        user.leave_game()
         return json.dumps({"result" : "ok"})
