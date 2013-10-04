@@ -75,7 +75,7 @@ class AlreadyInGame(GameException):
     """User is already in game"""
 
     def msg(self):
-        return '{"result" : "AlreadyInGame"}'
+        return '{"result" : "alreadyInGame"}'
 
 class GameFull(GameException):
     """Game is full"""

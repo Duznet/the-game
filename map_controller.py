@@ -22,4 +22,6 @@ class MapController(BasicController):
         except ValueError:
             raise BadMaxPlayers()
 
+        return '{"result" : "ok"}'
+
 

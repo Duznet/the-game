@@ -14,6 +14,7 @@ class UserController(BasicController):
         super(UserController, self).__init__(json)
         self.users = models.user
         self.messages = models.message
+        self.games = models.game
 
     def signup(self):
         try:

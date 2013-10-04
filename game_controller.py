@@ -1,6 +1,7 @@
 from basic_controller import BasicController
 from stdnet import odm
 from stdnet.utils.exceptions import CommitException
+from game_exception import *
 import json
 
 class GameController(BasicController):
@@ -14,14 +15,21 @@ class GameController(BasicController):
 
     def createGame(self):
         user = self._user_by_sid()
+
+        if user.game:
+            raise AlreadyInGame()
+
         try:
             maps = self.maps.filter(name = str(self.json['map']))
             if maps.count() != 1:
-                raise BadGameName()
+                raise BadMapName()
 
-            games.new(map = maps.items[0], name =  str(self.json['name']), max_players = int(str(self.json['maxPlayers'])))
+            map = maps[0]
+            game = self.games.new(map = map, name =  str(self.json['name']), max_players = int(str(self.json['maxPlayers'])))
+            user.game = game
+            user.save()
         except CommitException:
-            raise BadGameName()
+            raise GameExists()
         except ValueError:
             raise BadMaxPlayers()
         return json.dumps({"result" : "ok"})
