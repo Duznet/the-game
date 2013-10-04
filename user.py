@@ -61,11 +61,6 @@ class User(odm.StdModel):
         if not self.game:
             raise NotInGame()
 
-        game = games.filter(id = id)
-        if game.count() != 1:
-            raise BadGame()
-
-        game.delete()
         self.game = None
         self.save()
         return self
