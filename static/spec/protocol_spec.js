@@ -1,5 +1,9 @@
 describe("Protocol supporting server", function () {
 
+    it("should allow to start testing", function () {
+        expect(startTesting().result).toBe("ok");
+    });
+
     it("should respond with 'unknownAction' if it could not recognize action", function () {
         expect(getResponse("asdkhasdasd").result).toBe("unknownAction");
     });

@@ -19,6 +19,10 @@ var getResponse = function (action, params = {}) {
     return responseData;
 };
 
+var startTesting = function () {
+    return getResponse("startTesting");
+};
+
 var signup = function (login, password) {
     return getResponse("signup", {
         login: login,
