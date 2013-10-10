@@ -18,7 +18,7 @@
     (function() {
 
       var startRes = startTesting();
-      if (startRes == null || startReq.result !== "ok") {
+      if (startRes == null || startRes.result !== "ok") {
         console.log("Testing could not be started");
         document.write("Testing could not be started");
         return;
