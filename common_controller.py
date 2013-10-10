@@ -7,6 +7,6 @@ class CommonController(BasicController):
         super(CommonController, self).__init__(json)
         self.models
 
-    def start_testing():
+    def start_testing(self):
         self.models.flush()
         return '{"result": "ok"}'

@@ -20,7 +20,7 @@ class GameController(BasicController):
             raise AlreadyInGame()
 
         try:
-            maps = self.maps.filter(name = str(self.json['map']))
+            maps = self.maps.filter(id = str(self.json['map']))
             if maps.count() != 1:
                 raise BadMapName()
 

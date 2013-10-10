@@ -10,6 +10,16 @@ class MapController(BasicController):
     def __init__(self, json, models):
         super(MapController, self).__init__(json)
         self.maps = models.map
+        self.users = models.user
+
+    def get_maps(self):
+        maps = self.maps.all()
+        return json.dumps([{
+            "id": map.id,
+            "name": map.name,
+            "map": map.map,
+            "maxPlayers": map.max_players,
+            } for map in maps])
 
     def upload_map(self):
         try:
