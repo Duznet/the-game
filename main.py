@@ -8,7 +8,6 @@ from map_controller import MapController
 from common_controller import CommonController
 import json
 import re
-from redis import Redis
 from user import User
 from game import Game
 from map import Map
