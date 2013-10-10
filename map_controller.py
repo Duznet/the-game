@@ -11,7 +11,7 @@ class MapController(BasicController):
         super(MapController, self).__init__(json)
         self.maps = models.map
 
-    def uploadMap(self):
+    def upload_map(self):
         try:
             self.maps.new(
                 name = str(self.json['name']),

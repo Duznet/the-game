@@ -13,7 +13,7 @@ class GameController(BasicController):
         self.maps = models.map
         self.users = models.user
 
-    def createGame(self):
+    def create_game(self):
         user = self._user_by_sid()
 
         if user.game:
@@ -34,7 +34,7 @@ class GameController(BasicController):
             raise BadMaxPlayers()
         return json.dumps({"result" : "ok"})
 
-    def getGames(self):
+    def get_games(self):
         games = self.games.all()
         return json.dumps([{
             "name": game.name,

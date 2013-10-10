@@ -10,7 +10,7 @@ class MessageController(BasicController):
         self.messages = models.message
         self.users = models.user
 
-    def getMessages(self):
+    def get_messages(self):
         user = self._user_by_sid()
         all_messages = self.messages.filter(game = user.game) if str(self.json['game']) else self.messages.all()
         if str(self.json['game']):

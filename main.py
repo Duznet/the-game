@@ -6,6 +6,7 @@ from message_controller import MessageController
 from game_controller import GameController
 from map_controller import MapController
 import json
+import re
 from redis import Redis
 from user import User
 from game import Game
@@ -22,7 +23,13 @@ for model in model_classes:
         models.pre_commit.connect(getattr(model, "pre_commit"), sender=model)
 
 controllers = [UserController, MessageController, GameController, MapController]
-controller_by_action = {key: value for value in controllers for key in dir(value)}
+controller_by_action = {key: value for value in controllers for key in dir(value) if key.find("_")}
+
+def lower(matchobj):
+    return "_" + matchobj.group(0).lower()
+
+def camel_to_underscores(string):
+    return re.sub(r'([A-Z])', lower, string)
 
 class MainHandler(web.RequestHandler):
     """Main application requests handler"""
@@ -40,7 +47,7 @@ class MainHandler(web.RequestHandler):
 
         try:
             data = json.loads(data)
-            action = str(data['action'])
+            action = camel_to_underscores(str(data['action']))
             controller = controller_by_action[action](data['params'], models)
         except (KeyError, ValueError):
             self.write('{"result" : "unknownAction"}')

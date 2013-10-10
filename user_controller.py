@@ -43,17 +43,17 @@ class UserController(BasicController):
         user.signout()
         return json.dumps({"result" : "ok"})
 
-    def sendMessage(self):
+    def send_message(self):
         user = self._user_by_sid()
         user.new_message(str(self.json['text']), str(self.json['game']), self.messages)
         return json.dumps({"result" : "ok"})
 
-    def joinGame(self):
+    def join_game(self):
         user = self._user_by_sid()
         user.join_game(id = str(self.json['id']))
         return json.dumps({"result" : "ok"})
 
-    def leaveGame(self):
+    def leave_game(self):
         user = self._user_by_sid()
         user.leave_game()
         return json.dumps({"result" : "ok"})
