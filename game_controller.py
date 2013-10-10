@@ -13,14 +13,14 @@ class GameController(BasicController):
         self.maps = models.map
         self.users = models.user
 
-    def createGame(self):
+    def create_game(self):
         user = self._user_by_sid()
 
         if user.game:
             raise AlreadyInGame()
 
         try:
-            maps = self.maps.filter(name = str(self.json['map']))
+            maps = self.maps.filter(id = str(self.json['map']))
             if maps.count() != 1:
                 raise BadMapName()
 
@@ -34,7 +34,7 @@ class GameController(BasicController):
             raise BadMaxPlayers()
         return json.dumps({"result" : "ok"})
 
-    def getGames(self):
+    def get_games(self):
         games = self.games.all()
         return json.dumps([{
             "name": game.name,
