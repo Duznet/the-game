@@ -5,7 +5,7 @@ class CommonController(BasicController):
 
     def __init__(self, json, models):
         super(CommonController, self).__init__(json)
-        self.models
+        self.models = models
 
     def start_testing(self):
         self.models.flush()
