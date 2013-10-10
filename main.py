@@ -13,7 +13,7 @@ from user import User
 from game import Game
 from map import Map
 from message import Message
-from tornado import ioloop, web, autoreload
+from tornado import ioloop, web, autoreload, websocket
 
 models = odm.Router('redis://127.0.0.1:6379')
 
@@ -31,6 +31,10 @@ def lower(matchobj):
 
 def camel_to_underscores(string):
     return re.sub(r'([A-Z])', lower, string)
+
+class PingWebSocket(websocket.WebSocketHandler):
+    def on_message(self, message):
+        self.write_message('{"result": "ok"}')
 
 class MainHandler(web.RequestHandler):
     """Main application requests handler"""
@@ -64,6 +68,7 @@ if __name__ == '__main__':
     application = web.Application([
         (r'/static/(.*)', web.StaticFileHandler, {'path': 'static'}),
         (r"/", MainHandler),
+        (r'/websocket', PingWebSocket),
     ])
     application.listen(5000)
     ioloop = ioloop.IOLoop.instance()
