@@ -1,4 +1,10 @@
 describe("Protocol supporting server", function () {
+    var startRes = startTesting();
+    if (startRes == null || startRes.result !== "ok") {
+        console.log("Testing could not be started");
+        document.write("Testing could not be started");
+        return;
+    };
 
     it("should respond with 'unknownAction' if it could not recognize action", function () {
         expect(getResponse("asdkhasdasd").result).toBe("unknownAction");
@@ -112,6 +118,7 @@ describe("Protocol supporting server", function () {
             login: "mess_test_login2",
             password: "mess_test_pass2"
         };
+
         signup(firstUser.login, firstUser.password);
         signup(secondUser.login, secondUser.password);
 
