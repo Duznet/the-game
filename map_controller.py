@@ -2,7 +2,7 @@ from basic_controller import BasicController
 from game_exception import BadMapName, BadMaxPlayers
 from stdnet import odm
 from stdnet.utils.exceptions import CommitException
-import json
+from common import jsonify
 
 class MapController(BasicController):
     """Controller for all actions with maps"""
@@ -14,7 +14,7 @@ class MapController(BasicController):
 
     def get_maps(self):
         maps = self.maps.all()
-        return json.dumps([{
+        return jsonify([{
             "id": map.id,
             "name": map.name,
             "map": map.map,
@@ -32,6 +32,6 @@ class MapController(BasicController):
         except ValueError:
             raise BadMaxPlayers()
 
-        return '{"result" : "ok"}'
+        return jsonify(result = "ok")
 
 

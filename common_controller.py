@@ -1,4 +1,5 @@
 from basic_controller import BasicController
+from common import jsonify
 
 class CommonController(BasicController):
     """Controller for some actions"""
@@ -9,4 +10,4 @@ class CommonController(BasicController):
 
     def start_testing(self):
         self.models.flush()
-        return '{"result": "ok"}'
+        return jsonify(result = "ok")

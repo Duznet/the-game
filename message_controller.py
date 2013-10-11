@@ -1,4 +1,4 @@
-import json
+from common import jsonify
 from datetime import datetime
 from basic_controller import BasicController
 from game_exception import BadSince, BadGame
@@ -31,4 +31,4 @@ class MessageController(BasicController):
         messages = [msg for msg in all_messages if msg.timestamp >= since]
 
 
-        return json.dumps({"result": "ok", "messages": [{ "time": msg.timestamp, "text": msg.text, "login": msg.user.login} for msg in messages]})
+        return jsonify(result = "ok", messages = [{ "time": msg.timestamp, "text": msg.text, "login": msg.user.login} for msg in messages])

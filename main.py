@@ -7,7 +7,7 @@ from game_controller import GameController
 from map_controller import MapController
 from common_controller import CommonController
 import json
-import re
+from common import *
 from user import User
 from game import Game
 from map import Map
@@ -24,12 +24,6 @@ for model in model_classes:
 
 controllers = [UserController, MessageController, GameController, MapController, CommonController]
 controller_by_action = {key: value for value in controllers for key in dir(value) if key.find("_")}
-
-def lower(matchobj):
-    return "_" + matchobj.group(0).lower()
-
-def camel_to_underscores(string):
-    return re.sub(r'([A-Z])', lower, string)
 
 class PingWebSocket(websocket.WebSocketHandler):
     def on_message(self, message):

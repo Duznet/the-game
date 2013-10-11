@@ -2,7 +2,7 @@ from basic_controller import BasicController
 from stdnet import odm
 from stdnet.utils.exceptions import CommitException
 from game_exception import *
-import json
+from common import jsonify
 
 class GameController(BasicController):
     """Controller for all actions with games"""
@@ -32,11 +32,11 @@ class GameController(BasicController):
             raise GameExists()
         except ValueError:
             raise BadMaxPlayers()
-        return json.dumps({"result" : "ok"})
+        return jsonify(result = "ok")
 
     def get_games(self):
         games = self.games.all()
-        return json.dumps([{
+        return jsonify([{
             "name": game.name,
             "id": game.id,
             "map": game.map,
