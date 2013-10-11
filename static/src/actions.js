@@ -94,3 +94,9 @@ var uploadMap = function (name, maxPlayers, map = []) {
         map: map
     });
 };
+
+var getMaps = function(sid) {
+    return getResponse("getMaps", {
+        sid: sid
+    });
+}
