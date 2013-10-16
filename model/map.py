@@ -5,6 +5,6 @@ from game_exception import BadMapName
 class Map(odm.StdModel):
     """Model for map"""
 
-    name = odm.SymbolField(unique = True)
+    name = odm.SymbolField(unique=True)
     map = odm.CharField()
     max_players = odm.IntegerField()

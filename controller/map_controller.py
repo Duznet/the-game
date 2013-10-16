@@ -14,12 +14,14 @@ class MapController(BasicController):
 
     def get_maps(self):
         maps = self.maps.all()
-        return jsonify([{
-            "id": map.id,
-            "name": map.name,
-            "map": map.map,
-            "maxPlayers": map.max_players,
-            } for map in maps])
+        return jsonify(
+            maps=[{
+                "id": map.id,
+                "name": map.name,
+                "map": map.map,
+                "maxPlayers": map.max_players,
+                } for map in maps],
+            result="ok")
 
     def upload_map(self):
         try:
@@ -32,6 +34,6 @@ class MapController(BasicController):
         except ValueError:
             raise BadMaxPlayers()
 
-        return jsonify(result = "ok")
+        return jsonify(result="ok")
 
 

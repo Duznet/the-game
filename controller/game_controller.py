@@ -32,16 +32,18 @@ class GameController(BasicController):
             raise GameExists()
         except ValueError:
             raise BadMaxPlayers()
-        return jsonify(result = "ok")
+        return jsonify(result="ok")
 
     def get_games(self):
         games = self.games.all()
-        return jsonify([{
-            "name": game.name,
-            "id": game.id,
-            "map": game.map,
-            "maxPlayers": game.max_players,
-            "players": game.users.count(),
-            "status": game.status
-            } for game in games])
+        return jsonify(
+            games=[{
+                "name": game.name,
+                "id": game.id,
+                "map": game.map,
+                "maxPlayers": game.max_players,
+                "players": game.users.count(),
+                "status": game.status
+                } for game in games],
+            result="ok")
 

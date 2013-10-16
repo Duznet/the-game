@@ -31,4 +31,6 @@ class MessageController(BasicController):
         messages = [msg for msg in all_messages if msg.timestamp >= since]
 
 
-        return jsonify(result = "ok", messages = [{ "time": msg.timestamp, "text": msg.text, "login": msg.user.login} for msg in messages])
+        return jsonify(
+            result="ok",
+            messages=[{ "time": msg.timestamp, "text": msg.text, "login": msg.user.login} for msg in messages])

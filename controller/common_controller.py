@@ -10,4 +10,4 @@ class CommonController(BasicController):
 
     def start_testing(self):
         self.models.flush()
-        return jsonify(result = "ok")
+        return jsonify(result="ok")
