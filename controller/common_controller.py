@@ -1,4 +1,4 @@
-from basic_controller import BasicController
+from controller.basic_controller import BasicController
 from common import jsonify
 
 class CommonController(BasicController):

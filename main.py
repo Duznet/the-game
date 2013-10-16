@@ -1,17 +1,12 @@
-import os
+#!/usr/local/bin/python3
+# -*- coding: utf-8 -*-
+
 from stdnet import odm
-from game_exception import GameException
-from user_controller import UserController
-from message_controller import MessageController
-from game_controller import GameController
-from map_controller import MapController
-from common_controller import CommonController
+from controller import *
 import json
+from game_exception import GameException, UnknownAction
 from common import *
-from user import User
-from game import Game
-from map import Map
-from message import Message
+from model import *
 from tornado import ioloop, web, autoreload, websocket
 
 models = odm.Router('redis://127.0.0.1:6379')
@@ -25,7 +20,7 @@ for model in model_classes:
 controllers = [UserController, MessageController, GameController, MapController, CommonController]
 controller_by_action = {key: value for value in controllers for key in dir(value) if key.find("_")}
 
-class PingWebSocket(websocket.WebSocketHandler):
+class MainWSHandler(websocket.WebSocketHandler):
     def on_message(self, message):
         self.write_message('{"result": "ok"}')
 
@@ -48,7 +43,7 @@ class MainHandler(web.RequestHandler):
             action = camel_to_underscores(str(data['action']))
             controller = controller_by_action[action](data['params'], models)
         except (KeyError, ValueError):
-            self.write('{"result" : "unknownAction"}')
+            self.write(UnknownAction().msg())
             return
 
         try:
@@ -61,7 +56,7 @@ if __name__ == '__main__':
     application = web.Application([
         (r'/static/(.*)', web.StaticFileHandler, {'path': 'static'}),
         (r"/", MainHandler),
-        (r'/websocket', PingWebSocket),
+        (r'/websocket', MainWSHandler),
     ])
     application.listen(5000)
     ioloop = ioloop.IOLoop.instance()

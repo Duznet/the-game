@@ -1,4 +1,4 @@
-from basic_controller import BasicController
+from controller.basic_controller import BasicController
 from game_exception import BadMapName, BadMaxPlayers
 from stdnet import odm
 from stdnet.utils.exceptions import CommitException

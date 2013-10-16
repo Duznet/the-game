@@ -1,6 +1,6 @@
 from common import jsonify
 from datetime import datetime
-from basic_controller import BasicController
+from controller.basic_controller import BasicController
 from game_exception import BadSince, BadGame
 
 class MessageController(BasicController):

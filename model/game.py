@@ -1,6 +1,6 @@
 from stdnet import odm
 from stdnet.utils.exceptions import CommitException
-from map import Map
+from model.map import Map
 from game_exception import BadMaxPlayers, BadMapName, BadGameName
 
 class Game(odm.StdModel):

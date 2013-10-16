@@ -97,3 +97,9 @@ class BadSince(GameException):
 
     def msg(self):
         return jsonify(result = "badSince")
+
+class UnknownAction(GameException):
+    """There is no such an action"""
+
+    def msg(self):
+        return jsonify(result = "unknownAction")

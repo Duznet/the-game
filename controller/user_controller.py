@@ -1,4 +1,4 @@
-from basic_controller import BasicController
+from controller.basic_controller import BasicController
 from datetime import datetime
 from stdnet.utils.exceptions import CommitException
 from game_exception import Incorrect, UserExists, BadPassword

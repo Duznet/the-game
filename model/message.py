@@ -1,7 +1,7 @@
 from stdnet import odm
 from datetime import datetime
-from user import User
-from game import Game
+from model.user import User
+from model.game import Game
 
 class Message(odm.StdModel):
     """Message model"""

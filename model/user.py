@@ -1,6 +1,7 @@
 from stdnet import odm
+from re import match
 from stdnet.utils.exceptions import CommitException
-from game import Game
+from model.game import Game
 from datetime import datetime
 from game_exception import *
 import hashlib
