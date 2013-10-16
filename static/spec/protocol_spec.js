@@ -196,31 +196,17 @@ describe("Protocol supporting server", function () {
             password: "joiner_pass"
         };
 
-        var testMap = {
-            name: "testMap",
-            maxPlayers: 4,
-            map: ["..", ".."]
-        };
-        uploadMap(testMap.name, testMap.maxPlayers, testMap.map);
+        uploadMap("testMap", 4, ["..", ".."]);
+        uploadMap("testMap2", 4, ["."]);
 
-        var testMap2 = {
-            name: "testMap2",
-            maxPlayers: 8,
-            map: ["."]
-        };
-
-        uploadMap(testMap2.name, testMap2.maxPlayers, testMap2.map);
+        var maps = getMaps(hostUser.sid).maps;
 
         signup(hostUser.login, hostUser.password);
         signup(joiningUser.login, joiningUser.password);
 
-        var maps = []
-
         beforeEach(function () {
             hostUser.sid = signin(hostUser.login, hostUser.password).sid;
             joiningUser.sid = signin(joiningUser.login, joiningUser.password).sid;
-
-            maps = getMaps(hostUser.sid)
         });
 
         afterEach(function () {
@@ -229,53 +215,56 @@ describe("Protocol supporting server", function () {
         })
 
 
+        var map = maps[0];
+        var map2 = maps[1];
+
         describe("createGame action", function () {
 
             it("should allow users to create games", function () {
                 expect(createGame(
-                    hostUser.sid, testMap.name + "Game", maps[0].id, testMap.maxPlayers).result).toBe("ok");
+                    hostUser.sid, map.name + "Game", map.id, map.maxPlayers).result).toBe("ok");
             });
 
             it("should respond with 'gameExists' if game with requested name already exists", function () {
                 var gameName = "gameNumber1";
                 expect(createGame(
-                    hostUser.sid, gameName, maps[0].id, testMap.maxPlayers).result).toBe("ok");
+                    hostUser.sid, gameName, map.id, map.maxPlayers).result).toBe("ok");
                 expect(createGame(
-                    joiningUser.sid, gameName, maps[0].id, testMap.maxPlayers).result).toBe("gameExists");
+                    joiningUser.sid, gameName, map2.id, map2.maxPlayers).result).toBe("gameExists");
             });
 
             it("should respond with 'badName' if game name was empty", function () {
                 expect(createGame(
-                    hostUser.sid, "", maps[0].id, testMap.maxPlayers).result).toBe("badName");
+                    hostUser.sid, "", map.id, map.maxPlayers).result).toBe("badName");
             });
 
-            it("should respond with 'badMap' if map with that name was not found", function () {
+            it("should respond with 'badMap' if map with that id was not found", function () {
                 expect(createGame(
-                    hostUser.sid, "badMapGame", maps[0].id + "@#$@#$", testMap.maxPlayers).result).toBe("badMap");
+                    hostUser.sid, "badMapGame", map.id + "@#$@#$", map.maxPlayers).result).toBe("badMap");
             });
 
-            it("should respond with 'badMap' it requested map name was empty", function () {
+            it("should respond with 'badMap' if requested map id was empty", function () {
                 expect(createGame(
-                    hostUser.sid, "emptyMapNameGame", "", testMap.maxPlayers).result).toBe("badMap");
+                    hostUser.sid, "emptyMapNameGame", "", map.maxPlayers).result).toBe("badMap");
             });
 
-            it("should respond with 'badMaxPlayers' if maxPlaers field was empty", function () {
+            it("should respond with 'badMaxPlayers' if maxPlayers field was empty", function () {
                 expect(createGame(
-                    hostUser.sid, "badMaxPlayersGame", maps[0].id, "").result).toBe("badMaxPlayers");
+                    hostUser.sid, "badMaxPlayersGame", map.id, "").result).toBe("badMaxPlayers");
             });
 
             it("should respond with 'badMaxPlayers' if maxPlayers field was not like correct number", function () {
                 expect(createGame(
-                    hostUser.sid, "badMaxPlayersNaNGame", maps[0].id, "suddenly!").result).toBe("badMaxPlayers");
+                    hostUser.sid, "badMaxPlayersNaNGame", map.id, "suddenly!").result).toBe("badMaxPlayers");
             });
 
             it("should respond with 'alreadyInGame' if host user was trying to create two games simultaneously",
                 function () {
 
                 expect(createGame(
-                    hostUser.sid, "AlreadyInGameGame1", maps[0].id, testMap.maxPlayers).result).toBe("ok");
+                    hostUser.sid, "AlreadyInGameGame1", map.id, map.maxPlayers).result).toBe("ok");
                 expect(createGame(
-                    hostUser.sid, "AlreadyInGameGame2", maps[1].id, testMap.maxPlayers).result).toBe("alreadyInGame");
+                    hostUser.sid, "AlreadyInGameGame2", map2.id, map.maxPlayers).result).toBe("alreadyInGame");
             });
 
         });
