@@ -27,13 +27,12 @@ class MapController(BasicController):
         try:
             self.maps.new(
                 name = str(self.json['name']),
-                map = str(self.json['map']),
+                map = list(self.json['map']),
                 max_players = int(str(self.json['maxPlayers'])))
         except CommitException:
             raise BadMapName()
         except ValueError:
             raise BadMaxPlayers()
-
         return jsonify(result="ok")
 
 

@@ -6,5 +6,5 @@ class Map(odm.StdModel):
     """Model for map"""
 
     name = odm.SymbolField(unique=True)
-    map = odm.CharField()
+    map = odm.JSONField()
     max_players = odm.IntegerField()
