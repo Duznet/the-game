@@ -7,7 +7,7 @@ class BasicController:
         self.json = json
         if users:
             self.users = users
-            self._user_by_sid()
+            self.user = self._user_by_sid()
 
     def _user_by_sid(self):
         try:

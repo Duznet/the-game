@@ -4,8 +4,7 @@ class GameplayController(BasicController):
     """Controller for gameplay actions"""
 
     def __init__(self, json, models):
-        super(GameplayController, self).__init__(json)
-        self.users = models.user
+        super(GameplayController, self).__init__(json, models.user)
 
 
     def move():
