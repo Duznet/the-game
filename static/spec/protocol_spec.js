@@ -176,12 +176,79 @@ describe("Protocol supporting server", function () {
         });
     });
 
-    describe("uploadMap action", function () {
+    describe("Map controlling", function () {
 
-        it("should allow users to create maps", function () {
-            expect(uploadMap("testUploadedMap", 16, ["."]).result).toBe("ok");
+        describe("uploadMap action", function () {
+
+            var user = {
+                login: "mapUploaderLogin",
+                password: "mapUploaderPass"
+            };
+
+            signup(user.login, user.password);
+            user.sid = signin(user.login, user.password).sid;
+
+            it("should allow users to create maps", function () {
+                expect(uploadMap(user.sid, "testUploadedMap", 16, ["."]).result).toBe("ok");
+            });
+
+            it("should respond with 'badSid' if user with that sid was not found", function () {
+                expect(uploadMap(user.sid + "@#&*^@#$!}}", "testBadSid", 10, ["."]).result).toBe("badSid");
+            });
+
+            it("should respond with 'badName' if map name was empty", function () {
+                expect(uploadMap(user.sid, "", 10, ["."]).result).toBe("badName");
+            });
+
+            it("should respond with 'badMaxPlayers' if maxPlayers field was empty", function () {
+                expect(uploadMap(user.sid, "badMaxPlayersTest", "", ["."]).result).toBe("badMaxPlayers");
+            });
+
+            it("should respond with 'badMap' if row lengths are not equal", function () {
+                expect(uploadMap(user.sid, "DiffLengthsTest", 16, ["...", "..", "..."]).result).toBe("badMap");
+            });
+
         });
 
+        describe("getMaps action", function () {
+
+            var user = {
+                login: "mapGetterLogin",
+                password: "mapGetterPass"
+            };
+
+            signup(user.login, user.password);
+            user.sid = signin(user.login, user.password).sid;
+
+            var map = {
+                name: "gettingMapsTest",
+                maxPlayers: 4,
+                map: [
+                    "...",
+                    "...",
+                    "..."
+                ]
+            };
+            uploadMap(user.sid, map.name, map.maxPlayers, map.map);
+
+            it("should allow users to get map list", function () {
+                var getMapsRes = getMaps(user.sid);
+                expect(getMapsRes.result).toBe("ok");
+                expect(getMapsRes.maps).toBeDefined();
+                for (var i = 0; i < getMapsRes.maps.length; i++) {
+                    if (getMapsRes.maps[i].name = map.name) {
+                        var curMap = getMapsRes.maps[i];
+                        console.log(curMap);
+                        expect(curMap.map).toBe(map.map);
+                        expect(curMap.maxPlayers).toBe(map.maxPlayers);
+                    };
+                };
+            });
+
+            it("should respond with 'badSid' if user with that sid was not found", function () {
+                expect(getMaps(user.sid + "$#%%").result).toBe("badSid");
+            });
+        });
     });
 
     describe("Game controlling", function () {
@@ -195,25 +262,21 @@ describe("Protocol supporting server", function () {
             login: "joiner_login",
             password: "joiner_pass"
         };
-
-        uploadMap("testMap", 4, ["..", ".."]);
-        uploadMap("testMap2", 4, ["."]);
-
-        var maps = getMaps(hostUser.sid).maps;
-
         signup(hostUser.login, hostUser.password);
         signup(joiningUser.login, joiningUser.password);
 
-        beforeEach(function () {
-            hostUser.sid = signin(hostUser.login, hostUser.password).sid;
-            joiningUser.sid = signin(joiningUser.login, joiningUser.password).sid;
-        });
+        hostUser.sid = signin(hostUser.login, hostUser.password).sid;
+        joiningUser.sid = signin(joiningUser.login, joiningUser.password).sid;
+
+        uploadMap(hostUser.sid, "testMap", 4, ["..", ".."]);
+        uploadMap(hostUser.sid, "testMap2", 4, ["."]);
+
+        var maps = getMaps(hostUser.sid).maps;
 
         afterEach(function () {
             leaveGame(hostUser.sid);
             leaveGame(joiningUser.sid);
-        })
-
+        });
 
         var map = maps[0];
         var map2 = maps[1];
