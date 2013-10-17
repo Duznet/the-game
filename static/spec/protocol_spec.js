@@ -339,7 +339,10 @@ describe("Protocol supporting server", function () {
                 map: map.id,
                 maxPlayers: map.maxPlayers
             };
-            createGame(hostUser.sid, game.name, game.map, game.maxPlayers);
+
+            beforeEach(function () {
+                createGame(hostUser.sid, game.name, game.map, game.maxPlayers);
+            })
 
             it("should allow users to get game list", function () {
                 var getGamesResponse = getGames(joiningUser.sid);
