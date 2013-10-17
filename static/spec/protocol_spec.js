@@ -331,5 +331,122 @@ describe("Protocol supporting server", function () {
             });
 
         });
+
+        describe("getGames action", function () {
+
+            var game = {
+                name: "GamesTest",
+                map: map.id,
+                maxPlayers: map.maxPlayers
+            };
+
+            beforeEach(function () {
+                createGame(hostUser.sid, game.name, game.map, game.maxPlayers);
+            })
+
+            it("should allow users to get game list", function () {
+                var getGamesResponse = getGames(joiningUser.sid);
+                expect(getGamesResponse.result).toBe("ok");
+                expect(getGamesResponse.games).toBeDefined();
+                for (var i = 0; i < getMapsResponse.games.length; i++) {
+                    if (getGamesResponse.games[i].name == game.name) {
+                        var cur = getGamesResponse.games[i];
+                        expect(cur.map).toBe(game.map);
+                        expect(cur.maxPlayers).toBe(game.maxPlayers);
+                    };
+                };
+            });
+
+            it("should respond with 'badSid' if user with that sid was not found", function () {
+                expect(getGames(joiningUser.sid + "#(&@(&@$").result).toBe("badSid");
+            });
+
+        });
+
+        describe("joinGame action", function () {
+
+            var gameCreator = {
+                login: "gameCreator",
+                password: "hosterPass"
+            };
+
+            signup(gameCreator.login, gameCreator.password);
+            gameCreator.sid = signin(gameCreator.login, gameCreator.password).sid;
+
+            var game = {
+                name: "joinGameTest",
+                map: map.id,
+                maxPlayers: 2
+            };
+
+            createGame(gameCreator.sid, game.name, game.map, game.maxPlayers);
+            var games = getGames(joiningUser.sid).games;
+            for (var i = 0; i < games.length; i++) {
+                if (games[i].name == game.name) {
+                    game.id = games[i].id;
+                    break;
+                }
+            };
+
+            it("should allow users to join game using the sid and game id", function () {
+                expect(joinGame(joiningUser.sid, game.id).result).toBe("ok");
+            });
+
+            it("should respond with 'badSid' if user with that sid was not found", function () {
+                expect(joinGame(joiningUser.sid + "#@(*#q", game.id).result).toBe("badSid");
+            });
+
+            it("should respond with 'badGame' if game id was like some string", function () {
+                expect(joinGame(joiningUser.sid, game.id + "#@(&").result).toBe("badGame");
+            });
+
+            it("should respond with 'badGame' if game id was empty", function () {
+                expect(joinGame(joiningUser.sid, "").result).toBe("badGame");
+            });
+
+            it("should respond with 'badGame' if game id was empty", function () {
+                expect(joinGame(joiningUser.sid, "").result).toBe("badGame");
+            });
+
+            it("should respond with 'gameFull' if max players amount was reached", function () {
+                expect(joinGame(joiningUser.sid, game.id).result).toBe("ok");
+
+                var oddManOut = {
+                    login: "oddLogin",
+                    password: "oddPassword"
+                };
+
+                signup(oddManOut.login, oddManOut.password);
+                oddManOut.sid = signin(oddManOut.login, oddManOut.password).sid;
+                expect(joinGame(oddManOut.sid, game.id).result).toBe("gameFull");
+            });
+
+        });
+
+        describe("leaveGame action", function () {
+
+            var game = {
+                name: "leaveGameTest",
+                map: map.id,
+                maxPlayers: 3
+            };
+
+            beforeEach(function () {
+                createGame(hostUser.sid, game.name, game.map, game.maxPlayers);
+            });
+
+            it("should allow host users to leave created games", function () {
+                expect(leaveGame(hostUser.sid).result).toBe("ok");
+            });
+
+            it("should respond with 'notInGame' if user trying to leave game was not in any", function () {
+                expect(leaveGame(joiningUser.sid).result).toBe("notInGame");
+            });
+
+            it("should respong with 'badSid' if user with that sid was not found", function () {
+                expect(leaveGame(joiningUser.sid + "@#$@#$").result).toBe("badSid");
+            });
+        });
+
     });
 });
