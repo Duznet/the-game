@@ -331,5 +331,33 @@ describe("Protocol supporting server", function () {
             });
 
         });
+
+        describe("getGames action", function () {
+
+            var game = {
+                name: "getGamesTest",
+                map: map.id,
+                maxPlayers: map.maxPlayers
+            };
+            createGame(hostUser.sid, game.name, game.map, game.maxPlayers);
+
+            it("should allow users to get game list", function () {
+                var getGamesResponse = getGames(joiningUser.sid);
+                expect(getGamesResponse.result).toBe("ok");
+                expect(getGamesResponse.games).toBeDefined();
+                for (var i = 0; i < getMapsResponse.games.length; i++) {
+                    if (getGamesResponse.games[i].name == game.name) {
+                        var cur = getGamesResponse.games[i];
+                        expect(cur.map).toBe(game.map);
+                        expect(cur.maxPlayers).toBe(game.maxPlayers);
+                    };
+                };
+            });
+
+            it("should respond with 'badSid' if user with that sid was not found", function () {
+                expect(getGames(joiningUser.sid + "#(&@(&@$").result).toBe("badSid");
+            });
+
+        });
     });
 });
