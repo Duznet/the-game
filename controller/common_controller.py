@@ -4,7 +4,7 @@ from common import jsonify
 class CommonController(BasicController):
     """Controller for some actions"""
 
-    def __init__(self, json, models):
+    def __init__(self, json, models, games):
         super(CommonController, self).__init__(json)
         self.models = models
 

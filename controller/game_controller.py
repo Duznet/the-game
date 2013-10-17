@@ -7,7 +7,7 @@ from common import jsonify
 class GameController(BasicController):
     """Controller for all actions with games"""
 
-    def __init__(self, json, models):
+    def __init__(self, json, models, games):
         super(GameController, self).__init__(json, models.user)
         self.games = models.game
         self.maps = models.map

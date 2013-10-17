@@ -10,7 +10,7 @@ class UserController(BasicController):
 
     MIN_PASSWORD_SYMBOLS = 4
 
-    def __init__(self, json, models):
+    def __init__(self, json, models, games):
         super(UserController, self).__init__(json)
         self.users = models.user
         self.messages = models.message
