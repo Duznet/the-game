@@ -8,10 +8,10 @@ class Game(odm.StdModel):
 
     MIN_NAME_LENGTH = 1
 
-    name = odm.SymbolField(unique = True)
-    map = odm.ForeignKey(Map, required = True, index = True, related_name = 'games')
+    name = odm.SymbolField(unique=True)
+    map = odm.ForeignKey(Map, required=True, index=True, related_name='games')
     max_players = odm.IntegerField()
-    status = odm.SymbolField(default = "started")
+    status = odm.SymbolField(default="started")
 
     def pre_commit(instances, **named):
         game = instances[0]

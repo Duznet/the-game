@@ -236,10 +236,10 @@ describe("Protocol supporting server", function () {
                 expect(getMapsRes.result).toBe("ok");
                 expect(getMapsRes.maps).toBeDefined();
                 for (var i = 0; i < getMapsRes.maps.length; i++) {
-                    if (getMapsRes.maps[i].name = map.name) {
+                    if (getMapsRes.maps[i].name == map.name) {
                         var curMap = getMapsRes.maps[i];
                         console.log(curMap);
-                        expect(curMap.map).toBe(map.map);
+                        expect(curMap.map).toEqual(map.map);
                         expect(curMap.maxPlayers).toBe(map.maxPlayers);
                     };
                 };

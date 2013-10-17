@@ -8,15 +8,12 @@ class GameController(BasicController):
     """Controller for all actions with games"""
 
     def __init__(self, json, models):
-        super(GameController, self).__init__(json)
+        super(GameController, self).__init__(json, models.user)
         self.games = models.game
         self.maps = models.map
-        self.users = models.user
 
     def create_game(self):
-        user = self._user_by_sid()
-
-        if user.game:
+        if self.user.game:
             raise AlreadyInGame()
 
         try:
@@ -26,22 +23,24 @@ class GameController(BasicController):
 
             map = maps[0]
             game = self.games.new(map = map, name =  str(self.json['name']), max_players = int(str(self.json['maxPlayers'])))
-            user.game = game
-            user.save()
+            self.user.game = game
+            self.user.save()
         except CommitException:
             raise GameExists()
         except ValueError:
             raise BadMaxPlayers()
-        return jsonify(result = "ok")
+        return jsonify(result="ok")
 
     def get_games(self):
         games = self.games.all()
-        return jsonify([{
-            "name": game.name,
-            "id": game.id,
-            "map": game.map,
-            "maxPlayers": game.max_players,
-            "players": game.users.count(),
-            "status": game.status
-            } for game in games])
+        return jsonify(
+            games=[{
+                "name": game.name,
+                "id": game.id,
+                "map": game.map,
+                "maxPlayers": game.max_players,
+                "players": game.users.count(),
+                "status": game.status
+                } for game in games],
+            result="ok")
 

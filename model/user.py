@@ -13,10 +13,10 @@ class User(odm.StdModel):
     MIN_LOGIN_SYMBOLS = 4
     MAX_LOGIN_SYMBOLS = 40
 
-    login = odm.SymbolField(unique = True)
+    login = odm.SymbolField(unique=True)
     password = odm.SymbolField()
-    sid = odm.SymbolField(index = True, required = False)
-    game = odm.ForeignKey(Game, index = True, required = False, related_name = "players")
+    sid = odm.SymbolField(index=True, required=False)
+    game = odm.ForeignKey(Game, index=True, required=False, related_name="players")
 
     @staticmethod
     def encode(password):
@@ -34,10 +34,10 @@ class User(odm.StdModel):
     def new_message(self, text, game_id, message):
         try:
             if len(game_id) == 0:
-                return message.new(text = text, timestamp = datetime.utcnow().timestamp(), user = self)
+                return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self)
 
-            game = odm.session.query(Game).filter(id = int(game_id))
-            return message.new(text = text, timestamp = datetime.utcnow().timestamp(), user = self, game = game)
+            game = odm.session.query(Game).filter(id=int(game_id))
+            return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self, game=game)
         except ValueError:
             raise BadGame()
 

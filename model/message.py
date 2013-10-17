@@ -7,9 +7,9 @@ class Message(odm.StdModel):
     """Message model"""
 
     text = odm.CharField()
-    timestamp = odm.FloatField(index = True, required = True)
+    timestamp = odm.FloatField(index=True, required=True)
     user = odm.ForeignKey(User)
-    game = odm.ForeignKey(Game, required = False)
+    game = odm.ForeignKey(Game, required=False)
 
     class Meta:
         ordering = "timestamp"
