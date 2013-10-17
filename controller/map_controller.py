@@ -7,7 +7,7 @@ from common import jsonify
 class MapController(BasicController):
     """Controller for all actions with maps"""
 
-    def __init__(self, json, models):
+    def __init__(self, json, models, games):
         super(MapController, self).__init__(json, models.user)
         self.maps = models.map
 

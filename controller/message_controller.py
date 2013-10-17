@@ -5,7 +5,7 @@ from game_exception import BadSince, BadGame
 
 class MessageController(BasicController):
     """Controller for messages"""
-    def __init__(self, json, models):
+    def __init__(self, json, models, games):
         super(MessageController, self).__init__(json, models.user)
         self.messages = models.message
 

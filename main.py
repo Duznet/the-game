@@ -7,7 +7,10 @@ import json
 from game_exception import GameException, UnknownAction
 from common import *
 from model import *
+from current_games import CurrentGames
 from tornado import ioloop, web, autoreload, websocket
+
+games = CurrentGames()
 
 models = odm.Router('redis://127.0.0.1:6379')
 
@@ -28,7 +31,7 @@ class ActionProcesser():
     def process_action(self, action_name, data):
         try:
             try:
-                controller = self.controller_by_action[action_name](data, models)
+                controller = self.controller_by_action[action_name](data, models, games)
             except (KeyError, ValueError):
                 raise UnknownAction()
 
