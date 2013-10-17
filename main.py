@@ -27,11 +27,11 @@ class ActionProcesser():
 
     def process_action(self, action_name, data):
         try:
-            controller = self.controller_by_action[action_name](data, models)
-        except (KeyError, ValueError):
-            return UnknownAction().msg()
+            try:
+                controller = self.controller_by_action[action_name](data, models)
+            except (KeyError, ValueError):
+                raise UnknownAction()
 
-        try:
             response = getattr(controller, action_name)()
             return response
         except GameException as e:

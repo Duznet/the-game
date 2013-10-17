@@ -8,9 +8,8 @@ class MapController(BasicController):
     """Controller for all actions with maps"""
 
     def __init__(self, json, models):
-        super(MapController, self).__init__(json)
+        super(MapController, self).__init__(json, models.user)
         self.maps = models.map
-        self.users = models.user
 
     def get_maps(self):
         maps = self.maps.all()

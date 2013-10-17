@@ -7,3 +7,6 @@ class GameplayController(BasicController):
         super(GameplayController, self).__init__(json)
         self.users = models.user
 
+
+    def move():
+        return
