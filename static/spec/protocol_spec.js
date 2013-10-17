@@ -371,7 +371,7 @@ describe("Protocol supporting server", function () {
             };
 
             signup(gameCreator.login, gameCreator.password);
-            gameCreator.sid = signin(gameCreator.login, gameCreator.password);
+            gameCreator.sid = signin(gameCreator.login, gameCreator.password).sid;
 
             var game = {
                 name: "joinGameTest",
@@ -417,10 +417,36 @@ describe("Protocol supporting server", function () {
                 };
 
                 signup(oddManOut.login, oddManOut.password);
-                oddManOut.sid = signin(oddManOut.login, oddManOut.password);
+                oddManOut.sid = signin(oddManOut.login, oddManOut.password).sid;
                 expect(joinGame(oddManOut.sid, game.id).result).toBe("gameFull");
             });
 
         });
+
+        describe("leaveGame action", function () {
+
+            var game = {
+                name: "leaveGameTest",
+                map: map.id,
+                maxPlayers: 3
+            };
+
+            beforeEach(function () {
+                createGame(hostUser.sid, game.name, game.map, game.maxPlayers);
+            });
+
+            it("should allow host users to leave created games", function () {
+                expect(leaveGame(hostUser.sid).result).toBe("ok");
+            });
+
+            it("should respond with 'notInGame' if user trying to leave game was not in any", function () {
+                expect(leaveGame(joiningUser.sid).result).toBe("notInGame");
+            });
+
+            it("should respong with 'badSid' if user with that sid was not found", function () {
+                expect(leaveGame(joiningUser.sid + "@#$@#$").result).toBe("badSid");
+            });
+        });
+
     });
 });
