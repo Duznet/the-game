@@ -78,7 +78,7 @@ class MainHandler(web.RequestHandler):
         try:
             data = json.loads(data)
             action = camel_to_underscores(str(data['action']))
-            self.write(self.processer.process_action(action, data['params']))
+            self.write(self.processer.process_action(action, data.get("params", {})))
         except (KeyError, ValueError):
             self.write(UnknownAction().msg())
             return
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     application = web.Application([
         (r'/static/(.*)', web.StaticFileHandler, {'path': 'static'}),
         (r"/", MainHandler),
-        (r'/', MainWSHandler),
+        (r'/websocket', MainWSHandler),
     ])
     application.listen(5000)
     ioloop = ioloop.IOLoop.instance()

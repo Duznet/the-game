@@ -36,13 +36,13 @@ class User(odm.StdModel):
             if len(game_id) == 0:
                 return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self)
 
-            game = odm.session.query(Game).filter(id=int(game_id))
+            game = self.session.query(Game).filter(id=int(game_id))
             return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self, game=game)
         except ValueError:
             raise BadGame()
 
     def join_game(self, id):
-        game = odm.session.query(Game).filter(id = id)
+        game = self.session.query(Game).filter(id = id)
         if game.count() != 1:
             raise BadGame()
 
@@ -51,8 +51,8 @@ class User(odm.StdModel):
 
         game = game.items()[0]
 
-        if game.players.count() == game.max_players:
-            raise GameFlull()
+        if len(game.players.all()) == game.max_players:
+            raise GameFull()
 
         self.game = game
         self.save()

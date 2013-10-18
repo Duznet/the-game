@@ -19,7 +19,7 @@ def normalize_map(map, wall):
         return map
 
     result = []
-    wallstr = wall * len(map[0]) + 2
+    wallstr = wall * (len(map[0]) + 2)
     result.append(wallstr)
     for row in map:
         result.append(wall + row + wall)
@@ -29,7 +29,8 @@ def normalize_map(map, wall):
 
 
 class Game:
-    players = {}
+    _players = {}
+    players_order = []
     platforms = []
 
     DEFAULT_VELOCITY = 0.5
@@ -38,8 +39,10 @@ class Game:
     SPAWN = '$'
     SPACE = '.'
 
+    spawn = Point(0, 0)
+
     def __init__(self, map):
-        self.map = normalize_map(map)
+        self.map = normalize_map(map, self.WALL)
         for y, row in enumerate(map):
             for x, cell in enumerate(row):
                 if cell == self.SPAWN:
@@ -67,17 +70,21 @@ class Game:
             if map[y][cell.x] == self.WALL:
                 return Point(y - 1, x)
 
-    def players():
-        return list(players.values())
+    def players(self):
+        return [self._players[id] for id in self.players_order]
+
+    def player_ids(self):
+        return self.players_order
 
     def add_player(self, id):
-        self.players[id] = Player(self.spawn.x, self.spawn.y)
-        return self.players[id]
+        self._players[id] = Player(self.spawn.x, self.spawn.y)
+        self.players_order.append(id)
+        return self._players[id]
 
     def move(self, id, dx, dy):
         delta = Point(dx, dy)
         delta /= delta.distance(Point(0, 0))
-        player = players[id]
+        player = _players[id]
 
         path = Segment(player.point, player.point + self.DEFAULT_VELOCITY * delta)
 

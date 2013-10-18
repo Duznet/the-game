@@ -7,7 +7,7 @@ class CurrentGames:
 
     def add_game(self, id, map):
         self.games[id] = Game(map)
-        return games[id]
+        return self.games[id]
 
     def game(self, id):
         return self.games[id]
