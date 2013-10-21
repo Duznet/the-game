@@ -42,10 +42,9 @@ class GameController(BasicController):
             games=[{
                 "name": game.name,
                 "id": game.id,
-                "map": list(game.map.map),
+                "map": game.map.id,
                 "maxPlayers": game.max_players,
                 "players": [self.users.get(id=id).login for id in self.current_games.game(game.id).player_ids()],
                 "status": game.status
                 } for game in games],
             result="ok")
-

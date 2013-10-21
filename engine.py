@@ -27,6 +27,18 @@ def normalize_map(map, wall):
     result.append(wallstr)
     return result
 
+def line(start, end):
+    result = []
+    delta = end - start
+    error = 0
+    deltaerr = abs (delta.y / delta.x)
+    y = floor(start.y)
+    for x in range(floor(start.x), floor(end.x)):
+        result.append(Point(x, y))
+        error += deltaerr
+        if error >= 0.5:
+            y = y + 1
+            error -= 1
 
 class Game:
     _players = {}
@@ -79,6 +91,7 @@ class Game:
     def add_player(self, id):
         self._players[id] = Player(self.spawn.x, self.spawn.y)
         self.players_order.append(id)
+        print(len(self.players_order))
         return self._players[id]
 
     def move(self, id, dx, dy):
@@ -99,5 +112,4 @@ class Game:
         player.point = path.p2
         player.velocity += delta
 
-        player.point = self.fall_if_need(player.point)
         return player

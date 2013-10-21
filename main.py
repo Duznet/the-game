@@ -4,11 +4,13 @@
 from stdnet import odm
 from controller import *
 import json
+from datetime import datetime
 from game_exception import GameException, UnknownAction
 from common import *
 from model import *
 from current_games import CurrentGames
 from tornado import ioloop, web, autoreload, websocket
+import tornado.options
 
 games = CurrentGames()
 
@@ -40,22 +42,28 @@ class ActionProcesser():
         except GameException as e:
             return e.msg()
 
-
 class MainWSHandler(websocket.WebSocketHandler):
-    controllers = [GameplayController]
 
-    processer = ActionProcesser(controllers)
+    def open(self):
+        self.application.websockets.add(self)
+        self.controller = None
+
+    def tick(self):
+        if self.controller:
+            self.write_message(self.controller.tick())
 
     def on_message(self, message):
-        data = message.decode("utf-8", "replace")
-
         try:
-            data = json.loads(data)
+            data = json.loads(message)
+            self.controller = self.controller if self.controller else GameplayController(data, models, games)
             action = camel_to_underscores(str(data['action']))
-            self.write_message(self.processer.process_action(action, data))
+            getattr(self.controller, action)()
         except (KeyError, ValueError):
             self.write_message(UnknownAction().msg())
             return
+
+    def on_close(self, message=None):
+        self.application.websockets.remove(self)
 
 class MainHandler(web.RequestHandler):
     """Main application requests handler"""
@@ -63,7 +71,7 @@ class MainHandler(web.RequestHandler):
     controllers = [UserController, MessageController, GameController, MapController, CommonController]
 
     processer = ActionProcesser(controllers)
-
+    count = 0
     def get(self):
         self.render("templates/spec_runner.html")
 
@@ -74,7 +82,7 @@ class MainHandler(web.RequestHandler):
 
     def post(self):
         data = self.request.body.decode("utf-8", "replace")
-
+        print(data)
         try:
             data = json.loads(data)
             action = camel_to_underscores(str(data['action']))
@@ -83,13 +91,33 @@ class MainHandler(web.RequestHandler):
             self.write(UnknownAction().msg())
             return
 
+class GameApp(web.Application):
+    def __init__(self):
+        self.websockets = set()
+
+        handlers = [
+            (r'/static/(.*)', web.StaticFileHandler, {'path': 'static'}),
+            (r"/", MainHandler),
+            (r'/websocket', MainWSHandler),
+        ]
+
+        super(GameApp, self).__init__(handlers)
+
+
+    def tick(self):
+        for sock in self.websockets:
+            sock.tick()
+
+
+
 if __name__ == '__main__':
-    application = web.Application([
-        (r'/static/(.*)', web.StaticFileHandler, {'path': 'static'}),
-        (r"/", MainHandler),
-        (r'/websocket', MainWSHandler),
-    ])
+    application = GameApp()
+
+    tornado.options.parse_command_line()
+
     application.listen(5000)
-    ioloop = ioloop.IOLoop.instance()
-    autoreload.start(ioloop)
-    ioloop.start()
+    loop = ioloop.IOLoop.instance()
+    timer = ioloop.PeriodicCallback(application.tick, 500, io_loop = loop)
+    autoreload.start(loop)
+    timer.start()
+    loop.start()
