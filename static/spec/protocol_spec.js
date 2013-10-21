@@ -348,7 +348,7 @@ describe("Protocol supporting server", function () {
                 var getGamesResponse = getGames(joiningUser.sid);
                 expect(getGamesResponse.result).toBe("ok");
                 expect(getGamesResponse.games).toBeDefined();
-                for (var i = 0; i < getMapsResponse.games.length; i++) {
+                for (var i = 0; i < getGamesResponse.games.length; i++) {
                     if (getGamesResponse.games[i].name == game.name) {
                         var cur = getGamesResponse.games[i];
                         expect(cur.map).toBe(game.map);
