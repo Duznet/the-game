@@ -3,7 +3,7 @@ var getResponse = function (action, params = {}) {
 
     $.ajax({
         type: "POST",
-        url: "http://localhost:5000",
+        url: "/",
         dataType: "json",
         contentType: "application/json",
         async: false,
