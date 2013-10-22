@@ -4,8 +4,8 @@ from math import *
 class Player:
     DEFAULT_HP = 100
 
-    def __init__(self, x, y):
-        self.point = Point(x, y)
+    def __init__(self, point):
+        self.point = point
         self.velocity = 0
         self.hp = self.DEFAULT_HP
         self.score = 0
@@ -27,25 +27,17 @@ def normalize_map(map, wall):
     result.append(wallstr)
     return result
 
-def line(start, end):
-    result = []
-    delta = end - start
-    error = 0
-    deltaerr = abs (delta.y / delta.x)
-    y = floor(start.y)
-    for x in range(floor(start.x), floor(end.x)):
-        result.append(Point(x, y))
-        error += deltaerr
-        if error >= 0.5:
-            y = y + 1
-            error -= 1
+
 
 class Game:
     _players = {}
     players_order = []
     platforms = []
 
-    DEFAULT_VELOCITY = 0.5
+    MAX_VELOCITY = 1
+    DEFAULT_VELOCITY = 0.1
+    SIDE = 0.5
+    PLAYER_POS = Point(0.5, 0.5)
 
     WALL = '#'
     SPAWN = '$'
@@ -60,38 +52,40 @@ class Game:
                 if cell == self.SPAWN:
                     self.spawn = Point(x, y)
 
-            l = 0
-            r = l
-            while r < len(row):
-                if row[l] != self.WALL:
-                    r += 1
-                    l += 1
-                elif row[r] == row[l]:
-                    r += 1
-                else:
-                    platforms.append(Segment(Point(l, y), Point(r - 1, y)))
+    def is_on_my_way(start, end, cell):
+        path = Polygon(
+            Point(start.x, start.y - SIDE),
+            Point(start.x, start.y + SIDE),
+            Point(end.x, end.y + SIDE),
+            Point(end.x, end.y - SIDE))
+
+        cell = Polygon(cell, Point(cell.x, cell.y + 1), cell + Point(1, 1), Point(cell.x + 1, cell.y))
+
+        return path.intersection(cell)
 
 
-    def fall_if_need(self, point):
-        cell = pfloor(point)
+    def cells_path(start, end):
+        path = []
+        for x in range(floor(start.x), floor(end.x)):
+            for y in range(floor(start.y), floor(end.y)):
+                if is_on_my_way(start, end, Point(x, y)):
+                    path.append(Point(x, y))
 
-        if self.map[cell.y + 1][cell.x] == self.WALL:
-            return point
-
-        for y in range(cell.y, len(self.map) - 1):
-            if map[y][cell.x] == self.WALL:
-                return Point(y - 1, x)
+        return path
 
     def players(self):
-        return [self._players[id] for id in self.players_order]
+        players = self.players_order
+        for player in players:
+            players.point -= Point(1, 1)
+
+        return [self._players[id] for id in players]
 
     def player_ids(self):
         return self.players_order
 
     def add_player(self, id):
-        self._players[id] = Player(self.spawn.x, self.spawn.y)
+        self._players[id] = Player(self.spawn + self.PLAYER_POS)
         self.players_order.append(id)
-        print(len(self.players_order))
         return self._players[id]
 
     def move(self, id, dx, dy):
@@ -99,12 +93,11 @@ class Game:
         delta /= delta.distance(Point(0, 0))
         player = _players[id]
 
-        path = Segment(player.point, player.point + self.DEFAULT_VELOCITY * delta)
+        path = self.cells_path(player.point, player.point + self.DEFAULT_VELOCITY * delta)
 
-        for platform in platforms:
-            inter = path.intersection(platform)
-            if inter:
-                player.point = inter[0]
+        for id, cell in enumerate(path):
+            if self.map[cell.y][cell.x] == self.WALL:
+                player.point = path[id - 1] + self.PLAYER_POS
                 player.velocity = Point(0, 0)
                 return player
 
