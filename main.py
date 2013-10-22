@@ -117,7 +117,8 @@ if __name__ == '__main__':
 
     application.listen(5000)
     loop = ioloop.IOLoop.instance()
-    timer = ioloop.PeriodicCallback(application.tick, 500, io_loop = loop)
+    timer = ioloop.PeriodicCallback(application.tick, 30, io_loop = loop)
     autoreload.start(loop)
+
     timer.start()
     loop.start()
