@@ -5,13 +5,23 @@ describe 'Protocol supporting server', ->
     document.write "Testing could not be started"
     return
 
+  it 'should respond with "badJSON" if it got string instead of params object', ->
+    expect(getResponse("signup", "suddenly string").result).toBe "badJSON"
+
+  it 'should respond with "badJSON" if it got array instead of params object', ->
+    expect(getResponse("signup", [1, 2, 3]).result).toBe "badJSON"
+
   it 'should respond with "unknownAction" if it could not recognize action', ->
-    expect(getResponse("asdkhasdasd").result).toBe "unknownAction"
+    expect(getResponse("asdkhasdasd", {}).result).toBe "unknownAction"
 
   it 'should respond with "unknownAction" if the action field was empty', ->
-    expect(getResponse("").result).toBe "unknownAction"
+    expect(getResponse("", {}).result).toBe "unknownAction"
 
-  describe 'Signup action', ->
+  describe 'signup action', ->
+    it 'should respond with "paramMissed" if it did not receive all required params', ->
+      expect(getResponse("signup", login: "some_login").result).toBe "paramMissed"
+      expect(getResponse("signup", password: "some_password").result).toBe "paramMissed"
+
     it 'should require login and password', ->
       expect(signup("signup_test_login", "signup_test_password").result).toBe "ok"
 
@@ -33,7 +43,11 @@ describe 'Protocol supporting server', ->
       expect(signup("sh", "sh").result).toMatch /badPassword|badLogin/
 
 
-  describe 'Signin action', ->
+  describe 'signin action', ->
+    it 'should respond with "paramMissed" if it did not receive all required params', ->
+      expect(getResponse("signin", login: "some_login").result).toBe "paramMissed"
+      expect(getResponse("signin", param: "some_password").result).toBe "paramMissed"
+
     it 'should respond with sid after the correct signin request', ->
       userLogin = "signin_test_login"
       userPass = "signin_test_pass"
@@ -60,7 +74,10 @@ describe 'Protocol supporting server', ->
       expect(signin("", "123").result).toBe "incorrect"
 
 
-  describe 'Signout action', ->
+  describe 'signout action', ->
+    it 'should respond with "paramMissed" if it did not receive all required params', ->
+      expect(getResponse("signout", {}).result).toBe "paramMissed"
+
     it 'should allow user to sign out using the sid', ->
       userLogin = "signout_test_login"
       userPassword = "singout_test_pass"
@@ -100,6 +117,11 @@ describe 'Protocol supporting server', ->
       secondUser.sid = signin(secondUser.login, secondUser.password).sid
 
     describe 'sendMessage action', ->
+      it 'should respond with "paramMissed" if it did not receive all required params', ->
+        expect(getResponse("sendMessage", {sid: firstUser.sid, game: ""}).result).toBe "paramMissed"
+        expect(getResponse("sendMessage", {sid: firstUser.sid, text: "some text"}).result).toBe "paramMissed"
+        expect(getResponse("sendMessage", {game: "", text: "some text"}).result).toBe "paramMissed"
+
       it 'should allow user to send text to chat using sid', ->
         expect(sendMessage(firstUser.sid, "", "Hello").result).toBe "ok"
 
@@ -108,6 +130,9 @@ describe 'Protocol supporting server', ->
 
 
     describe 'getMessages action', ->
+      it 'should respond with "paramMissed" if it did not receive all required params', ->
+        expect(getResponse("getMessages", sid: firstUser.sid).result).toBe "paramMissed"
+
       it 'should allow user to get messages using sid', ->
         firstText = "Hello, second"
         secondText = "Hi, first"
@@ -144,6 +169,10 @@ describe 'Protocol supporting server', ->
 
       signup user.login, user.password
       user.sid = signin(user.login, user.password).sid
+
+      it 'should respond with "paramMissed" if it did not receive all required params', ->
+        expect(getResponse("uploadMap", sid: user.sid).result).toBe "paramMissed"
+
       it 'should allow users to create maps', ->
         expect(uploadMap(user.sid, "testUploadedMap", 16, ["."]).result).toBe "ok"
 
@@ -186,6 +215,8 @@ describe 'Protocol supporting server', ->
             expect(curMap.map).toEqual map.map
             expect(curMap.maxPlayers).toBe map.maxPlayers
           i++
+      it 'should respond with "paramMissed" if it did not receive all required params', ->
+        expect(getResponse("uploadMap", sid: user: sid).result).toBe "paramMissed"
 
       it 'should respond with "badSid" if user with that sid was not found', ->
         expect(getMaps(user.sid + "$#%").result).toBe "badSid"
@@ -215,6 +246,9 @@ describe 'Protocol supporting server', ->
     map = maps[0]
     map2 = maps[1]
     describe 'createGame action', ->
+      it 'should respond with "paramMissed" if it did not receive all required params', ->
+        expect(getResponse("createGame", sid: hostUser.sid).result).toBe "paramMissed"
+
       it 'should allow users to create games', ->
         expect(createGame(hostUser.sid, map.name + "Game", map.id, map.maxPlayers).result).toBe "ok"
 
@@ -251,6 +285,9 @@ describe 'Protocol supporting server', ->
 
       beforeEach ->
         createGame hostUser.sid, game.name, game.map, game.maxPlayers
+
+      it 'should respond with "paramMissed" if it did not receive all required params', ->
+        expect(getResponse("getGames", {}).result).toBe "paramMissed"
 
       it 'should allow users to get game list', ->
         getGamesResponse = getGames(joiningUser.sid)
@@ -324,6 +361,9 @@ describe 'Protocol supporting server', ->
 
       beforeEach ->
         createGame hostUser.sid, game.name, game.map, game.maxPlayers
+
+      it 'should respond with "paramMissed if it did not receive all required params ', ->
+        expect(getResponse("leaveGame", {}).result).toBe "paramMissed"
 
       it 'should allow host users to leave created games', ->
         expect(leaveGame(hostUser.sid).result).toBe "ok"
