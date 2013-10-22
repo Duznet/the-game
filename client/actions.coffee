@@ -2,7 +2,7 @@ window.getResponse = (action, params) ->
   responseData = null
   $.ajax
     type: "POST"
-    url: "/"
+    url: config.getDefaultUrl()
     dataType: "json"
     contentType: "application/json"
     async: false
