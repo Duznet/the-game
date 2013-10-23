@@ -4,6 +4,7 @@
 from stdnet import odm
 from controller import *
 import json
+from compile_coffee import CoffeeCompiler
 from datetime import datetime
 from game_exception import GameException, UnknownAction
 from common import *
@@ -109,8 +110,12 @@ class GameApp(web.Application):
             sock.tick()
 
 
+CLIENT_SCRIPTS_DIR = "client"
 
 if __name__ == '__main__':
+    coffee_compiler = CoffeeCompiler(CLIENT_SCRIPTS_DIR)
+    coffee_compiler.compile()
+
     application = GameApp()
 
     tornado.options.parse_command_line()
