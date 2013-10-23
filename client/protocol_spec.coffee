@@ -216,7 +216,7 @@ describe 'Protocol supporting server', ->
             expect(curMap.maxPlayers).toBe map.maxPlayers
           i++
       it 'should respond with "paramMissed" if it did not receive all required params', ->
-        expect(getResponse("uploadMap", sid: user: sid).result).toBe "paramMissed"
+        expect(getResponse("getMaps", {}).result).toBe "paramMissed"
 
       it 'should respond with "badSid" if user with that sid was not found', ->
         expect(getMaps(user.sid + "$#%").result).toBe "badSid"
