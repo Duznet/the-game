@@ -308,7 +308,7 @@ describe 'Protocol supporting server', ->
           i++
 
       it "should respond with object containing players array sorted by join time", ->
-        joinGame joiningUser, game.id
+        joinGame joiningUser.sid, game.id
         getGamesResponse = getGames joiningUser.sid
         expect(getGamesResponse.result).toBe "ok"
         expect(getGamesResponse.games).toBeDefined()
