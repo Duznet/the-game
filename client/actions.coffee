@@ -13,9 +13,6 @@ window.getResponse = (action, params) ->
     success: (data) ->
       responseData = data
 
-    error: ->
-      expect(true).toBe false
-
   responseData
 
 
