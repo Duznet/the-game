@@ -54,5 +54,7 @@ class UserController(BasicController):
 
     def leave_game(self):
         user = self._user_by_sid()
+        if user.game:
+            self.current_games.game(user.game.id).remove_player(user.id)
         user.leave_game()
         return jsonify(result="ok")
