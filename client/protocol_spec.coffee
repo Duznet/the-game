@@ -211,7 +211,6 @@ describe 'Protocol supporting server', ->
         while i < getMapsRes.maps.length
           if getMapsRes.maps[i].name is map.name
             curMap = getMapsRes.maps[i]
-            console.log curMap
             expect(curMap.map).toEqual map.map
             expect(curMap.maxPlayers).toBe map.maxPlayers
           i++
@@ -308,6 +307,11 @@ describe 'Protocol supporting server', ->
           i++
 
       it "should respond with object containing players array sorted by join time", ->
+        games = getGames(joiningUser.sid).games
+        for g in games
+          if g.name is game.name
+            game.id = g.id
+            break
         joinGame joiningUser.sid, game.id
         getGamesResponse = getGames joiningUser.sid
         expect(getGamesResponse.result).toBe "ok"
