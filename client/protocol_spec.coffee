@@ -279,11 +279,13 @@ describe 'Protocol supporting server', ->
 
     describe 'getGames action', ->
       game =
-        name: "GamesTest"
+        name: "getGamesTest"
         map: map.id
         maxPlayers: map.maxPlayers
 
       beforeEach ->
+        leaveGame hostUser.sid
+        leaveGame joiningUser.sid
         createGame hostUser.sid, game.name, game.map, game.maxPlayers
 
       it 'should respond with "paramMissed" if it did not receive all required params', ->
@@ -300,6 +302,26 @@ describe 'Protocol supporting server', ->
             cur = getGamesResponse.games[i]
             expect(cur.map).toBe game.map
             expect(cur.maxPlayers).toBe game.maxPlayers
+            expect(cur.players.length).toBe 1
+            expect(cur.players[0]).toBe hostUser.login
+
+          i++
+
+      it "should respond with object containing players array sorted by join time", ->
+        joinGame joiningUser, game.id
+        getGamesResponse = getGames joiningUser.sid
+        expect(getGamesResponse.result).toBe "ok"
+        expect(getGamesResponse.games).toBeDefined()
+        i = 0
+        while i < getGamesResponse.games.length
+          if getGamesResponse.games[i].name is game.name
+            cur = getGamesResponse.games[i]
+            expect(cur.map).toBe game.map
+            expect(cur.maxPlayers).toBe game.maxPlayers
+            expect(cur.players.length).toBe 2
+            expect(cur.players[0]).toBe hostUser.login
+            expect(cur.players[1]).toBe joiningUser.login
+
           i++
 
       it 'should respond with "badSid" if user with that sid was not found', ->
