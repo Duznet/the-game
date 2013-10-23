@@ -17,4 +17,4 @@ class GameplayController(BasicController):
 
 
     def tick():
-        return jsonify(self.game.players())
+        return jsonify(players=self.game.players())

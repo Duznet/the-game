@@ -1,4 +1,5 @@
 from sympy.geometry import Point, Segment
+import copy
 from math import *
 
 class Player:
@@ -6,7 +7,7 @@ class Player:
 
     def __init__(self, point):
         self.point = point
-        self.velocity = 0
+        self.velocity = Point(0, 0)
         self.hp = self.DEFAULT_HP
         self.score = 0
 
@@ -50,7 +51,7 @@ class Game:
                 if cell == self.SPAWN:
                     self.spawn = Point(x, y)
 
-    def is_on_my_way(start, end, cell):
+    def is_on_my_way(self, start, end, cell):
         path = Polygon(
             Point(start.x, start.y - SIDE),
             Point(start.x, start.y + SIDE),
@@ -62,7 +63,7 @@ class Game:
         return path.intersection(cell)
 
 
-    def cells_path(start, end):
+    def cells_path(self, start, end):
         path = []
         for x in range(floor(start.x), floor(end.x)):
             for y in range(floor(start.y), floor(end.y)):
@@ -72,11 +73,13 @@ class Game:
         return path
 
     def players(self):
-        players = self.players_order
-        for player in players:
-            players.point -= Point(1, 1)
-
-        return [self.players_[id] for id in players]
+        return [{
+            'x': self.players_[id].point.x - 1,
+            'y': self.player_[id].point.y - 1,
+            'vx': self.players_[id].velocity.x,
+            'vy': self.players_[id].velocity.y
+            'hp': self.players_[id].hp
+            } for id in self.players_order]
 
     def player_ids(self):
         return self.players_order
