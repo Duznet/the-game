@@ -77,7 +77,7 @@ class Game:
             'x': self.players_[id].point.x - 1,
             'y': self.player_[id].point.y - 1,
             'vx': self.players_[id].velocity.x,
-            'vy': self.players_[id].velocity.y
+            'vy': self.players_[id].velocity.y,
             'hp': self.players_[id].hp
             } for id in self.players_order]
 
