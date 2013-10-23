@@ -13,7 +13,7 @@ class CoffeeCompiler:
         for filename in glob(os.path.join(self.dir, "*.coffee")):
             file = open(filename, "r")
             basename = os.path.basename(filename)
-            output = open(os.path.join(self.OUTPUT_DIR, basename), "w")
+            output = open(os.path.join(self.OUTPUT_DIR, os.path.splitext(basename)[0] + ".js"), "w")
             output.write(coffeescript.compile(file.read()))
 
 
