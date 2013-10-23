@@ -117,3 +117,16 @@ class BadMap(GameException):
 
     def msg(self):
         return jsonify(result="badMap")
+
+class BadJSON(GameException):
+    """JSON object is incorrect"""
+
+    def msg(self):
+        return jsonify(result="badJSON")
+
+
+class ParamMissed(GameException):
+    """Some paramater is missing"""
+
+    def msg(self):
+        return jsonify(result="paramMissed")

@@ -29,10 +29,7 @@ class UserController(BasicController):
         return jsonify(result="ok")
 
     def signin(self):
-        try:
-            user = self.users.filter(login=str(self.json['login']), password=self.users.encode(str(self.json['password'])))
-        except KeyError:
-            raise Incorrect()
+        user = self.users.filter(login=str(self.json['login']), password=self.users.encode(str(self.json['password'])))
 
         if user.count() != 1:
             raise Incorrect()

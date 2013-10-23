@@ -6,7 +6,7 @@ from controller import *
 import json
 from compile_coffee import CoffeeCompiler
 from datetime import datetime
-from game_exception import GameException, UnknownAction
+from game_exception import * 
 from common import *
 from model import *
 from current_games import CurrentGames
@@ -36,10 +36,15 @@ class ActionProcesser():
             try:
                 controller = self.controller_by_action[action_name](data, models, games)
             except (KeyError, ValueError):
+                print(action_name)
                 raise UnknownAction()
 
             response = getattr(controller, action_name)()
             return response
+        except KeyError:
+            return ParamMissed().msg()
+        except TypeError:
+            return BadJSON().msg() 
         except GameException as e:
             return e.msg()
 
@@ -89,7 +94,7 @@ class MainHandler(web.RequestHandler):
             action = camel_to_underscores(str(data['action']))
             self.write(self.processer.process_action(action, data.get("params", {})))
         except (KeyError, ValueError):
-            self.write(UnknownAction().msg())
+            self.write(ParamMissed().msg())
             return
 
 class GameApp(web.Application):
