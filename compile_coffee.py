@@ -6,10 +6,13 @@ class CoffeeCompiler:
     OUTPUT_DIR = 'static/src'
 
     def __init__(self, dir):
-        self.dir = dir 
+        self.dir = dir
 
 
     def compile(self):
+        if not os.path.exists(self.OUTPUT_DIR):
+            os.mkdir(self.OUTPUT_DIR)
+
         for filename in glob(os.path.join(self.dir, "*.coffee")):
             file = open(filename, "r")
             basename = os.path.basename(filename)
