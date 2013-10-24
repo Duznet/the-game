@@ -1,3 +1,9 @@
+window.sendMessage = (websocket, action, params) ->
+  websocket.send JSON.stringify
+    action: action
+    params: params
+
+
 window.getResponse = (action, params) ->
   responseData = null
   $.ajax
@@ -87,3 +93,10 @@ window.getMaps = (sid) ->
   getResponse "getMaps",
     sid: sid
 
+window.move = (websocket, sid, tick, dx, dy) ->
+  sendMessage websocket,
+    "move",
+    sid: sid
+    tick: tick
+    dx: dx
+    dy: dy
