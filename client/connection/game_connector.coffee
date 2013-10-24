@@ -12,64 +12,64 @@ class window.GameConnector extends Connector
       data: requestData
       success: (responseData) ->
         response = responseData
-    response
+    if response.result is "ok" then response else throw new GameError response.result
 
   startTesting: ->
-    request "startTesting"
+    @request "startTesting"
 
   signup: (login, password) ->
-    request "signup",
+    @request "signup",
       login: login
       password: password
 
   signin: (login, password) ->
-    request "signin",
+    @request "signin",
       login: login
       password: password
 
   signout: (sid) ->
-    request "signout",
+    @request "signout",
       sid: sid
 
   sendMessage: (sid, game, text) ->
-    request "sendMessage",
+    @request "sendMessage",
       sid: sid
       game: game
       text: text
 
   getMessages: (sid, game, since) ->
-    request "getMessages",
+    @request "getMessages",
       sid: sid
       game: game
       since: since
 
   uploadMap: (sid, name, maxPlayers, mapData) ->
-    request "uploadMap",
+    @request "uploadMap",
       sid: sid
       name: name
       maxPlayers: maxPlayers
       map: mapData
 
   getMaps: (sid) ->
-    request "getMaps",
+    @request "getMaps",
       sid: sid
 
   createGame: (sid, name, maxPlayers, mapId) ->
-    request "createGame",
+    @request "createGame",
       sid: sid
       name: name
       maxPlayers: maxPlayers
       map: mapId
 
   getGames: (sid) ->
-    request "getGames",
+    @request "getGames",
       sid: sid
 
   joinGame: (sid, gameId) ->
-    request "joinGame",
+    @request "joinGame",
       sid: sid
       game: gameId
 
   leaveGame: (sid) ->
-    request "leaveGame",
+    @request "leaveGame",
       sid: sid
