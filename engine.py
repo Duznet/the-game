@@ -1,4 +1,4 @@
-from sympy.geometry import Point, Segment
+from sympy.geometry import Point, Segment, Polygon
 import copy
 from math import *
 
@@ -54,10 +54,10 @@ class Game:
 
     def is_on_my_way(self, start, end, cell):
         path = Polygon(
-            Point(start.x, start.y - SIDE),
-            Point(start.x, start.y + SIDE),
-            Point(end.x, end.y + SIDE),
-            Point(end.x, end.y - SIDE))
+            Point(start.x, start.y - self.SIDE),
+            Point(start.x, start.y + self.SIDE),
+            Point(end.x, end.y + self.SIDE),
+            Point(end.x, end.y - self.SIDE))
 
         cell = Polygon(cell, Point(cell.x, cell.y + 1), cell + Point(1, 1), Point(cell.x + 1, cell.y))
 
@@ -66,9 +66,9 @@ class Game:
 
     def cells_path(self, start, end):
         path = []
-        for x in range(floor(start.x), floor(end.x)):
-            for y in range(floor(start.y), floor(end.y)):
-                if is_on_my_way(start, end, Point(x, y)):
+        for x in range(floor(start.x), floor(end.x) + 1):
+            for y in range(floor(start.y), floor(end.y) + 1):
+                if self.is_on_my_way(start, end, Point(x, y)):
                     path.append(Point(x, y))
 
         return path
@@ -76,6 +76,8 @@ class Game:
     def players(self):
         for player in self.players_.values():
             player.point = player.point.evalf()
+            player.velocity = player.velocity.evalf()
+
         result = [{
             'x': float(self.players_[id].point.x - 1),
             'y': float(self.players_[id].point.y - 1),
@@ -83,6 +85,7 @@ class Game:
             'vy': float(self.players_[id].velocity.y),
             'hp': self.players_[id].hp
             } for id in self.players_order]
+        print(result)
         return result
 
     def player_ids(self):
@@ -109,7 +112,10 @@ class Game:
 
         player = self.players_[id]
 
-        path = self.cells_path(player.point, player.point + self.DEFAULT_VELOCITY * delta)
+
+        end = delta * self.DEFAULT_VELOCITY + player.point
+        print(end.evalf())
+        path = self.cells_path(player.point, end)
 
         for id, cell in enumerate(path):
             if self.map[cell.y][cell.x] == self.WALL:
@@ -118,7 +124,7 @@ class Game:
                 return player
 
 
-        player.point = path.p2
-        player.velocity += delta
+        player.point = end
+        player.velocity += delta * self.DEFAULT_VELOCITY
 
         return player
