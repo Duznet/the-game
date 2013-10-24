@@ -44,6 +44,7 @@ class Game:
         self.spawn = Point(0, 0)
         self.players_ = {}
         self.players_order = []
+        self.tick = 0
 
         self.map = normalize_map(map, self.WALL)
         for y, row in enumerate(map):

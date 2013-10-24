@@ -10,6 +10,10 @@ class GameplayController(BasicController):
 
 
     def move():
+        tick = int(json['tick'])
+        if tick != self.game.tick:
+            return
+
         data = json['move']
         dx, dy = data['dx'], data['dy']
 
@@ -17,4 +21,4 @@ class GameplayController(BasicController):
 
 
     def tick():
-        return jsonify(players=self.game.players())
+        return jsonify(players=self.game.players(), tick=self.game.tick)

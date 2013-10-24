@@ -6,7 +6,7 @@ from controller import *
 import json
 from compile_coffee import CoffeeCompiler
 from datetime import datetime
-from game_exception import * 
+from game_exception import *
 from common import *
 from model import *
 from current_games import CurrentGames
@@ -44,7 +44,7 @@ class ActionProcesser():
         except KeyError:
             return ParamMissed().msg()
         except TypeError:
-            return BadJSON().msg() 
+            return BadJSON().msg()
         except GameException as e:
             return e.msg()
 
@@ -111,6 +111,9 @@ class GameApp(web.Application):
 
 
     def tick(self):
+        for game in games:
+            game.tick += 1
+
         for sock in self.websockets:
             sock.tick()
 
