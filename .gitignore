@@ -1,4 +1,4 @@
 __pycache__
-static/src/*.js
+static/src
 *.sublime-project
 *.sublime-workspace
