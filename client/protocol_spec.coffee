@@ -1,12 +1,9 @@
 describe 'Protocol supporting server', ->
-  startRes = startTesting()
-  if not startRes? or startRes.result isnt "ok"
-    console.log "Testing could not be started"
-    document.write "Testing could not be started"
-    return
+  conn = new GameConnector(config.getDefaultUrl())
+  conn.startTesting()
 
   it 'should respond with "badJSON" if it got string instead of params object', ->
-    expect(getResponse("signup", "suddenly string").result).toBe "badJSON"
+    expect(-> conn.send "suddenly string").toThrow "badJSON"
 
   it 'should respond with "badJSON" if it got array instead of params object', ->
     expect(getResponse("signup", [1, 2, 3]).result).toBe "badJSON"
