@@ -56,5 +56,7 @@ class UserController(BasicController):
         user = self._user_by_sid()
         if user.game:
             self.current_games.game(user.game.id).remove_player(user.id)
+            if self.current_games.game(user.game.id).players_count() == 0:
+                self.current_games.remove_game(user.game.id)
         user.leave_game()
         return jsonify(result="ok")

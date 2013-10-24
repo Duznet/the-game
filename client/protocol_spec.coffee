@@ -1,6 +1,6 @@
 describe 'Protocol supporting server', ->
-  startRes = startTesting()
-  if not startRes? or startRes.result isnt "ok"
+  cleanData = startTesting()
+  if not cleanData? or cleanData.result isnt "ok"
     console.log "Testing could not be started"
     document.write "Testing could not be started"
     return
@@ -17,6 +17,8 @@ describe 'Protocol supporting server', ->
   it 'should respond with "unknownAction" if the action field was empty', ->
     expect(getResponse("", {}).result).toBe "unknownAction"
 
+  afterEach ->
+    startTesting()
   describe 'signup action', ->
     it 'should respond with "paramMissed" if it did not receive all required params', ->
       expect(getResponse("signup", login: "some_login").result).toBe "paramMissed"
@@ -110,9 +112,9 @@ describe 'Protocol supporting server', ->
       login: "mess_test_login2"
       password: "mess_test_pass2"
 
-    signup firstUser.login, firstUser.password
-    signup secondUser.login, secondUser.password
     beforeEach ->
+      signup firstUser.login, firstUser.password
+      signup secondUser.login, secondUser.password
       firstUser.sid = signin(firstUser.login, firstUser.password).sid
       secondUser.sid = signin(secondUser.login, secondUser.password).sid
 
@@ -167,8 +169,9 @@ describe 'Protocol supporting server', ->
         login: "mapUploaderLogin"
         password: "mapUploaderPass"
 
-      signup user.login, user.password
-      user.sid = signin(user.login, user.password).sid
+      beforeEach ->
+        signup user.login, user.password
+        user.sid = signin(user.login, user.password).sid
 
       it 'should respond with "paramMissed" if it did not receive all required params', ->
         expect(getResponse("uploadMap", sid: user.sid).result).toBe "paramMissed"
@@ -193,15 +196,18 @@ describe 'Protocol supporting server', ->
       user =
         login: "mapGetterLogin"
         password: "mapGetterPass"
-
-      signup user.login, user.password
-      user.sid = signin(user.login, user.password).sid
       map =
         name: "gettingMapsTest"
         maxPlayers: 4
         map: ["...", "...", "..."]
 
-      uploadMap user.sid, map.name, map.maxPlayers, map.map
+      beforeEach ->
+        signup user.login, user.password
+        user.sid = signin(user.login, user.password).sid
+        uploadMap user.sid, map.name, map.maxPlayers, map.map
+
+
+
       it 'should allow users to get map list', ->
         getMapsRes = getMaps(user.sid)
         expect(getMapsRes.result).toBe "ok"
@@ -231,19 +237,21 @@ describe 'Protocol supporting server', ->
       login: "joiner_login"
       password: "joiner_pass"
 
-    signup hostUser.login, hostUser.password
-    signup joiningUser.login, joiningUser.password
-    hostUser.sid = signin(hostUser.login, hostUser.password).sid
-    joiningUser.sid = signin(joiningUser.login, joiningUser.password).sid
-    uploadMap hostUser.sid, "testMap", 4, ["..", ".."]
-    uploadMap hostUser.sid, "testMap2", 4, ["."]
-    maps = getMaps(hostUser.sid).maps
-    afterEach ->
-      leaveGame hostUser.sid
-      leaveGame joiningUser.sid
+    maps = []
+    map = []
+    map2 = []
 
-    map = maps[0]
-    map2 = maps[1]
+    beforeEach ->
+      signup hostUser.login, hostUser.password
+      signup joiningUser.login, joiningUser.password
+      hostUser.sid = signin(hostUser.login, hostUser.password).sid
+      joiningUser.sid = signin(joiningUser.login, joiningUser.password).sid
+      uploadMap hostUser.sid, "testMap", 4, ["..", "$."]
+      uploadMap hostUser.sid, "testMap2", 4, ["."]
+      maps = getMaps(hostUser.sid).maps
+      map = maps[0]
+      map2 = maps[1]
+
     describe 'createGame action', ->
       it 'should respond with "paramMissed" if it did not receive all required params', ->
         expect(getResponse("createGame", sid: hostUser.sid).result).toBe "paramMissed"
@@ -337,22 +345,22 @@ describe 'Protocol supporting server', ->
         login: "gameCreator"
         password: "hosterPass"
 
-      signup gameCreator.login, gameCreator.password
-      gameCreator.sid = signin(gameCreator.login, gameCreator.password).sid
+
       game =
         name: "joinGameTest"
-        map: map.id
         maxPlayers: 2
 
-      createGame gameCreator.sid, game.name, game.map, game.maxPlayers
-      games = getGames(joiningUser.sid).games
-      i = 0
+      games = []
 
-      while i < games.length
-        if games[i].name is game.name
-          game.id = games[i].id
-          break
-        i++
+      beforeEach ->
+        game.map = map.id
+        signup gameCreator.login, gameCreator.password
+        gameCreator.sid = signin(gameCreator.login, gameCreator.password).sid
+        createGame gameCreator.sid, game.name, game.map, game.maxPlayers
+        games = getGames(joiningUser.sid).games
+        game = games[0]
+
+
       it 'should allow users to join game using the sid and game id', ->
         expect(joinGame(joiningUser.sid, game.id).result).toBe "ok"
 
@@ -382,10 +390,10 @@ describe 'Protocol supporting server', ->
     describe 'leaveGame action', ->
       game =
         name: "leaveGameTest"
-        map: map.id
         maxPlayers: 3
 
       beforeEach ->
+        game.map = map.id
         createGame hostUser.sid, game.name, game.map, game.maxPlayers
 
       it 'should respond with "paramMissed if it did not receive all required params ', ->
@@ -401,5 +409,65 @@ describe 'Protocol supporting server', ->
         expect(leaveGame(joiningUser.sid + "@#$@#$").result).toBe "badSid"
 
 
+  describe 'Websocket controlling', ->
 
+    hostUser =
+      login: "hostUser"
+      password: "hostUser"
 
+    game =
+      name: "joinGameTest"
+      maxPlayers: 2
+
+    map =
+      name: "testmap"
+      maxPlayers: 4
+      map: ["..", "$."]
+
+    websocket = {}
+
+    beforeEach ->
+      signup hostUser.login, hostUser.password
+      hostUser.sid = signin(hostUser.login, hostUser.password).sid
+
+      uploadMap hostUser.sid, map.name, map.maxPlayers, map.map
+      maps = getMaps(hostUser.sid).maps
+      map = maps[0]
+
+      game.map = map.id
+      createGame hostUser.sid, game.name, game.map, game.maxPlayers
+      games = getGames(hostUser.sid).games
+      game = games[0]
+
+      websocket = new WebSocket 'ws://localhost:5000/websocket'
+      opened = false
+      websocket.onopen = (event) ->
+        opened = true
+        move(websocket, hostUser.sid, 0, 0, 0)
+
+      waitsFor ( ->
+        opened
+        ), "websocket should be opened", true
+
+    tick = false
+
+    afterEach ->
+      websocket.close()
+
+    it 'should get correct game state every tick', ->
+      expectedPlayer =
+        x: 0.5
+        y: 1.5
+        vx: 0
+        vy: 0
+        hp: 100
+
+      websocket.onmessage = (event) ->
+        tick = true
+        console.log event.data
+
+        expect(JSON.parse(event.data).players[0]).toEqual expectedPlayer
+
+      waitsFor ( ->
+        tick
+        ), "should get tick", true

@@ -9,16 +9,15 @@ class GameplayController(BasicController):
         self.game = games.game(self.user.game.id)
 
 
-    def move():
-        tick = int(json['tick'])
+    def move(self):
+        tick = int(self.json['tick'])
         if tick != self.game.tick:
             return
 
-        data = json['move']
-        dx, dy = data['dx'], data['dy']
+        dx, dy = self.json['dx'], self.json['dy']
 
         self.game.move(self.user.id, dx, dy)
 
 
-    def tick():
+    def tick(self):
         return jsonify(players=self.game.players(), tick=self.game.tick)

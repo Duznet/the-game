@@ -41,13 +41,13 @@ class Game:
     SPACE = '.'
 
     def __init__(self, map):
-        self.spawn = Point(0, 0)
+        self.spawn = Point(1, 1)
         self.players_ = {}
         self.players_order = []
         self.tick = 0
 
         self.map = normalize_map(map, self.WALL)
-        for y, row in enumerate(map):
+        for y, row in enumerate(self.map):
             for x, cell in enumerate(row):
                 if cell == self.SPAWN:
                     self.spawn = Point(x, y)
@@ -74,16 +74,22 @@ class Game:
         return path
 
     def players(self):
-        return [{
-            'x': self.players_[id].point.x - 1,
-            'y': self.player_[id].point.y - 1,
-            'vx': self.players_[id].velocity.x,
-            'vy': self.players_[id].velocity.y,
+        for player in self.players_.values():
+            player.point = player.point.evalf()
+        result = [{
+            'x': float(self.players_[id].point.x - 1),
+            'y': float(self.players_[id].point.y - 1),
+            'vx': float(self.players_[id].velocity.x),
+            'vy': float(self.players_[id].velocity.y),
             'hp': self.players_[id].hp
             } for id in self.players_order]
+        return result
 
     def player_ids(self):
         return self.players_order
+
+    def players_count(self):
+        return len(self.players_order)
 
     def add_player(self, id):
         self.players_[id] = Player(self.spawn + self.PLAYER_POS)
@@ -96,8 +102,12 @@ class Game:
 
     def move(self, id, dx, dy):
         delta = Point(dx, dy)
+        if delta.distance(Point(0, 0)) == 0:
+            return self.players_[id]
+
         delta /= delta.distance(Point(0, 0))
-        player = players_[id]
+
+        player = self.players_[id]
 
         path = self.cells_path(player.point, player.point + self.DEFAULT_VELOCITY * delta)
 

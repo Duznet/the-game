@@ -1,7 +1,8 @@
-window.sendMessage = (websocket, action, params) ->
-  websocket.send JSON.stringify
+window.sendRequest = (websocket, action, params) ->
+  websocket.send (JSON.stringify
     action: action
     params: params
+   )
 
 
 window.getResponse = (action, params) ->
@@ -94,7 +95,7 @@ window.getMaps = (sid) ->
     sid: sid
 
 window.move = (websocket, sid, tick, dx, dy) ->
-  sendMessage websocket,
+  sendRequest websocket,
     "move",
     sid: sid
     tick: tick
