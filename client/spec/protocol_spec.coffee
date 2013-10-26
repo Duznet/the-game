@@ -1,5 +1,5 @@
 describe 'Protocol supporting server', ->
-  conn = new GameConnector(config.getDefaultUrl())
+  conn = new GameConnector(config.gameUrl)
   conn.startTesting()
 
   it 'should respond with "badJSON" if it got string instead of correct json object', ->
@@ -438,7 +438,7 @@ describe 'Protocol supporting server', ->
       games = getGames(hostUser.sid).games
       game = games[0]
 
-      websocket = new WebSocket 'ws://localhost:5000/websocket'
+      websocket = new WebSocket config.gameplayUrl
       opened = false
       websocket.onopen = (event) ->
         opened = true

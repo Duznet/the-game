@@ -1,22 +1,21 @@
 window.sendRequest = (websocket, action, params) ->
-  websocket.send (JSON.stringify
+  websocket.send JSON.stringify
     action: action
     params: params
-   )
+
 
 
 window.getResponse = (action, params) ->
   responseData = null
   $.ajax
     type: "POST"
-    url: config.getDefaultUrl()
+    url: config.gameUrl
     dataType: "json"
     contentType: "application/json"
     async: false
-    data: JSON.stringify(
+    data: JSON.stringify
       action: action
       params: params
-    )
     success: (data) ->
       responseData = data
 

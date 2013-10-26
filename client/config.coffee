@@ -1,8 +1,3 @@
 window.config =
-  url: "/"
-  gameUrlSuffix: "/websocket"
-
-  getDefaultUrl: ->
-    @url
-  getGameUrl: ->
-    "#{@url}#{if @url.charAt(@url.length - 1) == '/' then '' else '/'}#{@gameUrlSuffix}"
+  gameUrl: "http://localhost:5000"
+  gameplayUrl: "ws://localhost:5000/websocket"
