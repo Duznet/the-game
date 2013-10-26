@@ -11,11 +11,13 @@ class GameplayController(BasicController):
 
     def move(self):
         tick = int(self.json['tick'])
-        if tick != self.game.tick:
-            return
+        print("game tick: " + str(self.game.tick) + ", tick got: " + str(tick))
+        # if tick != self.game.tick:
+        #     return
 
         dx, dy = self.json['dx'], self.json['dy']
 
+        print("move")
         self.game.move(self.user.id, dx, dy)
 
 

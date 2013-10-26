@@ -470,3 +470,37 @@ describe 'Protocol supporting server', ->
       waitsFor ( ->
         tick
         ), "should get tick", true
+
+    it 'should move players correctly for one move', ->
+      expectedPlayer =
+        x: 0.6
+        y: 1.5
+        vx: 0.1
+        vy: 0
+        hp: 100
+
+      tick = false
+      count = 0
+
+      data = {}
+      websocket.onmessage = (event) ->
+        count++
+        console.log event.data
+        data = JSON.parse(event.data)
+        move(websocket, hostUser.sid, data.tick, 1, 0)
+
+        console.log tick
+
+        if count == 2
+          tick = true
+
+          player = data.players[0]
+          for key of player
+            player[key] = parseFloat(player[key].toFixed(6))
+
+          expect(data.players[0]).toEqual expectedPlayer
+
+      waitsFor ( ->
+        tick
+        ), "should get tick", 5000
+

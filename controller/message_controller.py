@@ -11,15 +11,17 @@ class MessageController(BasicController):
 
     def get_messages(self):
         self.user
-        all_messages = self.messages.filter(game = self.user.game) if str(self.json['game']) else self.messages.all()
+        game = str(self.json.get('game', ""))
+        all_messages = self.messages.filter(game = self.user.game) if game else self.messages.all()
         if str(self.json['game']):
             try:
-                game_id = int(str(self.json['game']))
+                game_id = int(game)
 
-                if game_id != self.user.game.id():
+                if self.user.game is None or game_id != self.user.game.id():
                     raise BadGame()
 
             except ValueError:
+                print(game)
                 raise BadGame()
 
         try:

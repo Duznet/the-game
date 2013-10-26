@@ -1,6 +1,6 @@
 from stdnet import odm
 from re import match
-from stdnet.utils.exceptions import CommitException
+from stdnet.utils.exceptions import CommitException, ObjectNotFound
 from model.game import Game
 from datetime import datetime
 from game_exception import *
@@ -36,9 +36,9 @@ class User(odm.StdModel):
             if len(game_id) == 0:
                 return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self)
 
-            game = self.session.query(Game).filter(id=int(game_id))
+            game = self.session.query(Game).get(id=int(game_id))
             return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self, game=game)
-        except ValueError:
+        except (ValueError, ObjectNotFound):
             raise BadGame()
 
     def join_game(self, id):
