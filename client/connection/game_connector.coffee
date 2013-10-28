@@ -2,17 +2,12 @@ class window.GameConnector extends Connector
   constructor: (@url) ->
 
   send: (requestData) ->
-    response = null
     $.ajax
       type: "POST"
       url: @url
       dataType: "json"
       contentType: "application/json"
-      async: false
       data: requestData
-      success: (responseData) ->
-        response = responseData
-    if response.result is "ok" then response else throw new GameError response.result
 
   startTesting: ->
     @request "startTesting"

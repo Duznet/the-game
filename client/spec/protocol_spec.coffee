@@ -1,9 +1,9 @@
 describe 'Protocol supporting server', ->
-  conn = new GameConnector(config.gameUrl)
-  conn.startTesting()
 
+  conn = new GameConnector(config.gameUrl)
   it 'should respond with "badJSON" if it got string instead of correct json object', ->
-    expect(-> conn.send "suddenly string").toThrow "badJSON"
+    $.when(conn.send "suddenly string").then (data) ->
+      expect(data.result).toBe "badJSON"
 
   it 'should respond with "badJSON" if it got string instead of params object', ->
     expect(getResponse("signup", "suddenly string").result).toBe "badJSON"

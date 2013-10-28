@@ -38,7 +38,15 @@
         if (currentWindowOnload) {
           currentWindowOnload();
         }
-        execJasmine();
+
+        var conn = new GameConnector(config.url);
+        $.when(conn.startTesting()).then(function (data) {
+          if (data.result === "ok") {
+            execJasmine();
+          } else {
+            console.log("Testing could not be started. Error: ", data.result);
+          }
+        });
       };
 
       function execJasmine() {
