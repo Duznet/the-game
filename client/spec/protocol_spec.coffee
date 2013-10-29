@@ -1,6 +1,15 @@
 describe 'Protocol supporting server', ->
 
   conn = new GameConnector(config.gameUrl)
+  testingStarted = false
+
+  beforeEach ->
+    runs ->
+      if not testingStarted
+        conn.startTesting().then ->
+          testingStarted = true
+    waitsFor -> testingStarted
+
   it 'should respond with "badJSON" if it got string instead of correct json object', ->
     $.when(conn.send "suddenly string").then (data) ->
       expect(data.result).toBe "badJSON"
