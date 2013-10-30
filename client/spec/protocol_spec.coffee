@@ -11,8 +11,13 @@ describe 'Protocol supporting server', ->
     waitsFor -> testingStarted
 
   it 'should respond with "badJSON" if it got string instead of correct json object', ->
-    $.when(conn.send "suddenly string").then (data) ->
-      expect(data.result).toBe "badJSON"
+    completed = false
+    runs ->
+      $.when(conn.send "suddenly string").then (data) ->
+        completed = true
+        expect(data.result).toBe "badJSON"
+    waitsFor ->
+      completed
 
   it 'should respond with "badJSON" if it got string instead of params object', ->
     expect(getResponse("signup", "suddenly string").result).toBe "badJSON"
@@ -28,12 +33,25 @@ describe 'Protocol supporting server', ->
   afterEach ->
     startTesting()
   describe 'signup action', ->
-    it 'should respond with "paramMissed" if it did not receive all required params', ->
-      expect(getResponse("signup", login: "some_login").result).toBe "paramMissed"
-      expect(getResponse("signup", password: "some_password").result).toBe "paramMissed"
+    it 'should respond with "badRequest" if it did not receive all required params', ->
+      completedCount = 0
+      runs ->
+        $.when(conn.request "signup", login: "some_login").then (data) ->
+          completedCount += 1
+          expect(data.result).toBe "badRequest"
+        $.when(conn.request "signup", password: "some_password").then (data) ->
+          completedCount += 1
+          expect(data.result).toBe "badRequest"
+      waitsFor ->
+        completedCount is 2
 
     it 'should require login and password', ->
-      expect(signup("signup_test_login", "signup_test_password").result).toBe "ok"
+      completed = false
+      runs ->
+        $.when(conn.signup "signup_test_login", "signup_test_pass").then (data) ->
+          completed = true
+          expect(data.result).toBe "ok"
+      waitsFor -> completed
 
     it 'should respond with "userExists" if this user already existed', ->
       expect(signup("existing_user", "existing_password").result).toBe "ok"
