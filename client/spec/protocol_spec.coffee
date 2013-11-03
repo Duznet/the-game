@@ -6,52 +6,80 @@ describe 'Protocol supporting server', ->
   before (done) ->
     conn.startTesting().then done()
 
-  it 'should respond with "badJSON" if it received incorrect json object', (done) ->
-    $.when(conn.send "{").then (data) ->
+  it 'should respond with Object', (done) ->
+    conn.send('some string').then (data) ->
+      expect(data).to.be.an('Object')
+      done()
+
+  it 'should respond with "badJSON" if it received one brace', (done) ->
+    conn.send("{").then (data) ->
       expect(data.result).to.equal "badJSON"
       done()
 
-  it 'should respond with "badJSON" if it got string instead of params object', ->
-    expect(getResponse("signup", "suddenly string").result).to.equal "badJSON"
-  it 'should respond with "badJSON" if it got array instead of params object', ->
-    expect(getResponse("signup", [1, 2, 3]).result).to.equal "badJSON"
+  it 'should respond with "badJSON" if it received incorrect json string', (done) ->
+    conn.send("suddenly string").then (data) ->
+      expect(data.result).to.equal "badJSON"
+      done()
 
-  it 'should respond with "unknownAction" if it could not recognize action', ->
-    expect(getResponse("asdkhasdasd", {}).result).to.equal "unknownAction"
+  it 'should respond with "badRequest" if it received only json string', (done) ->
+    conn.send('"suddenly string"').then (data) ->
+      expect(data.result).to.equal "badRequest"
+      done()
 
-  it 'should respond with "unknownAction" if the action field was empty', ->
-    expect(getResponse("", {}).result).to.equal "unknownAction"
+  it 'should respond with "badRequest" if it got array instead of params object', (done) ->
+    conn.request("signup", [1, 2, 3]).then (data) ->
+      expect(data.result).to.equal "badRequest"
+      done()
 
-  afterEach ->
-    startTesting()
+  it 'should respond with "unknownAction" if it could not recognize action', (done) ->
+    conn.request("asdkhasdasd", {}).then (data) ->
+      expect(data.result).to.equal "unknownAction"
+      done()
+
+  it 'should respond with "unknownAction" if the action field was empty', (done) ->
+    conn.request("", params: login: "some_login").then (data) ->
+      expect(data.result).to.equal "unknownAction"
+      done()
+
   describe 'signup action', ->
     it 'should respond with "badRequest" if it did not receive all required params', (done) ->
-      $.when(conn.request "signup", login: "some_login").then (data) ->
+      conn.request("signup", login: "some_login").then (data) ->
         expect(data.result).to.equal "badRequest"
         done()
 
-    it 'should require login and password', (done) ->
-      $.when(conn.signup "signup_test_login", "signup_test_pass").then (data) ->
+    it 'should allow user to sign up using login and password', (done) ->
+      conn.signup("signup_test_login", "signup_test_pass").then (data) ->
         expect(data.result).to.equal "ok"
         done()
 
-    it 'should respond with "userExists" if this user already existed', ->
-      expect(signup("existing_user", "existing_password").result).to.equal "ok"
-      expect(signup("existing_user", "existing_password").result).to.equal "userExists"
-      expect(signup("existing_user", "sdkfjhsdfkjhsdf").result).to.equal "userExists"
+    it 'should respond with "userExists" if this user already existed', (done) ->
+      conn.signup("existing_user", "existing_password")
+      .then ->
+        conn.signup("existing_user", "existing_password2")
+      .then (data) ->
+        expect(data.result).to.equal "userExists"
+        done()
 
-    it 'should respond with "badLogin" if login was shorter than 4 symbols', ->
-      expect(signup("1", "short_test_password").result).to.equal "badLogin"
+    it 'should respond with "badLogin" if login was shorter than 4 symbols', (done) ->
+      conn.signup("1", "short_test_password").then (data) ->
+        expect(data.result).to.equal "badLogin"
+        done()
 
-    it 'should respond with "badLogin" if login was longer than 40 symbols', ->
-      expect(signup("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "long_test_password").result).to.equal "badLogin"
+    it 'should respond with "badLogin" if login was longer than 40 symbols', (done) ->
+      conn.signup("abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz", "long_test_password")
+      .then (data) ->
+        expect(data.result).to.equal "badLogin"
+        done()
 
-    it 'should respond with "badPassword" if password was shorter than 4 symbols', ->
-      expect(signup("short_pass_login", "1").result).to.equal "badPassword"
+    it 'should respond with "badPassword" if password was shorter than 4 symbols', (done) ->
+      conn.signup("short_pass_login", "1").then (data) ->
+        expect(data.result).to.equal "badPassword"
+        done()
 
-    it 'should respond with "badLogin" or "badPassword" if login and password were incorrect', ->
-      expect(signup("sh", "sh").result).to.match /badPassword|badLogin/
-
+    it 'should respond with "badLogin" or "badPassword" if login and password were incorrect', (done) ->
+      conn.signup("sh", "sh").then (data) ->
+        expect(data.result).to.match /badPassword|badLogin/
+        done()
 
   describe 'signin action', ->
     it 'should respond with "paramMissed" if it did not receive all required params', ->
