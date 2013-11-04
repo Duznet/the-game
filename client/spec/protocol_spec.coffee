@@ -6,9 +6,11 @@ describe 'Protocol supporting server', ->
   before (done) ->
     conn.startTesting().then done()
 
-  it 'should respond with Object', (done) ->
+  it 'should respond with Object containing string field called "result"', (done) ->
     conn.send('some string').then (data) ->
       expect(data).to.be.an('Object')
+      expect(data).to.contain.keys('result')
+      expect(data.result).to.be.a('String')
       done()
 
   it 'should respond with "badJSON" if it received one brace', (done) ->
