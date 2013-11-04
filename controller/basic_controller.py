@@ -1,4 +1,4 @@
-from game_exception import BadSid, ParamMissed
+from game_exception import BadSid, BadRequest
 
 class BasicController:
     """Controller base class"""
@@ -13,7 +13,7 @@ class BasicController:
         try:
             user = self.users.filter(sid = str(self.json['sid']))
         except KeyError:
-            raise ParamMissed()
+            raise BadRequest()
 
         if user.count() != 1:
             raise BadSid()

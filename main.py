@@ -41,7 +41,7 @@ class ActionProcesser():
             response = getattr(controller, action_name)()
             return response
         except KeyError:
-            return ParamMissed().msg()
+            return BadRequest().msg()
         except TypeError:
             return BadJSON().msg()
         except GameException as e:
@@ -95,7 +95,7 @@ class MainHandler(web.RequestHandler):
             action = camel_to_underscores(str(data['action']))
             self.write(self.processer.process_action(action, data.get("params", {})))
         except (KeyError, ValueError):
-            self.write(ParamMissed().msg())
+            self.write(BadRequest().msg())
             return
 
 class GameApp(web.Application):

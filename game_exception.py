@@ -125,8 +125,8 @@ class BadJSON(GameException):
         return jsonify(result="badJSON")
 
 
-class ParamMissed(GameException):
+class BadRequest(GameException):
     """Some paramater is missing"""
 
     def msg(self):
-        return jsonify(result="paramMissed")
+        return jsonify(result="badRequest")
