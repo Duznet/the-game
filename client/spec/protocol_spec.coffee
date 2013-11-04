@@ -82,62 +82,96 @@ describe 'Protocol supporting server', ->
         done()
 
   describe 'signin action', ->
-    it 'should respond with "paramMissed" if it did not receive all required params', ->
-      expect(getResponse("signin", login: "some_login").result).to.equal "paramMissed"
-      expect(getResponse("signin", param: "some_password").result).to.equal "paramMissed"
+    it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+      conn.signin("signin", login: "some_login").then (data) ->
+        expect(data.result).to.equal "badRequest"
+        done()
 
-    it 'should respond with sid after the correct signin request', ->
-      userLogin = "signin_test_login"
-      userPass = "signin_test_pass"
-      expect(signup(userLogin, userPass).result).to.equal "ok"
-      got = signin(userLogin, userPass)
-      expect(got.result).to.equal "ok"
-      expect(got.sid).to.not.be.undefined
-      expect(got.sid).to.match /^[a-zA-z0-9]+$/
+    it 'should respond with sid after the correct signin request', (done) ->
+      user = new User "signin_test_login", "signin_test_pass", conn
+      user.signup()
+      .then ->
+        conn.signin(user.login, user.password)
+      .then (data) ->
+        expect(data.result).to.equal "ok"
+        expect(data.sid).to.match /^[a-zA-z0-9]+$/
+        done()
 
-    it 'should respond with "incorrect" if user with requested login did not exist', ->
-      userLogin = "signin_incorrect_l_test_login"
-      userPass = "signin_incorrect_l_test_pass"
-      expect(signup(userLogin, userPass).result).to.equal "ok"
-      expect(signin(userLogin + "no", userPass).result).to.equal "incorrect"
-      expect(signin(userLogin, userPass + "no").result).to.equal "incorrect"
+    it 'should respond with "incorrect" if user with requested login did not exist', (done) ->
+      user = new User "signin_incorrect_l_test_login", "signin_incorrect_l_test_pass", conn
+      user.signup()
+      .then ->
+        conn.signin(user.login + 'no', user.password)
+      .then (data) ->
+        expect(data.result).to.equal "incorrect"
+        done()
 
-    it 'should respond with "incorrect" if login and password did not match', ->
-      userLogin = "signin_incorrect_p_test_login"
-      userPass = "signin_incorrect_p_test_pass"
-      expect(signup(userLogin, userPass).result).to.equal "ok"
-      expect(signin(userLogin, userPass + "no").result).to.equal "incorrect"
+    it 'should respond with "incorrect" if login and password did not match', (done) ->
+      user = new User "signin_incorrect_p_test_login", "signin_incorrect_p_test_pass", conn
+      user.signup()
+      .then ->
+        conn.signin(user.login, user.password + 'no')
+      .then (data) ->
+        expect(data.result).to.equal "incorrect"
+        done()
 
-    it 'should respond with "incorrect" if login was empty', ->
-      expect(signin("", "123").result).to.equal "incorrect"
+    it 'should respond with "badLogin" if login was empty', (done) ->
+      conn.signin("", "some_password").then (data) ->
+        expect(data.result).to.equal "badLogin"
+        done()
 
+    it 'should respond with "badLogin" if login was too long', (done) ->
+      conn.signin("kjhasdfkjhasfkljhsadfkljhasdfkljhasdfkljhasdklj", "some_password").then (data) ->
+        expect(data.result).to.equal "badLogin"
+        done()
+
+    it 'should respond with "badPassword" if password was too short', (done) ->
+      conn.signin("correct_login", "s").then (data) ->
+        expect(data.result).to.equal "badPassword"
+        done()
 
   describe 'signout action', ->
-    it 'should respond with "paramMissed" if it did not receive all required params', ->
-      expect(getResponse("signout", {}).result).to.equal "paramMissed"
 
-    it 'should allow user to sign out using the sid', ->
-      userLogin = "signout_test_login"
-      userPassword = "singout_test_pass"
-      expect(signup(userLogin, userPassword).result).to.equal "ok"
-      signinResponse = signin(userLogin, userPassword)
-      expect(signinResponse.result).to.equal "ok"
-      expect(signout(signinResponse.sid).result).to.equal "ok"
+    it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+      conn.request("signout").then (data) ->
+        expect(data.result).to.equal "badRequest"
+        done()
 
-    it 'should respond with "badSid" if sid was empty', ->
-      expect(signout("").result).to.equal "badSid"
+    it 'should allow user to sign out using the sid', (done) ->
+      user = new User "signout_test_login", "signout_test_pass", conn
+      user.signup()
+      .then ->
+        user.signin()
+      .then ->
+        conn.signout(user.sid)
+      .then (data) ->
+        expect(data.result).to.equal "ok"
+        done()
 
-    it 'should respond with "badSid" if sid could not be found', ->
-      expect(signout("sidNotFound123").result).to.equal "badSid"
+    it 'should respond with "badSid" if sid was empty', (done) ->
+      conn.signout("").then (data) ->
+        expect(data.result).to.equal "badSid"
+        done()
 
-    it 'should respond with "badSid" if user was not signed in', ->
-      userLogin = "singed_out_user"
-      userPassword = "signed_out_pass"
-      signup userLogin, userPassword
-      sid = signin(userLogin, userPassword).sid
-      expect(signout(sid).result).to.equal "ok"
-      expect(signout(sid).result).to.equal "badSid"
+    it 'should respond with "badSid" if sid could not be found', (done) ->
+      conn.signout("sidNotFound123").then (data) ->
+        expect(data.result).to.equal "badSid"
+        done()
 
+    it 'should respond with "badSid" if user was not signed in', (done) ->
+      oldSid = ""
+      user = new User "singed_out_user", "singed_out_pass", conn
+      user.signup()
+      .then ->
+        user.signin()
+      .then ->
+         oldSid = user.sid
+         user.signout()
+      .then ->
+        conn.signout(oldSid)
+      .then (data) ->
+        expect(data.result).to.equal "badSid"
+        done()
 
   describe 'Messages', ->
     firstUser =

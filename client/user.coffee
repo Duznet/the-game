@@ -2,11 +2,13 @@ class window.User
   constructor: (@login, @password, @conn) ->
 
   signup: ->
-    @conn.signup(@login, @password).result
+    @conn.signup(@login, @password)
 
   signin: ->
     r = @conn.signin(@login, @password)
-    @sid = r.sid
+    r.then (data) =>
+      @sid = data.sid
+      r
 
   signout: ->
     r = @conn.signout(@sid)
