@@ -85,7 +85,7 @@ describe 'Protocol supporting server', ->
 
   describe 'signin action', ->
     it 'should respond with "badRequest" if it did not receive all required params', (done) ->
-      conn.signin("signin", login: "some_login").then (data) ->
+      conn.request("signin", login: "some_login").then (data) ->
         expect(data.result).to.equal "badRequest"
         done()
 
