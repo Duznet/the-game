@@ -2,7 +2,7 @@ expect = chai.expect
 
 describe 'Protocol supporting server', ->
   conn = new GameConnector(config.gameUrl)
-  testingStarted = false
+  gen = new Generator
   before (done) ->
     conn.startTesting().then done()
 
@@ -34,47 +34,49 @@ describe 'Protocol supporting server', ->
       done()
 
   it 'should respond with "badAction" if it could not recognize action', (done) ->
-    conn.request("asdkhasdasd", {}).then (data) ->
+    conn.request(gen.getStr(), {}).then (data) ->
       expect(data.result).to.equal "badAction"
       done()
 
   it 'should respond with "badAction" if the action field was empty', (done) ->
-    conn.request("", login: "some_login").then (data) ->
+    conn.request("", login: gen.getLogin()).then (data) ->
       expect(data.result).to.equal "badAction"
       done()
 
   describe 'signup action', ->
     it 'should respond with "badRequest" if it did not receive all required params', (done) ->
-      conn.request("signup", login: "some_login").then (data) ->
+      conn.request("signup", login: gen.getLogin()).then (data) ->
         expect(data.result).to.equal "badRequest"
         done()
 
     it 'should allow user to sign up using login and password', (done) ->
-      conn.signup("signup_test_login", "signup_test_pass").then (data) ->
+      user = gen.getUser()
+      conn.signup(user.login, user.password).then (data) ->
         expect(data.result).to.equal "ok"
         done()
 
     it 'should respond with "userExists" if this user already existed', (done) ->
-      conn.signup("existing_user", "existing_password")
+      user = gen.getUser()
+      conn.signup(user.login, user.password)
       .then ->
-        conn.signup("existing_user", "existing_password2")
+        conn.signup(user.login, user.password)
       .then (data) ->
         expect(data.result).to.equal "userExists"
         done()
 
     it 'should respond with "badLogin" if login was shorter than 4 symbols', (done) ->
-      conn.signup("1", "short_test_password").then (data) ->
+      conn.signup("1", gen.getPassword()).then (data) ->
         expect(data.result).to.equal "badLogin"
         done()
 
     it 'should respond with "badLogin" if login was longer than 40 symbols', (done) ->
-      conn.signup("abcdefghijklmnopqrstuvwxyz-abcdefghijklmnopqrstuvwxyz", "long_test_password")
+      conn.signup(gen.getLogin("veryveryveryveryveryveryveryveryverylong"), gen.getPassword())
       .then (data) ->
         expect(data.result).to.equal "badLogin"
         done()
 
     it 'should respond with "badPassword" if password was shorter than 4 symbols', (done) ->
-      conn.signup("short_pass_login", "1").then (data) ->
+      conn.signup(gen.getLogin(), "1").then (data) ->
         expect(data.result).to.equal "badPassword"
         done()
 
@@ -85,12 +87,12 @@ describe 'Protocol supporting server', ->
 
   describe 'signin action', ->
     it 'should respond with "badRequest" if it did not receive all required params', (done) ->
-      conn.request("signin", login: "some_login").then (data) ->
+      conn.request("signin", login: gen.getLogin()).then (data) ->
         expect(data.result).to.equal "badRequest"
         done()
 
     it 'should respond with sid after the correct signin request', (done) ->
-      user = new User "signin_test_login", "signin_test_pass"
+      user = gen.getUser()
       user.signup()
       .then ->
         conn.signin(user.login, user.password)
@@ -100,7 +102,7 @@ describe 'Protocol supporting server', ->
         done()
 
     it 'should respond with "incorrect" if user with requested login did not exist', (done) ->
-      user = new User "signin_incorrect_l_test_login", "signin_incorrect_l_test_pass"
+      user = gen.getUser()
       user.signup()
       .then ->
         conn.signin(user.login + 'no', user.password)
@@ -109,7 +111,7 @@ describe 'Protocol supporting server', ->
         done()
 
     it 'should respond with "incorrect" if login and password did not match', (done) ->
-      user = new User "signin_incorrect_p_test_login", "signin_incorrect_p_test_pass"
+      user = gen.getUser()
       user.signup()
       .then ->
         conn.signin(user.login, user.password + 'no')
@@ -118,17 +120,18 @@ describe 'Protocol supporting server', ->
         done()
 
     it 'should respond with "badLogin" if login was empty', (done) ->
-      conn.signin("", "some_password").then (data) ->
+      conn.signin("", gen.getPassword()).then (data) ->
         expect(data.result).to.equal "badLogin"
         done()
 
     it 'should respond with "badLogin" if login was too long', (done) ->
-      conn.signin("kjhasdfkjhasfkljhsadfkljhasdfkljhasdfkljhasdklj", "some_password").then (data) ->
+      conn.signin(gen.getLogin("veryveryveryveryveryveryveryveryverylong"),
+          gen.getPassword()).then (data) ->
         expect(data.result).to.equal "badLogin"
         done()
 
     it 'should respond with "badPassword" if password was too short', (done) ->
-      conn.signin("correct_login", "s").then (data) ->
+      conn.signin(gen.getLogin(), "s").then (data) ->
         expect(data.result).to.equal "badPassword"
         done()
 
@@ -140,7 +143,7 @@ describe 'Protocol supporting server', ->
         done()
 
     it 'should allow user to sign out using the sid', (done) ->
-      user = new User "signout_test_login", "signout_test_pass"
+      user = gen.getUser()
       user.signup()
       .then ->
         user.signin()
@@ -160,9 +163,9 @@ describe 'Protocol supporting server', ->
         expect(data.result).to.equal "badSid"
         done()
 
-    it 'should respond with "badSid" if user was not signed in', (done) ->
+    it 'should respond with "badSid" if user has already signed out', (done) ->
       oldSid = ""
-      user = new User "singed_out_user", "singed_out_pass"
+      user = gen.getUser()
       user.signup()
       .then ->
         user.signin()
