@@ -36,7 +36,7 @@ class ActionProcesser():
             try:
                 controller = self.controller_by_action[action_name](data, models, games)
             except (KeyError, ValueError):
-                raise UnknownAction()
+                raise BadAction()
 
             response = getattr(controller, action_name)()
             return response
@@ -66,7 +66,7 @@ class MainWSHandler(websocket.WebSocketHandler):
             action = camel_to_underscores(str(data['action']))
             getattr(self.controller, action)()
         except (KeyError, ValueError):
-            self.write_message(UnknownAction().msg())
+            self.write_message(BadAction().msg())
             return
 
     def on_close(self, message=None):

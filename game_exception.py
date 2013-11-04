@@ -98,11 +98,11 @@ class BadSince(GameException):
     def msg(self):
         return jsonify(result="badSince")
 
-class UnknownAction(GameException):
+class BadAction(GameException):
     """There is no such an action"""
 
     def msg(self):
-        return jsonify(result="unknownAction")
+        return jsonify(result="badAction")
 
 
 class BadName(GameException):

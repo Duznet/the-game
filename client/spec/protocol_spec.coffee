@@ -33,14 +33,14 @@ describe 'Protocol supporting server', ->
       expect(data.result).to.equal "badRequest"
       done()
 
-  it 'should respond with "unknownAction" if it could not recognize action', (done) ->
+  it 'should respond with "badAction" if it could not recognize action', (done) ->
     conn.request("asdkhasdasd", {}).then (data) ->
-      expect(data.result).to.equal "unknownAction"
+      expect(data.result).to.equal "badAction"
       done()
 
-  it 'should respond with "unknownAction" if the action field was empty', (done) ->
-    conn.request("", params: login: "some_login").then (data) ->
-      expect(data.result).to.equal "unknownAction"
+  it 'should respond with "badAction" if the action field was empty', (done) ->
+    conn.request("", login: "some_login").then (data) ->
+      expect(data.result).to.equal "badAction"
       done()
 
   describe 'signup action', ->
