@@ -88,7 +88,7 @@ describe 'Protocol supporting server', ->
         done()
 
     it 'should respond with sid after the correct signin request', (done) ->
-      user = new User "signin_test_login", "signin_test_pass", conn
+      user = new User "signin_test_login", "signin_test_pass"
       user.signup()
       .then ->
         conn.signin(user.login, user.password)
@@ -98,7 +98,7 @@ describe 'Protocol supporting server', ->
         done()
 
     it 'should respond with "incorrect" if user with requested login did not exist', (done) ->
-      user = new User "signin_incorrect_l_test_login", "signin_incorrect_l_test_pass", conn
+      user = new User "signin_incorrect_l_test_login", "signin_incorrect_l_test_pass"
       user.signup()
       .then ->
         conn.signin(user.login + 'no', user.password)
@@ -107,7 +107,7 @@ describe 'Protocol supporting server', ->
         done()
 
     it 'should respond with "incorrect" if login and password did not match', (done) ->
-      user = new User "signin_incorrect_p_test_login", "signin_incorrect_p_test_pass", conn
+      user = new User "signin_incorrect_p_test_login", "signin_incorrect_p_test_pass"
       user.signup()
       .then ->
         conn.signin(user.login, user.password + 'no')
@@ -138,7 +138,7 @@ describe 'Protocol supporting server', ->
         done()
 
     it 'should allow user to sign out using the sid', (done) ->
-      user = new User "signout_test_login", "signout_test_pass", conn
+      user = new User "signout_test_login", "signout_test_pass"
       user.signup()
       .then ->
         user.signin()
@@ -160,7 +160,7 @@ describe 'Protocol supporting server', ->
 
     it 'should respond with "badSid" if user was not signed in', (done) ->
       oldSid = ""
-      user = new User "singed_out_user", "singed_out_pass", conn
+      user = new User "singed_out_user", "singed_out_pass"
       user.signup()
       .then ->
         user.signin()

@@ -1,5 +1,6 @@
 class window.User
-  constructor: (@login, @password, @conn) ->
+  constructor: (@login, @password) ->
+    @conn = new GameConnector(config.gameUrl)
 
   signup: ->
     @conn.signup(@login, @password)
