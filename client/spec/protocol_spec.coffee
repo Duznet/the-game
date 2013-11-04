@@ -175,7 +175,7 @@ describe 'Protocol supporting server', ->
         expect(data.result).to.equal "badSid"
         done()
 
-  describe 'Messages', ->
+  ###describe 'Messages', ->
     firstUser =
       login: "mess_test_login1"
       password: "mess_test_pass1"
@@ -555,3 +555,4 @@ describe 'Protocol supporting server', ->
 
           expect(data.players[0]).to.eql expectedPlayer
           done()
+###
