@@ -1,12 +1,13 @@
 expect = chai.expect
 
-describe 'Protocol supporting server', ->
+describe 'API using server', ->
+
   conn = new GameConnector(config.gameUrl)
   gen = new Generator
   before (done) ->
     conn.startTesting().then done()
 
-  it 'should respond with Object containing string field called "result"', (done) ->
+  it 'should respond with Object containing string field "result"', (done) ->
     conn.send('some string').then (data) ->
       expect(data).to.be.an('Object')
       expect(data).to.contain.keys('result')
@@ -43,140 +44,148 @@ describe 'Protocol supporting server', ->
       expect(data.result).to.equal "badAction"
       done()
 
-  describe 'signup action', ->
-    it 'should respond with "badRequest" if it did not receive all required params', (done) ->
-      conn.request("signup", login: gen.getLogin()).then (data) ->
-        expect(data.result).to.equal "badRequest"
-        done()
 
-    it 'should allow user to sign up using login and password', (done) ->
-      user = gen.getUser()
-      conn.signup(user.login, user.password).then (data) ->
-        expect(data.result).to.equal "ok"
-        done()
+  describe 'on Auth', ->
 
-    it 'should respond with "userExists" if this user already existed', (done) ->
-      user = gen.getUser()
-      conn.signup(user.login, user.password)
-      .then ->
+    describe '#signup', ->
+
+      it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+        conn.request("signup", login: gen.getLogin()).then (data) ->
+          expect(data.result).to.equal "badRequest"
+          done()
+
+      it 'should allow user to sign up using login and password', (done) ->
+        user = gen.getUser()
+        conn.signup(user.login, user.password).then (data) ->
+          expect(data.result).to.equal "ok"
+          done()
+
+      it 'should respond with "userExists" if this user already existed', (done) ->
+        user = gen.getUser()
         conn.signup(user.login, user.password)
-      .then (data) ->
-        expect(data.result).to.equal "userExists"
-        done()
+        .then ->
+          conn.signup(user.login, user.password)
+        .then (data) ->
+          expect(data.result).to.equal "userExists"
+          done()
 
-    it 'should respond with "badLogin" if login was shorter than 4 symbols', (done) ->
-      conn.signup("1", gen.getPassword()).then (data) ->
-        expect(data.result).to.equal "badLogin"
-        done()
+      it 'should respond with "badLogin" if login was shorter than 4 symbols', (done) ->
+        conn.signup("1", gen.getPassword()).then (data) ->
+          expect(data.result).to.equal "badLogin"
+          done()
 
-    it 'should respond with "badLogin" if login was longer than 40 symbols', (done) ->
-      conn.signup(gen.getLogin("veryveryveryveryveryveryveryveryverylong"), gen.getPassword())
-      .then (data) ->
-        expect(data.result).to.equal "badLogin"
-        done()
+      it 'should respond with "badLogin" if login was longer than 40 symbols', (done) ->
+        conn.signup(gen.getLogin("veryveryveryveryveryveryveryveryverylong"), gen.getPassword())
+        .then (data) ->
+          expect(data.result).to.equal "badLogin"
+          done()
 
-    it 'should respond with "badPassword" if password was shorter than 4 symbols', (done) ->
-      conn.signup(gen.getLogin(), "1").then (data) ->
-        expect(data.result).to.equal "badPassword"
-        done()
+      it 'should respond with "badPassword" if password was shorter than 4 symbols', (done) ->
+        conn.signup(gen.getLogin(), "1").then (data) ->
+          expect(data.result).to.equal "badPassword"
+          done()
 
-    it 'should respond with "badLogin" or "badPassword" if login and password were incorrect', (done) ->
-      conn.signup("sh", "sh").then (data) ->
-        expect(data.result).to.match /badPassword|badLogin/
-        done()
+      it 'should respond with "badLogin" or "badPassword" if login and password were incorrect', (done) ->
+        conn.signup("sh", "sh").then (data) ->
+          expect(data.result).to.match /badPassword|badLogin/
+          done()
 
-  describe 'signin action', ->
-    it 'should respond with "badRequest" if it did not receive all required params', (done) ->
-      conn.request("signin", login: gen.getLogin()).then (data) ->
-        expect(data.result).to.equal "badRequest"
-        done()
 
-    it 'should respond with sid after the correct signin request', (done) ->
-      user = gen.getUser()
-      user.signup()
-      .then ->
-        conn.signin(user.login, user.password)
-      .then (data) ->
-        expect(data.result).to.equal "ok"
-        expect(data.sid).to.match /^[a-zA-z0-9]+$/
-        done()
+    describe '#signin', ->
 
-    it 'should respond with "incorrect" if user with requested login did not exist', (done) ->
-      user = gen.getUser()
-      user.signup()
-      .then ->
-        conn.signin(user.login + 'no', user.password)
-      .then (data) ->
-        expect(data.result).to.equal "incorrect"
-        done()
+      it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+        conn.request("signin", login: gen.getLogin()).then (data) ->
+          expect(data.result).to.equal "badRequest"
+          done()
 
-    it 'should respond with "incorrect" if login and password did not match', (done) ->
-      user = gen.getUser()
-      user.signup()
-      .then ->
-        conn.signin(user.login, user.password + 'no')
-      .then (data) ->
-        expect(data.result).to.equal "incorrect"
-        done()
+      it 'should respond with sid after the correct signin request', (done) ->
+        user = gen.getUser()
+        user.signup()
+        .then ->
+          conn.signin(user.login, user.password)
+        .then (data) ->
+          expect(data.result).to.equal "ok"
+          expect(data.sid).to.match /^[a-zA-z0-9]+$/
+          done()
 
-    it 'should respond with "badLogin" if login was empty', (done) ->
-      conn.signin("", gen.getPassword()).then (data) ->
-        expect(data.result).to.equal "badLogin"
-        done()
+      it 'should respond with "incorrect" if user with requested login did not exist', (done) ->
+        user = gen.getUser()
+        user.signup()
+        .then ->
+          conn.signin(user.login + 'no', user.password)
+        .then (data) ->
+          expect(data.result).to.equal "incorrect"
+          done()
 
-    it 'should respond with "badLogin" if login was too long', (done) ->
-      conn.signin(gen.getLogin("veryveryveryveryveryveryveryveryverylong"),
-          gen.getPassword()).then (data) ->
-        expect(data.result).to.equal "badLogin"
-        done()
+      it 'should respond with "incorrect" if login and password did not match', (done) ->
+        user = gen.getUser()
+        user.signup()
+        .then ->
+          conn.signin(user.login, user.password + 'no')
+        .then (data) ->
+          expect(data.result).to.equal "incorrect"
+          done()
 
-    it 'should respond with "badPassword" if password was too short', (done) ->
-      conn.signin(gen.getLogin(), "s").then (data) ->
-        expect(data.result).to.equal "badPassword"
-        done()
+      it 'should respond with "badLogin" if login was empty', (done) ->
+        conn.signin("", gen.getPassword()).then (data) ->
+          expect(data.result).to.equal "badLogin"
+          done()
 
-  describe 'signout action', ->
+      it 'should respond with "badLogin" if login was too long', (done) ->
+        conn.signin(gen.getLogin("veryveryveryveryveryveryveryveryverylong"),
+            gen.getPassword()).then (data) ->
+          expect(data.result).to.equal "badLogin"
+          done()
 
-    it 'should respond with "badRequest" if it did not receive all required params', (done) ->
-      conn.request("signout").then (data) ->
-        expect(data.result).to.equal "badRequest"
-        done()
+      it 'should respond with "badPassword" if password was too short', (done) ->
+        conn.signin(gen.getLogin(), "s").then (data) ->
+          expect(data.result).to.equal "badPassword"
+          done()
 
-    it 'should allow user to sign out using the sid', (done) ->
-      user = gen.getUser()
-      user.signup()
-      .then ->
-        user.signin()
-      .then ->
-        conn.signout(user.sid)
-      .then (data) ->
-        expect(data.result).to.equal "ok"
-        done()
 
-    it 'should respond with "badSid" if sid was empty', (done) ->
-      conn.signout("").then (data) ->
-        expect(data.result).to.equal "badSid"
-        done()
+    describe '#signout', ->
 
-    it 'should respond with "badSid" if sid could not be found', (done) ->
-      conn.signout("sidNotFound123").then (data) ->
-        expect(data.result).to.equal "badSid"
-        done()
+      it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+        conn.request("signout").then (data) ->
+          expect(data.result).to.equal "badRequest"
+          done()
 
-    it 'should respond with "badSid" if user has already signed out', (done) ->
-      oldSid = ""
-      user = gen.getUser()
-      user.signup()
-      .then ->
-        user.signin()
-      .then ->
-         oldSid = user.sid
-         user.signout()
-      .then ->
-        conn.signout(oldSid)
-      .then (data) ->
-        expect(data.result).to.equal "badSid"
-        done()
+      it 'should allow user to sign out using the sid', (done) ->
+        user = gen.getUser()
+        user.signup()
+        .then ->
+          user.signin()
+        .then ->
+          conn.signout(user.sid)
+        .then (data) ->
+          expect(data.result).to.equal "ok"
+          done()
+
+      it 'should respond with "badSid" if sid was empty', (done) ->
+        conn.signout("").then (data) ->
+          expect(data.result).to.equal "badSid"
+          done()
+
+      it 'should respond with "badSid" if sid could not be found', (done) ->
+        conn.signout("sidNotFound123").then (data) ->
+          expect(data.result).to.equal "badSid"
+          done()
+
+      it 'should respond with "badSid" if user has already signed out', (done) ->
+        oldSid = ""
+        user = gen.getUser()
+        user.signup()
+        .then ->
+          user.signin()
+        .then ->
+           oldSid = user.sid
+           user.signout()
+        .then ->
+          conn.signout(oldSid)
+        .then (data) ->
+          expect(data.result).to.equal "badSid"
+          done()
+
 
   ###describe 'Messages', ->
     firstUser =
