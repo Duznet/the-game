@@ -187,67 +187,173 @@ describe 'API using server', ->
           done()
 
 
-  ###describe 'Messages', ->
-    firstUser =
-      login: "mess_test_login1"
-      password: "mess_test_pass1"
+  describe 'on Messages', ->
 
-    secondUser =
-      login: "mess_test_login2"
-      password: "mess_test_pass2"
+    user = gen.getUser()
 
-    beforeEach ->
-      signup firstUser.login, firstUser.password
-      signup secondUser.login, secondUser.password
-      firstUser.sid = signin(firstUser.login, firstUser.password).sid
-      secondUser.sid = signin(secondUser.login, secondUser.password).sid
+    before (done) ->
+      user.signup()
+      .then ->
+        user.signin()
+      .then ->
+        done()
 
-    describe 'sendMessage action', ->
-      it 'should respond with "paramMissed" if it did not receive all required params', ->
-        expect(getResponse("sendMessage", {sid: firstUser.sid, game: ""}).result).to.equal "paramMissed"
-        expect(getResponse("sendMessage", {sid: firstUser.sid, text: "some text"}).result).to.equal "paramMissed"
-        expect(getResponse("sendMessage", {game: "", text: "some text"}).result).to.equal "paramMissed"
+    describe '#sendMessage', ->
 
-      it 'should allow user to send text to chat using sid', ->
-        expect(sendMessage(firstUser.sid, "", "Hello").result).to.equal "ok"
+      it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+        conn.request("sendMessage", sid: user.sid).then (data) ->
+          expect(data.result).to.equal "badRequest"
+          done()
 
-      it 'should respond with "badSid" if user with that sid was not found', ->
-        expect(sendMessage("^&%DF&TSDFH", "", "Hello").result).to.equal "badSid"
+      it 'should allow users to send text to the global chat using sid', (done) ->
+        conn.sendMessage(user.sid, "", "Hello").then (data) ->
+          expect(data.result).to.equal "ok"
+          done()
+
+      it 'should respond with "badSid" if user with that sid was not found', (done) ->
+        conn.sendMessage("^&%DF&TSDFH", "", "Hello").then (data) ->
+          expect(data.result).to.equal "badSid"
+          done()
+
+      it 'should respond with "badGame" if it received string value in game field instead of number', (done) ->
+        conn.sendMessage(user.sid, "Scaarface", "I always tell the truth. Even when I lie").then (data) ->
+          expect(data.result).to.equal "badGame"
+          done()
+
+      it 'should respond with "badText" if it received an array instead of string value in text field', (done) ->
+        conn.sendMessage(user.sid, "", [1, 2, 12]).then (data) ->
+          expect(data.result).to.equal "badText"
+          done()
+
+      describe 'after joining into game', ->
+
+        gameCreator = gen.getUser()
+        anotherGameCreator = gen.getUser()
+        joinedUser = gen.getUser()
+
+        map = null
+        game = null
+        anotherGame = null
+
+        mapName = gen.getStr()
+        gameName = gen.getStr()
+        anotherGameName = gen.getStr()
+
+        before (done) ->
+          $.when(gameCreator.signup(), anotherGameCreator.signup(), joinedUser.signup())
+          .then ->
+            $.when(gameCreator.signin(), anotherGameCreator.signin(), joinedUser.signin())
+          .then ->
+            gameCreator.uploadMap(mapName, 16, ['...', '.$.', '###'])
+          .then ->
+            gameCreator.getMaps()
+          .then (data) ->
+            for curMap in data.maps
+              if curMap.name is mapName
+                map = curMap
+                break
+            $.when(gameCreator.createGame(gameName, map.maxPlayers, map.id),
+                anotherGameCreator.createGame(anotherGameName, map.maxPlayers, map.id))
+          .then ->
+            joinedUser.getGames()
+          .then (data) ->
+            for curGame in data.games
+              if curGame.name is gameName
+                game = curGame
+              else if curGame.name is anotherGameName
+                anotherGame = curGame
+            joinedUser.joinGame(game.id)
+          .then (data) ->
+            if data.result is "ok"
+              done()
+
+        it 'should allow game creator to send Messages into the global chat', (done) ->
+          conn.sendMessage(gameCreator.sid, "", gen.getStr()).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should allow game guest to send messages into the global chat', (done) ->
+          conn.sendMessage(joinedUser.sid, "", gen.getStr()).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should respond with "badGame" if game creator was trying to send message to another in-game chat', (done) ->
+          conn.sendMessage(gameCreator.sid, anotherGame.id, gen.getStr()).then (data) ->
+            expect(data.result).to.equal "badGame"
+            done()
+
+        it 'should respond with "badGame" if game guest was trying to send message to another in-game chat', (done) ->
+          conn.sendMessage(joinedUser.sid, anotherGame.id, gen.getStr()).then (data) ->
+            expect(data.result).to.equal "badGame"
+            done()
 
 
-    describe 'getMessages action', ->
-      it 'should respond with "paramMissed" if it did not receive all required params', ->
-        expect(getResponse("getMessages", sid: firstUser.sid).result).to.equal "paramMissed"
+    describe '#getMessages', ->
 
-      it 'should allow user to get messages using sid', ->
-        firstText = "Hello, second"
-        secondText = "Hi, first"
-        expect(sendMessage(firstUser.sid, "", firstText).result).to.equal "ok"
-        expect(sendMessage(secondUser.sid, "", secondText).result).to.equal "ok"
-        getMessagesResponse = getMessages(firstUser.sid, "", 0)
-        expect(getMessagesResponse.result).to.equal "ok"
-        firstMessage = getMessagesResponse.messages[getMessagesResponse.messages.length - 2]
-        secondMessage = getMessagesResponse.messages[getMessagesResponse.messages.length - 1]
-        expect(secondMessage.time).to.be.above firstMessage.time
-        firstAuthor = (if firstMessage.login is firstUser.login then firstUser else secondUser)
-        secondAuthor = (if secondMessage.login is secondUser.login then secondUser else firstUser)
-        expect(firstMessage.login).to.equal firstAuthor.login
-        expect(firstMessage.text).to.equal firstText
-        expect(secondMessage.login).to.equal secondAuthor.login
-        expect(secondMessage.text).to.equal secondText
+      it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+        conn.request("getMessages", sid: user.sid).then (data) ->
+          expect(data.result).to.equal "badRequest"
+          done()
 
-      it 'should respond with "badSid" if user with that sid was not found', ->
-        expect(getMessages(firstUser.sid + "#W*&^W#$", "", 0).result).to.equal "badSid"
+      it 'should respond with "badSid" if user with that sid was not found', (done) ->
+        conn.getMessages(user.sid + "#W*&^W#$", "", 0).then (data) ->
+          expect(data.result).to.equal "badSid"
+          done()
 
-      it 'should respond with "badGame" if game with that id was not found', ->
-        expect(getMessages(firstUser.sid, "#$(*&", 0).result).to.equal "badGame"
+      it 'should respond with "badGame" if it received string game id instead of number', (done) ->
+        conn.getMessages(user.sid, "#$(*&", 0).then (data) ->
+          expect(data.result).to.equal "badGame"
+          done()
 
-      it 'should respond with "badSince" if the "since" timestamp was not cool', ->
-        expect(getMessages(firstUser.sid, "", "suddenly not time").result).to.equal "badSince"
+      it 'should respond with "badSince" if the "since" timestamp was not correct', (done) ->
+        conn.getMessages(user.sid, "", "suddenly not correct time").then (data) ->
+          expect(data.result).to.equal "badSince"
+          done()
+
+      describe 'after some messages sending', ->
+
+        messagesCount = 30
+        messages = []
+
+        messageContent = (login, game, text) -> "#{login}::#{game}::#{text}"
+
+        before (done) ->
+          completedCount = 0
+
+          wait = ->
+            if completedCount is messagesCount
+              done()
+
+          for i in [0...messagesCount]
+            text = gen.getStr()
+            messages[i] = messageContent user.login, "", text
+            conn.sendMessage(user.sid, "", text).then ->
+              completedCount += 1
+              wait()
+
+        it 'should allow user to execute getMessages using sid', (done) ->
+          conn.getMessages(user.sid, "", 0).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should respond with array containing all sent messages', (done) ->
+          conn.getMessages(user.sid, "", 0).then (data) ->
+            expect(data.messages).to.have.length.of.at.least messagesCount
+            messagesGot = data.messages.map (message) -> messageContent message.login, "", message.text
+            for m in messages
+              expect(messagesGot).to.contain m
+            done()
+
+        it 'should respond with array containing messages ordered by time', (done) ->
+          conn.getMessages(user.sid, "", 0).then (data) ->
+            curTime = 0
+            for m in data.messages
+              expect(m.time).to.be.at.least curTime
+              curTime = m.time
+            done()
 
 
-
-  describe 'Map controlling', ->
+  ###describe 'Map controlling', ->
     describe 'uploadMap action', ->
       user =
         login: "mapUploaderLogin"
