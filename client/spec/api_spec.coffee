@@ -379,7 +379,7 @@ describe 'API using server', ->
             conn.getMessages(user.sid, "", time)
           .then (data) ->
             for m in data.messages
-              expect(m.time).to.be.above time
+              expect(m.time).to.be.at.least time
             done()
 
       describe 'after joining into game', ->
