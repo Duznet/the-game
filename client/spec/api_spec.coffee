@@ -314,6 +314,7 @@ describe 'API using server', ->
 
         messagesCount = 30
         messages = []
+        users = []
 
         messageContent = (login, game, text) -> "#{login}::#{game}::#{text}"
 
@@ -324,12 +325,18 @@ describe 'API using server', ->
             if completedCount is messagesCount
               done()
 
-          for i in [0...messagesCount]
-            text = gen.getStr()
-            messages[i] = messageContent user.login, "", text
-            conn.sendMessage(user.sid, "", text).then ->
-              completedCount += 1
-              wait()
+          users[0] = user
+          user[1] = gen.getUser()
+          user.signup()
+          .then ->
+            user.signin()
+          .then ->
+            for i in [0...messagesCount]
+              text = gen.getStr()
+              messages[i] = messageContent users[i % users.length].login, "", text
+              conn.sendMessage(users[i % users.length].sid, "", text).then ->
+                completedCount += 1
+                wait()
 
         it 'should allow user to execute getMessages using sid', (done) ->
           conn.getMessages(user.sid, "", 0).then (data) ->
