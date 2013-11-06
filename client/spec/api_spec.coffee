@@ -147,7 +147,7 @@ describe 'API using server', ->
           expect(data.result).to.equal "incorrect"
           done()
 
-      it 'should respond with "badPassword" if password was too short', (done) ->
+      it 'should respond with "badPassword" if password was not correct string', (done) ->
         conn.signin(gen.getLogin(), id: 31415).then (data) ->
           expect(data.result).to.equal "badPassword"
           done()
