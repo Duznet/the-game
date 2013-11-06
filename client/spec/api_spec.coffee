@@ -435,36 +435,48 @@ describe 'API using server', ->
             done()
 
 
-  ###describe 'Map controlling', ->
-    describe 'uploadMap action', ->
-      user =
-        login: "mapUploaderLogin"
-        password: "mapUploaderPass"
+  describe 'on Maps', ->
+    describe '#uploadMap', (done) ->
+      user = gen.getUser()
 
-      beforeEach ->
-        signup user.login, user.password
-        user.sid = signin(user.login, user.password).sid
+      before (done) ->
+        user.signup()
+        .then ->
+          user.signin()
+        .then ->
+          done()
 
-      it 'should respond with "paramMissed" if it did not receive all required params', ->
-        expect(getResponse("uploadMap", sid: user.sid).result).to.equal "paramMissed"
+      it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+        conn.request("uploadMap", sid: user.sid).then (data) ->
+          expect(data.result).to.equal "badRequest"
+          done()
 
-      it 'should allow users to create maps', ->
-        expect(uploadMap(user.sid, "testUploadedMap", 16, ["."]).result).to.equal "ok"
+      it 'should allow users to create maps', (done) ->
+        conn.uploadMap(user.sid, gen.getStr(), 16, ["."]).then (data) ->
+          expect(data.result).to.equal "ok"
+          done()
 
-      it 'should respond with "badSid" if user with that sid was not found', ->
-        expect(uploadMap(user.sid + "@#&*^@#$!}}", "testBadSid", 10, ["."]).result).to.equal "badSid"
+      it 'should respond with "badSid" if user with that sid was not found', (done) ->
+        conn.uploadMap("#{user.sid}@#&*^@#$!}}", 10, ["."]).then (data) ->
+          expect(data.result).to.equal "badSid"
+          done()
 
-      it 'should respond with "badName" if map name was empty', ->
-        expect(uploadMap(user.sid, "", 10, ["."]).result).to.equal "badName"
+      it 'should respond with "badName" if map name was empty', (done) ->
+        conn.uploadMap(user.sid, "", 10, ["."]).then (data) ->
+          expect(data.result).to.equal "badName"
+          done()
 
-      it 'should respond with "badMaxPlayers" if maxPlayers field was empty', ->
-        expect(uploadMap(user.sid, "badMaxPlayersTest", "", ["."]).result).to.equal "badMaxPlayers"
+      it 'should respond with "badMaxPlayers" if maxPlayers field was empty', (done) ->
+        conn.uploadMap(user.sid, gen.getStr(), "", ["."]).then (data) ->
+          expect(data.result).to.equal "badMaxPlayers"
+          done()
 
-      it 'should respond with "badMap" if row lengths are not equal', ->
-        expect(uploadMap(user.sid, "DiffLengthsTest", 16, ["...", "..", "..."]).result).to.equal "badMap"
+      it 'should respond with "badMap" if row lengths are not equal', (done) ->
+        conn.uploadMap(usr.sid, gen.getStr(), 16, ["...", "..", "..."]).then (data) ->
+          expect(data.result).to.equal "badMap"
+          done()
 
-
-    describe 'getMaps action', ->
+    ###describe 'getMaps action', ->
       user =
         login: "mapGetterLogin"
         password: "mapGetterPass"
