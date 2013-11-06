@@ -436,7 +436,9 @@ describe 'API using server', ->
 
 
   describe 'on Maps', ->
+
     describe '#uploadMap', (done) ->
+
       user = gen.getUser()
 
       before (done) ->
@@ -472,47 +474,56 @@ describe 'API using server', ->
           done()
 
       it 'should respond with "badMap" if row lengths are not equal', (done) ->
-        conn.uploadMap(usr.sid, gen.getStr(), 16, ["...", "..", "..."]).then (data) ->
+        conn.uploadMap(user.sid, gen.getStr(), 16, ["...", "..", "..."]).then (data) ->
           expect(data.result).to.equal "badMap"
           done()
 
-    ###describe 'getMaps action', ->
-      user =
-        login: "mapGetterLogin"
-        password: "mapGetterPass"
+
+    describe '#getMaps', ->
+
+      user = gen.getUser()
       map =
-        name: "gettingMapsTest"
+        name: gen.getStr()
         maxPlayers: 4
         map: ["...", "...", "..."]
 
-      beforeEach ->
-        signup user.login, user.password
-        user.sid = signin(user.login, user.password).sid
-        uploadMap user.sid, map.name, map.maxPlayers, map.map
+      before (done) ->
+        user.signup()
+        .then ->
+          user.signin()
+        .then ->
+          user.uploadMap map.name, map.maxPlayers, map.map
+        .then ->
+          done()
 
+      it 'should allow users to execute getMaps action using the correct sid', (done) ->
+        conn.getMaps(user.sid).then (data) ->
+          expect(data.result).to.equal "ok"
+          done()
 
+      it 'should allow users to get map list containing uploaded map', (done) ->
+        conn.getMaps(user.sid).then (data) ->
+          expect(data.maps.length).to.be.above 0
+          uploadedMapFoundCount = 0
+          for m in data.maps
+            if m.name is map.name
+              uploadedMapFoundCount += 1
+              expect(m.map).to.eql map.map
+              expect(m.maxPlayers).to.equal map.maxPlayers
+          expect(uploadedMapFoundCount).to.equal 1
+          done()
 
-      it 'should allow users to get map list', ->
-        getMapsRes = getMaps(user.sid)
-        expect(getMapsRes.result).to.equal "ok"
-        expect(getMapsRes.maps).to.not.be.undefined
-        i = 0
+      it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+        conn.request("getMaps", {}).then (data) ->
+          expect(data.result).to.equal "badRequest"
+          done()
 
-        while i < getMapsRes.maps.length
-          if getMapsRes.maps[i].name is map.name
-            curMap = getMapsRes.maps[i]
-            expect(curMap.map).to.eql map.map
-            expect(curMap.maxPlayers).to.equal map.maxPlayers
-          i++
-      it 'should respond with "paramMissed" if it did not receive all required params', ->
-        expect(getResponse("getMaps", {}).result).to.equal "paramMissed"
+      it 'should respond with "badSid" if user with that sid was not found', (done) ->
+        conn.getMaps("#{user.sid}$#%").then (data) ->
+          expect(data.result).to.equal "badSid"
+          done()
 
-      it 'should respond with "badSid" if user with that sid was not found', ->
-        expect(getMaps(user.sid + "$#%").result).to.equal "badSid"
-
-
-
-  describe 'Game controlling', ->
+  ###describe 'Game controlling', ->
     hostUser =
       login: "host_user"
       password: "host_pass"
