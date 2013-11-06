@@ -359,6 +359,81 @@ describe 'API using server', ->
               curTime = m.time
             done()
 
+        it 'should respond with array containing messages received on server later than time parameter', (done) ->
+          firstLength = 0
+          time = 0
+          conn.getMessages(user.sid, "", 0)
+          .then (data) ->
+            firstLength = data.messages.length
+            time = data.messages[Math.floor data.messages.length / 2].time
+            conn.getMessages(user.sid, "", time)
+          .then (data) ->
+            for m in data.messages
+              expect(m.time).to.be.above time
+            done()
+
+      describe 'after joining into game', ->
+
+        gameCreator = gen.getUser()
+        anotherGameCreator = gen.getUser()
+        joinedUser = gen.getUser()
+
+        map = null
+        game = null
+        anotherGame = null
+
+        mapName = gen.getStr()
+        gameName = gen.getStr()
+        anotherGameName = gen.getStr()
+
+        before (done) ->
+          $.when(gameCreator.signup(), anotherGameCreator.signup(), joinedUser.signup())
+          .then ->
+            $.when(gameCreator.signin(), anotherGameCreator.signin(), joinedUser.signin())
+          .then ->
+            gameCreator.uploadMap(mapName, 16, ['...', '.$.', '###'])
+          .then ->
+            gameCreator.getMaps()
+          .then (data) ->
+            for curMap in data.maps
+              if curMap.name is mapName
+                map = curMap
+                break
+            $.when(gameCreator.createGame(gameName, map.maxPlayers, map.id),
+                anotherGameCreator.createGame(anotherGameName, map.maxPlayers, map.id))
+          .then ->
+            joinedUser.getGames()
+          .then (data) ->
+            for curGame in data.games
+              if curGame.name is gameName
+                game = curGame
+              else if curGame.name is anotherGameName
+                anotherGame = curGame
+            joinedUser.joinGame(game.id)
+          .then (data) ->
+            if data.result is "ok"
+              done()
+
+        it 'should allow game creator to send Messages into the global chat', (done) ->
+          conn.getMessages(gameCreator.sid, "", 0).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should allow game guest to send messages into the global chat', (done) ->
+          conn.getMessages(joinedUser.sid, "", 0).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should respond with "badGame" if game creator was trying to send message to another in-game chat', (done) ->
+          conn.getMessages(gameCreator.sid, anotherGame.id, 0).then (data) ->
+            expect(data.result).to.equal "badGame"
+            done()
+
+        it 'should respond with "badGame" if game guest was trying to send message to another in-game chat', (done) ->
+          conn.getMessages(joinedUser.sid, anotherGame.id, 0).then (data) ->
+            expect(data.result).to.equal "badGame"
+            done()
+
 
   ###describe 'Map controlling', ->
     describe 'uploadMap action', ->
