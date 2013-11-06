@@ -17,7 +17,7 @@ class MessageController(BasicController):
             try:
                 game_id = int(game)
 
-                if self.user.game is None or game_id != self.user.game.id():
+                if self.user.game is None or game_id != self.user.game.id:
                     raise BadGame()
 
             except ValueError:

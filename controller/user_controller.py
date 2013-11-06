@@ -19,17 +19,18 @@ class UserController(BasicController):
 
     def signup(self):
         try:
-            if len(str(self.json['password'])) < self.MIN_PASSWORD_SYMBOLS:
+            password = self._str_param('password')
+            if len(password) < self.MIN_PASSWORD_SYMBOLS:
                 raise BadPassword()
 
-            self.users.new(login=str(self.json['login']), password=self.users.encode(str(self.json['password'])))
+            self.users.new(login=self._str_param('login'), password=self.users.encode(password))
         except CommitException:
             raise UserExists()
 
         return jsonify(result="ok")
 
     def signin(self):
-        user = self.users.filter(login=str(self.json['login']), password=self.users.encode(str(self.json['password'])))
+        user = self.users.filter(login=self._str_param('login'), password=self.users.encode(self._str_param('password')))
 
         if user.count() != 1:
             raise Incorrect()
@@ -44,15 +45,12 @@ class UserController(BasicController):
     def send_message(self):
         user = self._user_by_sid()
 
-        if not isinstance(self.json['text'], type("")):
-            raise BadText()
-
-        user.new_message(self.json['text'], str(self.json['game']), self.messages)
+        user.new_message(self._str_param('text'), str(self.json['game']), self.messages)
         return jsonify(result="ok")
 
     def join_game(self):
         user = self._user_by_sid()
-        user.join_game(id=str(self.json['game']))
+        user.join_game(id=int(self.json['game']))
         self.current_games.game(int(self.json['game'])).add_player(user.id)
         return jsonify(result="ok")
 
