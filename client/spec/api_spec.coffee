@@ -126,19 +126,29 @@ describe 'API using server', ->
           expect(data.result).to.equal "incorrect"
           done()
 
-      it 'should respond with "badLogin" if login was empty', (done) ->
+      it 'should respond with "incorrect" if login was empty', (done) ->
         conn.signin("", gen.getPassword()).then (data) ->
+          expect(data.result).to.equal "incorrect"
+          done()
+
+      it 'should respond with "incorrect" if login was too long', (done) ->
+        conn.signin(gen.getLogin("veryveryveryveryveryveryveryveryverylong"),
+            gen.getPassword()).then (data) ->
+          expect(data.result).to.equal "incorrect"
+          done()
+
+      it 'should respond with "badLogin" if login was not correct string', (done) ->
+        conn.signin(prop: "haha", gen.getPassword()).then (data) ->
           expect(data.result).to.equal "badLogin"
           done()
 
-      it 'should respond with "badLogin" if login was too long', (done) ->
-        conn.signin(gen.getLogin("veryveryveryveryveryveryveryveryverylong"),
-            gen.getPassword()).then (data) ->
-          expect(data.result).to.equal "badLogin"
+      it 'should respond with "incorrect" if password was too short', (done) ->
+        conn.signin(gen.getLogin(), "s").then (data) ->
+          expect(data.result).to.equal "incorrect"
           done()
 
       it 'should respond with "badPassword" if password was too short', (done) ->
-        conn.signin(gen.getLogin(), "s").then (data) ->
+        conn.signin(gen.getLogin(), id: 31415).then (data) ->
           expect(data.result).to.equal "badPassword"
           done()
 
