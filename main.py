@@ -40,10 +40,6 @@ class ActionProcesser():
 
             response = getattr(controller, action_name)()
             return response
-        except KeyError:
-            return BadRequest().msg()
-        except TypeError:
-            return BadJSON().msg()
         except GameException as e:
             return e.msg()
 
@@ -92,9 +88,14 @@ class MainHandler(web.RequestHandler):
         print(data)
         try:
             data = json.loads(data)
+        except (ValueError):
+            self.write(BadJSON().msg())
+            return
+
+        try:
             action = camel_to_underscores(str(data['action']))
             self.write(self.processer.process_action(action, data.get("params", {})))
-        except (KeyError, ValueError):
+        except (KeyError, TypeError):
             self.write(BadRequest().msg())
             return
 

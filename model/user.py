@@ -36,7 +36,9 @@ class User(odm.StdModel):
             if len(game_id) == 0:
                 return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self)
 
-            game = self.session.query(Game).get(id=int(game_id))
+            if self.game is None or str(self.game.id) != str(game_id):
+                raise BadGame()
+
             return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self, game=game)
         except (ValueError, ObjectNotFound):
             raise BadGame()
@@ -69,7 +71,10 @@ class User(odm.StdModel):
         self.save()
         return self
 
+    def is_login_correct(login):
+        return len(login) < User.MIN_LOGIN_SYMBOLS or len(login) > User.MAX_LOGIN_SYMBOLS
+
     def pre_commit(instances, **named):
         user = instances[0]
-        if len(user.login) < user.MIN_LOGIN_SYMBOLS or len(user.login) > user.MAX_LOGIN_SYMBOLS:
+        if User.is_login_correct(user.login):
             raise BadLogin()

@@ -1,7 +1,7 @@
 from controller.basic_controller import BasicController
 from datetime import datetime
 from stdnet.utils.exceptions import CommitException
-from game_exception import Incorrect, UserExists, BadPassword
+from game_exception import *
 from common import jsonify
 import hashlib
 
@@ -43,7 +43,11 @@ class UserController(BasicController):
 
     def send_message(self):
         user = self._user_by_sid()
-        user.new_message(str(self.json['text']), str(self.json['game']), self.messages)
+
+        if not isinstance(self.json['text'], type("")):
+            raise BadText()
+
+        user.new_message(self.json['text'], str(self.json['game']), self.messages)
         return jsonify(result="ok")
 
     def join_game(self):

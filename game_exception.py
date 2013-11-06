@@ -43,6 +43,13 @@ class Incorrect(GameException):
         return jsonify(result="incorrect")
 
 
+class BadText(GameException):
+    """Text is incorrect"""
+
+    def msg(self):
+        return jsonify(result="badText")
+
+
 class BadGame(GameException):
     """There is no game with this id"""
 
