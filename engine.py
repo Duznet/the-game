@@ -1,5 +1,6 @@
 from sympy.geometry import Point, Segment, Polygon
 from sympy.geometry.util import *
+import re
 
 import copy
 from math import *
@@ -13,7 +14,7 @@ class Player:
         self.velocity = Point(0, 0)
         self.hp = self.DEFAULT_HP
         self.score = 0
-        self.moved = false
+        self.moved = False
 
     def normalize_v(self):
         if abs(self.velocity.x) > MAX_VELOCITY:
@@ -49,6 +50,7 @@ class Game:
     DEFAULT_VELOCITY = 0.1
     SIDE = 0.5
     PLAYER_POS = Point(0.5, 0.5)
+    GRAVITATION = 0.2
 
     WALL = '#'
     SPAWN = '$'
@@ -72,7 +74,7 @@ class Game:
             for x, cell in enumerate(row):
                 if cell == self.SPAWN:
                     if last_spawn:
-                        NEXT_SPAWN[last_spawn] = Point(x, y)
+                        self.NEXT_SPAWN[last_spawn] = Point(x, y)
                     else:
                         self.spawn = Point(x, y)
 
@@ -80,19 +82,19 @@ class Game:
 
                 if re.match('[0-9]', cell):
                     if last_portal.get(cell):
-                        NEXT_PORTAL[last_portal[cell]] = Point(x, y)
+                        self.NEXT_PORTAL[last_portal[cell]] = Point(x, y)
                     else:
                         self.first_portal[cell] = Point(x, y)
 
                     last_portal[cell] = Point(x, y)
 
-        NEXT_SPAWN[last_spawn] = self.first_spawn
+        self.NEXT_SPAWN[last_spawn] = self.first_spawn
 
         for key in last_portal.keys():
             lp = last_portal.get(key)
 
             if lp:
-                NEXT_PORTAL[lp] = self.first_portal[key]
+                self.NEXT_PORTAL[lp] = self.first_portal[key]
 
     def next_tick(self):
         self.tick += 1
@@ -110,8 +112,8 @@ class Game:
         pts = []
         for signx in [-1, 1]:
             for signy in [-1, 1]:
-                pts.append(Point(start.x + signx * self.SIDE, start.y + signy * self.SIDE))
-                pts.append(Point(end.x + signx * self.SIDE, end.y + signy * self.SIDE))
+                pts.append(Point(start.x + signx * Game.SIDE, start.y + signy * Game.SIDE))
+                pts.append(Point(end.x + signx * Game.SIDE, end.y + signy * Game.SIDE))
 
         return convex_hull(*pts)
 
@@ -156,18 +158,37 @@ class Game:
         self.players_.pop(id)
         self.players_order.remove(id)
 
+    @staticmethod
+    def underpoint(player):
+        return Point(floor(player.point.x), floor(player.point.y + Game.SIDE))
+
     def update_v(self, id, dx, dy):
         player = self.players_[id]
 
         delta = Point(dx, dy)
+
+        underpoint_ = self.underpoint(player)
+
+        if delta.y < 0 and self.map[underpoint_.y][underpoint_.x] == self.WALL:
+            player.velocity.y = -Player.MAX_VELOCITY
+        else:
+            if self.map[underpoint_.y][underpoint_.x] != self.WALL:
+                player.velocity.y += GRAVITATION
+
+            delta.y = 0
+
         if delta.distance(Point(0, 0)) == 0:
             return self
 
         delta /= delta.distance(Point(0, 0))
 
         player.velocity += delta * self.DEFAULT_VELOCITY
+
+
         player.normalize_v()
         player.moved = True
+
+        return self
 
 
     def brake_if_not_moved(self, id):
@@ -178,7 +199,9 @@ class Game:
 
         norm = player.velocity.distance(Point(0, 0))
 
-        if norm == 0:
+        underpoint = self.underpoint(player)
+
+        if norm == 0 or self.map[underpoint.y][underpoint.x] != self.WALL:
             return player
 
         brake_v = self.DEFAULT_VELOCITY * player.velocity / norm
@@ -197,7 +220,11 @@ class Game:
     def move(self, id):
         player = self.brake_if_not_moved(id)
 
+        if player.velocity == Point(0, 0):
+            return self
+
         end = player.velocity + player.point
+        print("whaat")
         print(end.evalf())
         path = self.cells_path(player.point, end)
 

@@ -58,7 +58,7 @@ class MainWSHandler(websocket.WebSocketHandler):
         try:
             print(message)
             data = json.loads(message)
-            self.controller = GameplayController(data['params'], models, games)
+            self.controller = self.controller if self.controller else GameplayController(data['params'], models, games)
             action = camel_to_underscores(str(data['action']))
             getattr(self.controller, action)()
         except (KeyError, ValueError):
@@ -113,6 +113,9 @@ class GameApp(web.Application):
 
 
     def tick(self):
+        if len(self.websockets) == 0:
+            return
+
         for game in games.games.values():
             game.next_tick()
 
