@@ -713,46 +713,51 @@ describe 'API using server', ->
       it 'should respong with "badSid" if user with that sid was not found', ->
         expect(leaveGame(joiningUser.sid + "@#$@#$").result).to.equal "badSid"
 
+###
+  describe 'on Websocket', ->
 
-  describe 'Websocket controlling', ->
-
-    hostUser =
-      login: "hostUser"
-      password: "hostUser"
+    hostUser = gen.getUser()
+    gc = null
 
     game =
-      name: "joinGameTest"
+      name: gen.getStr()
       maxPlayers: 2
 
     map =
-      name: "testmap"
+      name: gen.getStr()
       maxPlayers: 4
       map: ["..", "$."]
 
-    websocket = {}
+    maps = null
 
-    beforeEach (done) ->
-      signup hostUser.login, hostUser.password
-      hostUser.sid = signin(hostUser.login, hostUser.password).sid
-
-      uploadMap hostUser.sid, map.name, map.maxPlayers, map.map
-      maps = getMaps(hostUser.sid).maps
-      map = maps[0]
-
-      game.map = map.id
-      createGame hostUser.sid, game.name, game.map, game.maxPlayers
-      games = getGames(hostUser.sid).games
-      game = games[0]
-
-      websocket = new WebSocket config.gameplayUrl
-      websocket.onopen = (event) ->
-        move(websocket, hostUser.sid, 0, 0, 0)
-        done()
-
-    afterEach ->
-      websocket.close()
+    before (done) ->
+      hostUser.signup()
+      .then ->
+        hostUser.signin()
+      .then ->
+        hostUser.uploadMap map.name, map.maxPlayers, map.map
+      .then ->
+        hostUser.getMaps()
+      .then (data) ->
+        for m in data.maps
+          if m.name is map.name
+            map = m
+            break
+        game.map = map.id
+        hostUser.createGame game.name, game.maxPlayers, game.map
+      .then ->
+        hostUser.getGames()
+      .then (data) ->
+        for g in data.games
+          if g.name is game.name
+            game = g
+        gc = new GameplayConnector config.gameplayUrl
+        gc.ws.onopen = ->
+          gc.move hostUser.sid, 0, 0, 0
+          done()
 
     it 'should get correct game state every tick', (done) ->
+
       expectedPlayer =
         x: 0.5
         y: 1.5
@@ -760,12 +765,12 @@ describe 'API using server', ->
         vy: 0
         hp: 100
 
-      websocket.onmessage = (event) ->
-        console.log event.data
-        expect(JSON.parse(event.data).players[0]).to.eql expectedPlayer
+      gc.ws.onmessage = (event) ->
+        expect(event.data.players[0]).to.eql expectedPlayer
         done()
 
-    it 'should move players correctly for one move', (done) ->
+    it 'should move player correctly for one move', (done) ->
+
       expectedPlayer =
         x: 0.6
         y: 1.5
@@ -775,17 +780,15 @@ describe 'API using server', ->
 
       count = 0
 
-      data = {}
-      websocket.onmessage = (event) ->
+      gc.ws.onmessage = (event) ->
         count++
         console.log event.data
-        data = JSON.parse(event.data)
-        move(websocket, hostUser.sid, data.tick, 1, 0)
+        data = event.data
+        gc.move(hostUser.sid, data.tick, 1, 0)
         if count == 2
           player = data.players[0]
           for key of player
-            player[key] = parseFloat(player[key].toFixed(6))
+            player[key] = player[key].toFixed(6)
 
           expect(data.players[0]).to.eql expectedPlayer
           done()
-###
