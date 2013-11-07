@@ -17,7 +17,7 @@ class GameplayController(BasicController):
 
         dx, dy = self.json['dx'], self.json['dy']
 
-        print("move")
+        print("move ", dx, " ", dy)
         self.game.update_v(self.user.id, dx, dy)
 
 

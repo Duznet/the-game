@@ -59,6 +59,8 @@ class MainWSHandler(websocket.WebSocketHandler):
         print(message)
         data = json.loads(message)
         self.controller = self.controller if self.controller else GameplayController(data['params'], models, games)
+        self.controller.json = data['params']
+
         action = camel_to_underscores(str(data['action']))
         getattr(self.controller, action)()
         # except (KeyError, ValueError):

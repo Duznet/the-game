@@ -19,14 +19,14 @@ class Player:
 
     def normalize_v(self):
         x = self.velocity.x
-        if abs(x) > MAX_VELOCITY:
+        if abs(x) > self.MAX_VELOCITY:
             x /= abs(x)
-            x *= MAX_VELOCITY
+            x *= self.MAX_VELOCITY
 
         y = self.velocity.y
-        if abs(y) > MAX_VELOCITY:
+        if abs(y) > self.MAX_VELOCITY:
             y /= abs(y)
-            y *= MAX_VELOCITY
+            y *= self.MAX_VELOCITY
 
         self.velocity = Point(x, y)
         return self
@@ -71,6 +71,9 @@ class Game:
         self.first_portal = {}
 
         self.map = normalize_map(map, self.WALL)
+
+        print(self.map)
+
         last_spawn = None
         last_portal = {}
         for y, row in enumerate(self.map):
@@ -79,7 +82,7 @@ class Game:
                     if last_spawn:
                         self.NEXT_SPAWN[last_spawn] = Point(x, y)
                     else:
-                        self.spawn = Point(x, y)
+                        self.first_spawn = Point(x, y)
 
                     last_spawn = Point(x, y)
 
@@ -174,6 +177,8 @@ class Game:
 
         delta = Point(dx, dy)
 
+        print(delta)
+
         underpoint_ = self.underpoint(player)
 
         y = player.velocity.y
@@ -185,6 +190,7 @@ class Game:
             delta = Point(delta.x, 0)
 
         player.velocity = Point(player.velocity.x, y)
+        print(player.velocity)
 
         if delta.distance(Point(0, 0)) == 0:
             return self
@@ -192,7 +198,7 @@ class Game:
         delta /= delta.distance(Point(0, 0))
 
         player.velocity += delta * self.DEFAULT_VELOCITY
-
+        print(player.velocity)
 
         player.normalize_v()
         player.moved = True
