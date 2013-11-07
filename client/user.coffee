@@ -1,6 +1,8 @@
 class window.User
   constructor: (@login, @password) ->
     @conn = new GameConnector(config.gameUrl)
+    # available values: "notSignedUp", "offline", "online", "playing"
+    @status = "notSignedUp"
 
   signup: ->
     @conn.signup(@login, @password)
