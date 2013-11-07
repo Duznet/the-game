@@ -716,22 +716,25 @@ describe 'API using server', ->
 ###
   describe 'on Websocket', ->
 
-    hostUser = gen.getUser()
+    hostUser = null
     gc = null
+    game = null
+    map = null
 
-    game =
-      name: gen.getStr()
-      maxPlayers: 2
-
-    map =
-      name: gen.getStr()
-      maxPlayers: 4
-      map: ["#..",
-            "#$."]
 
     maps = null
 
-    before (done) ->
+    beforeEach (done) ->
+      hostUser = gen.getUser()
+      game =
+        name: gen.getStr()
+        maxPlayers: 2
+
+      map =
+        name: gen.getStr()
+        maxPlayers: 4
+        map: ["#..",
+              "#$."]
       hostUser.signup()
       .then ->
         hostUser.signin()
@@ -757,6 +760,11 @@ describe 'API using server', ->
           gc.move hostUser.sid, 0, 0, 0
           done()
 
+    afterEach (done) ->
+      gc.ws.close()
+      gc.ws.onclose = ->
+        done()
+
     it 'should get correct game state every tick', (done) ->
 
       expectedPlayer =
@@ -769,12 +777,14 @@ describe 'API using server', ->
       gc.ws.onmessage = (event) ->
         data = JSON.parse event.data
         console.log "data: ", data
-        console.log "players[0]: ",data.players[0]
-        console.log "expected player: ", expectedPlayer
+        console.log "expected: ", expectedPlayer
+        console.log "got: ",data.players[0]
         expect(data.players[0]).to.eql expectedPlayer
         done()
 
     it 'should move player correctly for one move', (done) ->
+
+      @timeout 5000
 
       expectedPlayer =
         x: 1.6
@@ -790,11 +800,13 @@ describe 'API using server', ->
         console.log event.data
         data = JSON.parse event.data
         console.log data
+        console.log "expected: ", expectedPlayer
+        console.log "got: ", data.players[0]
         gc.move(hostUser.sid, data.tick, 1, 0)
         if count == 2
           player = data.players[0]
           for key of player
-            player[key] = player[key].toFixed(6)
+            player[key] = parseFloat player[key].toFixed(6)
           expect(data.players[0]).to.eql expectedPlayer
           done()
 
@@ -814,33 +826,12 @@ describe 'API using server', ->
         data = JSON.parse event.data
         gc.move(hostUser.sid, data.tick, -1, 0)
         console.log data
+        console.log "expected: ", expectedPlayer
+        console.log "got: ", data.players[0]
         if count == 2
           player = data.players[0]
           for key of player
-            player[key] = player[key].toFixed(6)
-
-          expect(data.players[0]).to.eql expectedPlayer
-          done()
-
-    it 'should not allow player to move through the wall', (done) ->
-
-      expectedPlayer =
-        x: 1.5
-        y: 1.5
-        vx: 0
-        vy: 0
-        hp: 100
-
-      count = 0
-
-      gc.ws.onmessage = (event) ->
-        count++
-        data = event.data
-        gc.move(hostUser.sid, data.tick, -1, 0)
-        if count == 2
-          player = data.players[0]
-          for key of player
-            player[key] = player[key].toFixed(6)
+            player[key] = parseFloat player[key].toFixed(6)
 
           expect(data.players[0]).to.eql expectedPlayer
           done()
