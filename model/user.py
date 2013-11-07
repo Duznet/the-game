@@ -6,6 +6,8 @@ from datetime import datetime
 from game_exception import *
 import hashlib
 from datetime import datetime
+from calendar import timegm
+
 
 class User(odm.StdModel):
     """User model"""
@@ -39,7 +41,7 @@ class User(odm.StdModel):
             if self.game is None or str(self.game.id) != str(game_id):
                 raise BadGame()
 
-            return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self, game=game)
+            return message.new(text=text, timestamp=timegm(datetime.now().utctimetuple()), user=self, game=game)
         except (ValueError, ObjectNotFound):
             raise BadGame()
 

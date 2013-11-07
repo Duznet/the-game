@@ -1,6 +1,6 @@
 from game_exception import *
 
-class BasicController:
+class BasicController(object):
     """Controller base class"""
 
     def __init__(self, json, users=None):

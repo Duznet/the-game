@@ -1,4 +1,5 @@
-from sympy.geometry import Point, Segment, Polygon
+
+from sympy.geometry import *
 from sympy.geometry.util import *
 import re
 
@@ -17,15 +18,17 @@ class Player:
         self.moved = False
 
     def normalize_v(self):
-        if abs(self.velocity.x) > MAX_VELOCITY:
-            self.velocity.x /= abs(self.velocity.x)
-            self.velocity.x *= MAX_VELOCITY
+        x = self.velocity.x
+        if abs(x) > MAX_VELOCITY:
+            x /= abs(x)
+            x *= MAX_VELOCITY
 
+        y = self.velocity.y
+        if abs(y) > MAX_VELOCITY:
+            y /= abs(y)
+            y *= MAX_VELOCITY
 
-        if abs(self.velocity.y) > MAX_VELOCITY:
-            self.velocity.y /= abs(self.velocity.y)
-            self.velocity.y *= MAX_VELOCITY
-
+        self.velocity = Point(x, y)
         return self
 
 def pfloor(point):
@@ -50,7 +53,7 @@ class Game:
     DEFAULT_VELOCITY = 0.1
     SIDE = 0.5
     PLAYER_POS = Point(0.5, 0.5)
-    GRAVITATION = 0.2
+    GRAVITY = 0.2
 
     WALL = '#'
     SPAWN = '$'
@@ -150,7 +153,11 @@ class Game:
         return len(self.players_order)
 
     def add_player(self, id):
+        print(self.first_spawn)
+        print("before add")
+
         self.players_[id] = Player(self.first_spawn + self.PLAYER_POS)
+        print("after")
         self.players_order.append(id)
         return self.players_[id]
 
@@ -169,13 +176,15 @@ class Game:
 
         underpoint_ = self.underpoint(player)
 
+        y = player.velocity.y
         if delta.y < 0 and self.map[underpoint_.y][underpoint_.x] == self.WALL:
-            player.velocity.y = -Player.MAX_VELOCITY
+            y = -Player.MAX_VELOCITY
         else:
             if self.map[underpoint_.y][underpoint_.x] != self.WALL:
-                player.velocity.y += GRAVITATION
+                y += self.GRAVITY
+            delta = Point(delta.x, 0)
 
-            delta.y = 0
+        player.velocity = Point(player.velocity.x, y)
 
         if delta.distance(Point(0, 0)) == 0:
             return self
@@ -204,10 +213,13 @@ class Game:
         if norm == 0 or self.map[underpoint.y][underpoint.x] != self.WALL:
             return player
 
-        brake_v = self.DEFAULT_VELOCITY * player.velocity / norm
+        brake_v = player.velocity * self.DEFAULT_VELOCITY / norm
 
-        player.velocity.x = 0 if brake_v.x > player.velocity.x else player.velocity.x - brake_v.x
-        player.velocity.y = 0 if brake_v.y > player.velocity.y else player.velocity.y - brake_v.y
+        x = player.velocity.x
+        y = player.velocity.y
+        x = 0 if brake_v.x > x else x - brake_v.x
+        y = 0 if brake_v.y > y else y - brake_v.y
+        player.velocity = Point(x, y)
 
         return player
 
@@ -224,7 +236,7 @@ class Game:
             return self
 
         end = player.velocity + player.point
-        print("whaat")
+
         print(end.evalf())
         path = self.cells_path(player.point, end)
 

@@ -55,15 +55,15 @@ class MainWSHandler(websocket.WebSocketHandler):
             self.write_message(self.controller.tick())
 
     def on_message(self, message):
-        try:
-            print(message)
-            data = json.loads(message)
-            self.controller = self.controller if self.controller else GameplayController(data['params'], models, games)
-            action = camel_to_underscores(str(data['action']))
-            getattr(self.controller, action)()
-        except (KeyError, ValueError):
-            self.write_message(BadAction().msg())
-            return
+        # try:
+        print(message)
+        data = json.loads(message)
+        self.controller = self.controller if self.controller else GameplayController(data['params'], models, games)
+        action = camel_to_underscores(str(data['action']))
+        getattr(self.controller, action)()
+        # except (KeyError, ValueError):
+            # self.write_message(BadAction().msg())
+            # return
 
     def on_close(self, message=None):
         self.application.websockets.remove(self)
