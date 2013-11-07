@@ -7,8 +7,6 @@ def jsonify(*args, **named):
     else:
         return json.dumps(named)
 
-
-
 def lower(matchobj):
     return "_" + matchobj.group(0).lower()
 

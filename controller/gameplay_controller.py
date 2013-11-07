@@ -18,7 +18,7 @@ class GameplayController(BasicController):
         dx, dy = self.json['dx'], self.json['dy']
 
         print("move")
-        self.game.move(self.user.id, dx, dy)
+        self.game.update_v(self.user.id, dx, dy)
 
 
     def tick(self):

@@ -114,7 +114,7 @@ class GameApp(web.Application):
 
     def tick(self):
         for game in games.games.values():
-            game.tick += 1
+            game.next_tick()
 
         for sock in self.websockets:
             sock.tick()

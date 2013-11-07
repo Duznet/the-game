@@ -21,7 +21,6 @@ class MessageController(BasicController):
                     raise BadGame()
 
             except ValueError:
-                print(game)
                 raise BadGame()
 
         try:
