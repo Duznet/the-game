@@ -16,6 +16,7 @@ class window.User
   signout: ->
     r = @conn.signout(@sid)
     delete @sid
+    r
 
   sendMessage: (gameId, text) ->
     @conn.sendMessage @sid, gameId, text

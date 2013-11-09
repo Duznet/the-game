@@ -93,37 +93,11 @@ describe 'API using server', ->
 
     describe '#signin', ->
 
+      user = null
+
       it 'should respond with "badRequest" if it did not receive all required params', (done) ->
         conn.request("signin", login: gen.getLogin()).then (data) ->
           expect(data.result).to.equal "badRequest"
-          done()
-
-      it 'should respond with sid after the correct signin request', (done) ->
-        user = gen.getUser()
-        user.signup()
-        .then ->
-          conn.signin(user.login, user.password)
-        .then (data) ->
-          expect(data.result).to.equal "ok"
-          expect(data.sid).to.match /^[a-zA-z0-9]+$/
-          done()
-
-      it 'should respond with "incorrect" if user with requested login did not exist', (done) ->
-        user = gen.getUser()
-        user.signup()
-        .then ->
-          conn.signin(user.login + 'no', user.password)
-        .then (data) ->
-          expect(data.result).to.equal "incorrect"
-          done()
-
-      it 'should respond with "incorrect" if login and password did not match', (done) ->
-        user = gen.getUser()
-        user.signup()
-        .then ->
-          conn.signin(user.login, user.password + 'no')
-        .then (data) ->
-          expect(data.result).to.equal "incorrect"
           done()
 
       it 'should respond with "incorrect" if login was empty', (done) ->
@@ -152,23 +126,47 @@ describe 'API using server', ->
           expect(data.result).to.equal "badPassword"
           done()
 
+      describe 'after signup', ->
+
+        beforeEach (done) ->
+          user = gen.getUser()
+          user.signup()
+          .then ->
+            done()
+
+        it 'should respond with sid after the correct signin request', (done) ->
+          conn.signin(user.login, user.password)
+          .then (data) ->
+            expect(data.result).to.equal "ok"
+            expect(data.sid).to.match /^[a-zA-z0-9]+$/
+            done()
+
+        it 'should respond with "incorrect" if user with requested login did not exist', (done) ->
+          conn.signin(user.login + 'no', user.password)
+          .then (data) ->
+            expect(data.result).to.equal "incorrect"
+            done()
+
+        it 'should respond with "incorrect" if login and password did not match', (done) ->
+          conn.signin(user.login, user.password + 'no')
+          .then (data) ->
+            expect(data.result).to.equal "incorrect"
+            done()
+
+        it 'should allow user to signin when user has already signed in', (done) ->
+          conn.signin(user.login, user.password)
+          .then ->
+            conn.signin(user.login, user.password)
+          .then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
 
     describe '#signout', ->
 
       it 'should respond with "badRequest" if it did not receive all required params', (done) ->
         conn.request("signout").then (data) ->
           expect(data.result).to.equal "badRequest"
-          done()
-
-      it 'should allow user to sign out using the sid', (done) ->
-        user = gen.getUser()
-        user.signup()
-        .then ->
-          user.signin()
-        .then ->
-          conn.signout(user.sid)
-        .then (data) ->
-          expect(data.result).to.equal "ok"
           done()
 
       it 'should respond with "badSid" if sid was empty', (done) ->
@@ -181,20 +179,37 @@ describe 'API using server', ->
           expect(data.result).to.equal "badSid"
           done()
 
-      it 'should respond with "badSid" if user has already signed out', (done) ->
-        oldSid = ""
-        user = gen.getUser()
-        user.signup()
-        .then ->
-          user.signin()
-        .then ->
-           oldSid = user.sid
-           user.signout()
-        .then ->
-          conn.signout(oldSid)
-        .then (data) ->
+      it 'should respond with "badSid" if sid contained invalid symbols', (done) ->
+        conn.signout("@{$@#$").then (data) ->
           expect(data.result).to.equal "badSid"
           done()
+
+      describe 'after signin', ->
+
+        user = null
+
+        beforeEach (done) ->
+          user = gen.getUser()
+          user.signup()
+          .then ->
+            user.signin()
+          .then ->
+            done()
+
+        it 'should allow user to sign out using the sid', (done) ->
+          conn.signout(user.sid)
+          .then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should respond with "badSid" if user has already signed out', (done) ->
+          oldSid = user.sid
+          user.signout()
+          .then ->
+            conn.signout(oldSid)
+          .then (data) ->
+            expect(data.result).to.equal "badSid"
+            done()
 
 
   describe 'on Messages', ->
