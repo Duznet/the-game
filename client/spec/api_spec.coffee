@@ -254,7 +254,7 @@ describe 'API using server', ->
 
         gameCreator = gen.getUser()
         anotherGameCreator = gen.getUser()
-        joinedUser = gen.getUser()
+        gameGuest = gen.getUser()
 
         map = null
         game = null
@@ -265,9 +265,9 @@ describe 'API using server', ->
         anotherGameName = gen.getStr()
 
         before (done) ->
-          $.when(gameCreator.signup(), anotherGameCreator.signup(), joinedUser.signup())
+          $.when(gameCreator.signup(), anotherGameCreator.signup(), gameGuest.signup())
           .then ->
-            $.when(gameCreator.signin(), anotherGameCreator.signin(), joinedUser.signin())
+            $.when(gameCreator.signin(), anotherGameCreator.signin(), gameGuest.signin())
           .then ->
             gameCreator.uploadMap(mapName, 16, ['...', '.$.', '###'])
           .then ->
@@ -280,25 +280,35 @@ describe 'API using server', ->
             $.when(gameCreator.createGame(gameName, map.maxPlayers, map.id),
                 anotherGameCreator.createGame(anotherGameName, map.maxPlayers, map.id))
           .then ->
-            joinedUser.getGames()
+            gameGuest.getGames()
           .then (data) ->
             for curGame in data.games
               if curGame.name is gameName
                 game = curGame
               else if curGame.name is anotherGameName
                 anotherGame = curGame
-            joinedUser.joinGame(game.id)
+            gameGuest.joinGame(game.id)
           .then (data) ->
             if data.result is "ok"
               done()
 
-        it 'should allow game creator to send Messages into the global chat', (done) ->
+        it 'should allow game creator to send messages into the global chat', (done) ->
           conn.sendMessage(gameCreator.sid, "", gen.getStr()).then (data) ->
             expect(data.result).to.equal "ok"
             done()
 
         it 'should allow game guest to send messages into the global chat', (done) ->
-          conn.sendMessage(joinedUser.sid, "", gen.getStr()).then (data) ->
+          conn.sendMessage(gameGuest.sid, "", gen.getStr()).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should allow game creator to send messages into the in-game chat', (done) ->
+          conn.sendMessage(gameCreator.sid, game.id, gen.getStr()).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should allow game guest to send messages into the in-game chat', (done) ->
+          conn.sendMessage(gameGuest.sid, game.id, gen.getStr()).then (data) ->
             expect(data.result).to.equal "ok"
             done()
 
@@ -308,7 +318,7 @@ describe 'API using server', ->
             done()
 
         it 'should respond with "badGame" if game guest was trying to send message to another in-game chat', (done) ->
-          conn.sendMessage(joinedUser.sid, anotherGame.id, gen.getStr()).then (data) ->
+          conn.sendMessage(gameGuest.sid, anotherGame.id, gen.getStr()).then (data) ->
             expect(data.result).to.equal "badGame"
             done()
 
@@ -401,7 +411,7 @@ describe 'API using server', ->
 
         gameCreator = gen.getUser()
         anotherGameCreator = gen.getUser()
-        joinedUser = gen.getUser()
+        gameGuest = gen.getUser()
 
         map = null
         game = null
@@ -412,9 +422,9 @@ describe 'API using server', ->
         anotherGameName = gen.getStr()
 
         before (done) ->
-          $.when(gameCreator.signup(), anotherGameCreator.signup(), joinedUser.signup())
+          $.when(gameCreator.signup(), anotherGameCreator.signup(), gameGuest.signup())
           .then ->
-            $.when(gameCreator.signin(), anotherGameCreator.signin(), joinedUser.signin())
+            $.when(gameCreator.signin(), anotherGameCreator.signin(), gameGuest.signin())
           .then ->
             gameCreator.uploadMap(mapName, 16, ['...', '.$.', '###'])
           .then ->
@@ -427,35 +437,45 @@ describe 'API using server', ->
             $.when(gameCreator.createGame(gameName, map.maxPlayers, map.id),
                 anotherGameCreator.createGame(anotherGameName, map.maxPlayers, map.id))
           .then ->
-            joinedUser.getGames()
+            gameGuest.getGames()
           .then (data) ->
             for curGame in data.games
               if curGame.name is gameName
                 game = curGame
               else if curGame.name is anotherGameName
                 anotherGame = curGame
-            joinedUser.joinGame(game.id)
+            gameGuest.joinGame(game.id)
           .then (data) ->
             if data.result is "ok"
               done()
 
-        it 'should allow game creator to send Messages into the global chat', (done) ->
+        it 'should allow game creator to get messages from the global chat', (done) ->
           conn.getMessages(gameCreator.sid, "", 0).then (data) ->
             expect(data.result).to.equal "ok"
             done()
 
-        it 'should allow game guest to send messages into the global chat', (done) ->
-          conn.getMessages(joinedUser.sid, "", 0).then (data) ->
+        it 'should allow game guest to get messages from the global chat', (done) ->
+          conn.getMessages(gameGuest.sid, "", 0).then (data) ->
             expect(data.result).to.equal "ok"
             done()
 
-        it 'should respond with "badGame" if game creator was trying to send message to another in-game chat', (done) ->
+        it 'should allow game creator to get messages from the in-game chat', (done) ->
+          conn.getMessages(gameCreator.sid, game.id, 0).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should allow game guest to get messages from the in-game chat', (done) ->
+          conn.getMessages(gameGuest.sid, game.id, 0).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should respond with "badGame" if game creator was trying to get messages from another in-game chat', (done) ->
           conn.getMessages(gameCreator.sid, anotherGame.id, 0).then (data) ->
             expect(data.result).to.equal "badGame"
             done()
 
-        it 'should respond with "badGame" if game guest was trying to send message to another in-game chat', (done) ->
-          conn.getMessages(joinedUser.sid, anotherGame.id, 0).then (data) ->
+        it 'should respond with "badGame" if game guest was trying to get messages from another in-game chat', (done) ->
+          conn.getMessages(gameGuest.sid, anotherGame.id, 0).then (data) ->
             expect(data.result).to.equal "badGame"
             done()
 
