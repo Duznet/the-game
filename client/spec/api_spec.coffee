@@ -571,13 +571,14 @@ describe 'API using server', ->
 
   describe 'on Games', ->
 
-    gameCreator = gen.getUser()
-
-    mapName = gen.getStr()
-
+    gameCreator = null
+    mapName = null
     map = null
 
-    before (done) ->
+    beforeEach (done) ->
+      gameCreator = gen.getUser()
+      mapName = gen.getStr()
+
       gameCreator.signup()
       .then ->
         gameCreator.signin()
@@ -601,66 +602,74 @@ describe 'API using server', ->
           done()
 
       it 'should respond with "badMap" if requested map id was empty', (done) ->
-        conn.createGame(gameCreator.sid, gen.getStr(), "", 2).then (data) ->
+        conn.createGame(gameCreator.sid, gen.getStr(), 2, "").then (data) ->
+          expect(data.result).to.equal "badMap"
+          done()
+
+      it 'should respond with "badMap" if map id was not integer', (done) ->
+        conn.createGame(
+            gameCreator.sid, gen.getStr(), map.maxPlayers, "#{map.id}@#$@#$").then (data) ->
+          expect(data.result).to.equal "badMap"
+          done()
+
+      it 'should respond with "badMap" if map id could not be found', (done) ->
+        conn.createGame(
+            gameCreator.sid, gen.getStr(), map.maxPlayers, map.id + 200000).then (data) ->
           expect(data.result).to.equal "badMap"
           done()
 
       it 'should allow users to create games', (done) ->
-        conn.createGame(gameCreator.sid, gen.getStr(), map.id, map.maxPlayers).then (data) ->
-          expect(data.result).to.equal "ok"
-          done()
-
-      it 'should allow users to create games on one map', (done) ->
-        conn.createGame(gameCreator.sid, gen.getStr(), map.id, map.maxPlayers)
-        .then ->
-          conn.createGame(gameCreator.sid, gen.getStr(), map.id, map.maxPlayers)
-        .then (data) ->
+        conn.createGame(gameCreator.sid, gen.getStr(), map.maxPlayers, map.id).then (data) ->
           expect(data.result).to.equal "ok"
           done()
 
       it 'should respond with "badName" if game name was empty', (done) ->
-        conn.createGame(gameCreator.sid, "", map.id, map.maxPlayers).then (data) ->
+        conn.createGame(gameCreator.sid, "", map.maxPlayers, map.id).then (data) ->
           expect(data.result).to.equal "badName"
           done()
 
-      it 'should respond with "badMap" if map with that id was not found', (done) ->
-        conn.createGame(gameCreator.sid, gen.getStr(), "#{map.id}@#$@#$", map.maxPlayers).then (data) ->
-          expect(data.result).to.equal "badMap"
-          done()
-
-      it 'should respond with "badMaxPlayers" if maxPlayers field was empty', (done) ->
-        conn.createGame(gameCreator.sid, gen.getStr(), map.id, "").then (data) ->
+      it 'should respond with "badMaxPlayers" if maxPlayers field was empty string', (done) ->
+        conn.createGame(gameCreator.sid, gen.getStr(), "", map.id).then (data) ->
           expect(data.result).to.equal "badMaxPlayers"
           done()
 
       it 'should respond with "badMaxPlayers" if maxPlayers field was not like correct number', (done) ->
-        conn.createGame(gameCreator.sid, gen.getStr(), map.id, "suddenly string").then (data) ->
+        conn.createGame(gameCreator.sid, gen.getStr(), "suddenly string", map.id).then (data) ->
           expect(data.result).to.equal "badMaxPlayers"
           done()
 
       it 'should respond with "badMaxPlayers" if maxPlayers of the game is greater than map allows', (done) ->
-        conn.createGame(gameCreator.sid, gen.getStr(), map.id, map.maxPlayers + 1).then (data) ->
+        conn.createGame(gameCreator.sid, gen.getStr(), map.maxPlayers + 1, map.id).then (data) ->
           expect(data.result).to.equal "badMaxPlayers"
           done()
 
       it 'should respond with "alreadyInGame" if host user was trying to create two games simultaneously', (done) ->
-        conn.createGame(gameCreator.sid, gen.getStr(), map.id, map.maxPlayers)
+        conn.createGame(gameCreator.sid, gen.getStr(), map.maxPlayers, map.id)
         .then ->
-          conn.createGame(gameCreator.sid, gen.getStr(), map.id, map.maxPlayers)
+          conn.createGame(gameCreator.sid, gen.getStr(), map.maxPlayers, map.id)
         .then (data) ->
           expect(data.result).to.equal "alreadyInGame"
           done()
 
-      describe 'after another map uploading', ->
+      describe 'after another player singing in', ->
 
         anotherMap = null
+        anotherGameCreator = null
+        anotherMapName = null
+        gameName = null
 
-        anotherMapName = gen.getStr()
+        beforeEach (done) ->
+          anotherGameCreator = gen.getUser()
+          anotherMapName = gen.getStr()
+          gameName = gen.getStr()
 
-        before (done) ->
-          gameCreator.uploadMap(anotherMapName, 2, [".....", "####$$"])
+          anotherGameCreator.signup()
           .then ->
-            gameCreator.getMaps()
+            anotherGameCreator.signin()
+          .then ->
+            anotherGameCreator.uploadMap(anotherMapName, 2, ["......", "####$$"])
+          .then (data) ->
+            anotherGameCreator.getMaps()
           .then (data) ->
             for m in data.maps
               if m.name is anotherMapName
@@ -668,11 +677,19 @@ describe 'API using server', ->
                 break
             done()
 
+        it 'should allow users to create games on one map', (done) ->
+          conn.createGame(gameCreator.sid, gen.getStr(), map.maxPlayers, map.id)
+          .then ->
+            conn.createGame(anotherGameCreator.sid, gen.getStr(), map.maxPlayers, map.id)
+          .then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
         it 'should respond with "gameExists" if game with requested name already exists', (done) ->
           gameName = gen.getStr()
-          conn.createGame(gameCreator.sid, gen.getStr(), map.id, map.maxPlayers)
+          conn.createGame(gameCreator.sid, gameName, map.maxPlayers, map.id)
           .then ->
-            conn.createGame(gameCreator.sid, gameName, anotherMap.id, anotherMap.maxPlayers)
+            conn.createGame(anotherGameCreator.sid, gameName, anotherMap.maxPlayers, anotherMap.id)
           .then (data) ->
             expect(data.result).to.equal "gameExists"
             done()
