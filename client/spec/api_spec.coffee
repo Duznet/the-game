@@ -708,14 +708,14 @@ describe 'API using server', ->
         .then ->
           done()
 
+      afterEach (done) ->
+        gameGuest.leaveGame()
+        .then ->
+          done()
+
       describe '#getGames', ->
 
-        beforeEach (done) ->
-          gameGuest.leaveGame()
-          .then ->
-            done()
-
-        it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+        it 'should respond with "badRequest" if it did not receive all required params', (done) ->gameGuest.sid
           conn.request("getGames").then (data) ->
             expect(data.result).to.equal "badRequest"
             done()
@@ -739,7 +739,6 @@ describe 'API using server', ->
             expect(curGame.map).to.equal map.id
             expect(curGame.players.length).to.equal 1
             done()
-
 
         it "should respond with object containing players array sorted by join time", (done) ->
 
