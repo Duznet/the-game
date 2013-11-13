@@ -571,14 +571,11 @@ describe 'API using server', ->
 
   describe 'on Games', ->
 
-    gameCreator = null
-    mapName = null
+    gameCreator = gen.getUser()
+    mapName = gen.getStr()
     map = null
 
-    beforeEach (done) ->
-      gameCreator = gen.getUser()
-      mapName = gen.getStr()
-
+    before (done) ->
       gameCreator.signup()
       .then ->
         gameCreator.signin()
@@ -587,14 +584,16 @@ describe 'API using server', ->
       .then ->
         gameCreator.getMaps()
       .then (data) ->
-        maps = data.maps
-        for m in maps
-          if m.name is mapName
-            map = m
-            break
+        maps = data.maps.filter (m) -> m.name is mapName
+        map = maps[0]
         done()
 
     describe '#createGame', ->
+
+      afterEach (done) ->
+        gameCreator.leaveGame()
+        .then ->
+          done()
 
       it 'should respond with "badRequest" if it did not receive all required params', (done) ->
         conn.request("createGame", sid: gameCreator.sid).then (data) ->
@@ -658,10 +657,9 @@ describe 'API using server', ->
         anotherMapName = null
         gameName = null
 
-        beforeEach (done) ->
+        before (done) ->
           anotherGameCreator = gen.getUser()
           anotherMapName = gen.getStr()
-          gameName = gen.getStr()
 
           anotherGameCreator.signup()
           .then ->
@@ -671,10 +669,13 @@ describe 'API using server', ->
           .then (data) ->
             anotherGameCreator.getMaps()
           .then (data) ->
-            for m in data.maps
-              if m.name is anotherMapName
-                anotherMap = m
-                break
+            maps = data.maps.filter (m) -> m.name is anotherMapName
+            anotherMap = maps[0]
+            done()
+
+        afterEach (done) ->
+          anotherGameCreator.leaveGame()
+          .then ->
             done()
 
         it 'should allow users to create games on one map', (done) ->
