@@ -482,7 +482,7 @@ describe 'API using server', ->
 
   describe 'on Maps', ->
 
-    describe '#uploadMap', (done) ->
+    describe '#uploadMap', ->
 
       user = gen.getUser()
 
@@ -520,6 +520,16 @@ describe 'API using server', ->
 
       it 'should respond with "badMap" if row lengths are not equal', (done) ->
         conn.uploadMap(user.sid, gen.getStr(), 16, ["...", "..", "..."]).then (data) ->
+          expect(data.result).to.equal "badMap"
+          done()
+
+      it 'should respond with "badMap" if it has one teleport without exit', (done) ->
+        conn.uploadMap(user.sid, gen.getStr(), 16, ["1..", ".$."]).then (data) ->
+          expect(data.result).to.equal "badMap"
+          done()
+
+      it 'should respond with "badMap" if it has more than two teleports marked with one number', (done) ->
+        conn.uploadMap(user.sid, gen.getStr(), 16, ["1.1", ".1.", "###"]).then (data) ->
           expect(data.result).to.equal "badMap"
           done()
 
