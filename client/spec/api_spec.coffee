@@ -840,28 +840,39 @@ describe 'API using server', ->
               done()
 
 
-    ###describe '#leaveGame', ->
-      game =
-        name: "leaveGameTest"
-        maxPlayers: 3
+      describe '#leaveGame', ->
 
-      beforeEach ->
-        game.map = map.id
-        createGame hostUser.sid, game.name, game.map, game.maxPlayers
+        game = null
 
-      it 'should respond with "paramMissed if it did not receive all required params ', ->
-        expect(getResponse("leaveGame", {}).result).to.equal "paramMissed"
+        beforeEach (done) ->
+          gameCreator.createGame(gameName, map.maxPlayers, map.id)
+          .then ->
+            gameGuest.getGames()
+          .then (data) ->
+            game = findGame(data.games, gameName)
+            done()
 
-      it 'should allow host users to leave created games', ->
-        expect(leaveGame(hostUser.sid).result).to.equal "ok"
+        it 'should respond with "badRequest if it did not receive all required params ', (done) ->
+          conn.request("leaveGame").then (data) ->
+            expect(data.result).to.equal "badRequest"
+            done()
 
-      it 'should respond with "notInGame" if user trying to leave game was not in any', ->
-        expect(leaveGame(joiningUser.sid).result).to.equal "notInGame"
+        it 'should allow host users to leave created games', (done) ->
+          conn.leaveGame(gameCreator.sid).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
 
-      it 'should respong with "badSid" if user with that sid was not found', ->
-        expect(leaveGame(joiningUser.sid + "@#$@#$").result).to.equal "badSid"
+        it 'should respond with "notInGame" if user trying to leave game was not in any', (done) ->
+          conn.leaveGame(gameGuest.sid).then (data) ->
+            expect(data.result).to.equal "notInGame"
+            done()
 
-###
+        it 'should respong with "badSid" if user with that sid was not found', (done) ->
+          conn.leaveGame("#a{gameGuest.sid}asd1").then (data) ->
+            expect(data.result).to.equal "badSid"
+            done()
+
+
   describe 'on Websocket', ->
 
     hostUser = null
