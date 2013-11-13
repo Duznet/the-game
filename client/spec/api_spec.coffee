@@ -701,6 +701,9 @@ describe 'API using server', ->
       gameName = gen.getStr()
       gameGuest = gen.getUser()
 
+      findGame = (games, name) ->
+        (games.filter (g) -> g.name is name)[0]
+
       before (done) ->
         gameGuest.signup()
         .then ->
@@ -715,7 +718,7 @@ describe 'API using server', ->
 
       describe '#getGames', ->
 
-        it 'should respond with "badRequest" if it did not receive all required params', (done) ->gameGuest.sid
+        it 'should respond with "badRequest" if it did not receive all required params', (done) ->
           conn.request("getGames").then (data) ->
             expect(data.result).to.equal "badRequest"
             done()
@@ -742,9 +745,6 @@ describe 'API using server', ->
 
         it "should respond with object containing players array sorted by join time", (done) ->
 
-          findGame = (games, name) ->
-            (games.filter (g) -> g.name is name)[0]
-
           conn.getGames(gameGuest.sid)
           .then (data) ->
             curGame = findGame data.games, gameName
@@ -764,54 +764,83 @@ describe 'API using server', ->
             done()
 
 
-    ###describe '#joinGame', ->
-      gameCreator =
-        login: "gameCreator"
-        password: "hosterPass"
+      describe '#joinGame', ->
+
+        game = null
+
+        before (done) ->
+          gameGuest.getGames()
+          .then (data) ->
+            game = findGame(data.games, gameName)
+            done()
+
+        it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+          conn.request("joinGame").then (data) ->
+            expect(data.result).to.equal "badRequest"
+            done()
+
+        it 'should allow users to join game using the sid and game id', (done) ->
+          conn.joinGame(gameGuest.sid, game.id).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
+
+        it 'should respond with "badSid" if user with that sid was not found', (done) ->
+          conn.joinGame("#{gameGuest.sid}ab123", game.id).then (data) ->
+            expect(data.result).to.equal "badSid"
+            done()
+
+        it 'should respond with "badGame" if game id could not be found', (done) ->
+          conn.joinGame(gameGuest.sid, "#{game.id}12").then (data) ->
+            expect(data.result).to.equal "badGame"
+            done()
+
+        it 'should respond with "badGame" if game id was empty', (done) ->
+          conn.joinGame(gameGuest.sid, "").then (data) ->
+            expect(data.result).to.equal "badGame"
+            done()
+
+        describe 'after filling in game', ->
+
+          guests = [gameCreator]
+
+          before (done) ->
+            @timeout 5000
+            count = 0
+
+            addGuest = ->
+              if count is game.maxPlayers - 1
+                done()
+              else
+                g = gen.getUser()
+                g.signup()
+                .then ->
+                  g.signin()
+                .then ->
+                  g.joinGame(game.id)
+                .then (data) ->
+                  if data.result is "ok"
+                    count++
+                    guests.push g
+                    addGuest()
+                  else
+                    console.log data.result
+
+            addGuest()
+
+          it 'should respond with "gameFull" if max players amount was reached', (done) ->
+
+            oddManOut = gen.getUser()
+            oddManOut.signup()
+            .then ->
+              oddManOut.signin()
+            .then ->
+              conn.joinGame(oddManOut.sid, game.id)
+            .then (data) ->
+              expect(data.result).to.equal "gameFull"
+              done()
 
 
-      game =
-        name: "joinGameTest"
-        maxPlayers: 2
-
-      games = []
-
-      beforeEach ->
-        game.map = map.id
-        signup gameCreator.login, gameCreator.password
-        gameCreator.sid = signin(gameCreator.login, gameCreator.password).sid
-        createGame gameCreator.sid, game.name, game.map, game.maxPlayers
-        games = getGames(joiningUser.sid).games
-        game = games[0]
-
-
-      it 'should allow users to join game using the sid and game id', ->
-        expect(joinGame(joiningUser.sid, game.id).result).to.equal "ok"
-
-      it 'should respond with "badSid" if user with that sid was not found', ->
-        expect(joinGame(joiningUser.sid + "#@(*#q", game.id).result).to.equal "badSid"
-
-      it 'should respond with "badGame" if game id was like some string', ->
-        expect(joinGame(joiningUser.sid, game.id + "#@(&").result).to.equal "badGame"
-
-      it 'should respond with "badGame" if game id was empty', ->
-        expect(joinGame(joiningUser.sid, "").result).to.equal "badGame"
-
-      it 'should respond with "badGame" if game id was empty', ->
-        expect(joinGame(joiningUser.sid, "").result).to.equal "badGame"
-
-      it 'should respond with "gameFull" if max players amount was reached', ->
-        expect(joinGame(joiningUser.sid, game.id).result).to.equal "ok"
-        oddManOut =
-          login: "oddLogin"
-          password: "oddPassword"
-
-        signup oddManOut.login, oddManOut.password
-        oddManOut.sid = signin(oddManOut.login, oddManOut.password).sid
-        expect(joinGame(oddManOut.sid, game.id).result).to.equal "gameFull"
-
-
-    describe '#leaveGame', ->
+    ###describe '#leaveGame', ->
       game =
         name: "leaveGameTest"
         maxPlayers: 3
