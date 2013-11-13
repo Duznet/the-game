@@ -696,63 +696,76 @@ describe 'API using server', ->
             done()
 
 
-    ###describe '#getGames', ->
-      game =
-        name: "getGamesTest"
-        map: map.id
-        maxPlayers: map.maxPlayers
+    describe 'after game creation', ->
 
-      beforeEach ->
-        leaveGame hostUser.sid
-        leaveGame joiningUser.sid
-        createGame hostUser.sid, game.name, game.map, game.maxPlayers
+      gameName = gen.getStr()
+      gameGuest = gen.getUser()
 
-      it 'should respond with "paramMissed" if it did not receive all required params', ->
-        expect(getResponse("getGames", {}).result).to.equal "paramMissed"
+      before (done) ->
+        gameGuest.signup()
+        .then ->
+          $.when(gameGuest.signin(), gameCreator.createGame(gameName, map.maxPlayers, map.id))
+        .then ->
+          done()
 
-      it 'should allow users to get game list', ->
-        getGamesResponse = getGames(joiningUser.sid)
-        expect(getGamesResponse.result).to.equal "ok"
-        expect(getGamesResponse.games).to.not.be.undefined
-        i = 0
+      describe '#getGames', ->
 
-        while i < getGamesResponse.games.length
-          if getGamesResponse.games[i].name is game.name
-            cur = getGamesResponse.games[i]
-            expect(cur.map).to.equal game.map
-            expect(cur.maxPlayers).to.equal game.maxPlayers
-            expect(cur.players.length).to.equal 1
-            expect(cur.players[0]).to.equal hostUser.login
+        beforeEach (done) ->
+          gameGuest.leaveGame()
+          .then ->
+            done()
 
-          i++
+        it 'should respond with "badRequest" if it did not receive all required params', (done) ->
+          conn.request("getGames").then (data) ->
+            expect(data.result).to.equal "badRequest"
+            done()
 
-      it "should respond with object containing players array sorted by join time", ->
-        games = getGames(joiningUser.sid).games
-        for g in games
-          if g.name is game.name
-            game.id = g.id
-            break
-        joinGame joiningUser.sid, game.id
-        getGamesResponse = getGames joiningUser.sid
-        expect(getGamesResponse.result).to.equal "ok"
-        expect(getGamesResponse.games).to.not.be.undefined
-        i = 0
-        while i < getGamesResponse.games.length
-          if getGamesResponse.games[i].name is game.name
-            cur = getGamesResponse.games[i]
-            expect(cur.map).to.equal game.map
-            expect(cur.maxPlayers).to.equal game.maxPlayers
-            expect(cur.players.length).to.equal 2
-            expect(cur.players[0]).to.equal hostUser.login
-            expect(cur.players[1]).to.equal joiningUser.login
+        it 'should allow in-game users to get game list', (done) ->
+          conn.getGames(gameCreator.sid).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
 
-          i++
+        it 'should allow not-in-game users to get game list', (done) ->
+          conn.getGames(gameGuest.sid).then (data) ->
+            expect(data.result).to.equal "ok"
+            done()
 
-      it 'should respond with "badSid" if user with that sid was not found', ->
-        expect(getGames(joiningUser.sid + "#(&@(&@$").result).to.equal "badSid"
+        it 'should respond with list of games containing recently created game', (done) ->
+          conn.getGames(gameGuest.sid).then (data) ->
+            games = data.games.filter (g) -> g.name is gameName
+            expect(games.length).to.equal 1
+            curGame = games[0]
+            expect(curGame.maxPlayers).to.equal map.maxPlayers
+            expect(curGame.map).to.equal map.id
+            expect(curGame.players.length).to.equal 1
+            done()
 
 
-    describe '#joinGame', ->
+        it "should respond with object containing players array sorted by join time", (done) ->
+
+          findGame = (games, name) ->
+            (games.filter (g) -> g.name is name)[0]
+
+          conn.getGames(gameGuest.sid)
+          .then (data) ->
+            curGame = findGame data.games, gameName
+            gameGuest.joinGame(curGame.id)
+          .then ->
+            conn.getGames(gameGuest.sid)
+          .then (data) ->
+            curGame = findGame data.games, gameName
+            expect(curGame.players.length).to.equal 2
+            expect(curGame.players[0]).to.equal gameCreator.login
+            expect(curGame.players[1]).to.equal gameGuest.login
+            done()
+
+        it 'should respond with "badSid" if user with that sid was not found', (done) ->
+          conn.getGames("#{gameGuest.sid}#(&@(&@$").then (data) ->
+            expect(data.result).to.equal "badSid"
+            done()
+
+
+    ###describe '#joinGame', ->
       gameCreator =
         login: "gameCreator"
         password: "hosterPass"
