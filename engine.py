@@ -205,12 +205,9 @@ class Game:
         underpoint_ = self.underpoint(player)
 
         y = player.velocity.y
+        print("underpoint is: ", underpoint_, " ", self.map[underpoint_.y][underpoint_.x])
         if delta.y < 0 and self.map[underpoint_.y][underpoint_.x] == self.WALL:
             y = -Player.MAX_VELOCITY
-        else:
-            if self.map[underpoint_.y][underpoint_.x] != self.WALL:
-                y += self.GRAVITY
-            delta = Point(delta.x, 0)
 
         player.velocity = Point(player.velocity.x, y)
         print(player.velocity)
@@ -228,6 +225,18 @@ class Game:
 
         return player
 
+    def fall_down_if_need(self, id):
+        player = self.players_[id]
+
+        y = player.velocity.y
+        underpoint_ = self.underpoint(player)
+        if self.map[underpoint_.y][underpoint_.x] != self.WALL:
+            print("gravity")
+            y += self.GRAVITY
+
+        player.velocity = Point(player.velocity.x, y)
+
+        return player
 
     def brake_if_not_moved(self, id):
         player = self.players_[id]
@@ -260,6 +269,7 @@ class Game:
 
     def move(self, id):
         player = self.brake_if_not_moved(id)
+        player = self.fall_down_if_need(id)
 
         if player.velocity == Point(0, 0):
             return self
