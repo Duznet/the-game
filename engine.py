@@ -8,7 +8,7 @@ from math import *
 
 class Player:
     DEFAULT_HP = 100
-    MAX_VELOCITY = 1
+    MAX_VELOCITY = 0.2
 
     def __init__(self, point):
         self.point = point
@@ -53,10 +53,10 @@ def normalize_map(map, wall):
 
 
 class Game:
-    DEFAULT_VELOCITY = 0.1
+    DEFAULT_VELOCITY = 0.02
     SIDE = 0.5
     PLAYER_POS = Point(0.5, 0.5)
-    GRAVITY = 0.2
+    GRAVITY = 0.02
 
     WALL = '#'
     SPAWN = '$'
@@ -125,6 +125,24 @@ class Game:
                 pts.append(Point(end.x + signx * Game.SIDE, end.y + signy * Game.SIDE))
 
         return convex_hull(*pts)
+
+    @staticmethod
+    def player_bound(point):
+        pts = []
+        for signx in [-1, 1]:
+            for signy in [-1 * signx, 1 * signx]:
+                pts.append(Point(start.x + signx * Game.SIDE, start.y + signy * Game.SIDE))
+
+    def can_teleport(self, player):
+        tp = cell_coords(player.point)
+
+        if self.map[tp.y][tp.x] != self.PORTAL:
+            return False
+
+        tp = Point(tp.x + self.SIDE, tp.y + self.SIDE)
+
+        return (tp.x < player.x + Game.SIDE and tp.x > player.x - Game.SIDE and
+            tp.y < player.y + Game.SIDE and tp.y > player.y - Game.SIDE)
 
 
     def cells_path(self, start, end):
@@ -287,6 +305,10 @@ class Game:
 
         player.point = Point(endx, endy)
         player.velocity = Point(vx, vy)
+
+        if self.can_teleport(player):
+            cell = cell_coords(player.point)
+            player.point = self.NEXT_PORTAL[cell] + Point(self.SIDE, self.SIDE)
 
         player.moved = False
 
