@@ -50,10 +50,11 @@ class UserController(BasicController):
 
     def join_game(self):
         user = self._user_by_sid()
-        user.join_game(id=int(self.json['game']))
-        print("before")
-        self.current_games.game(int(self.json['game'])).add_player(user.id)
-        print("after")
+        try:
+            user.join_game(id=int(self.json['game']))
+            self.current_games.game(int(self.json['game'])).add_player(user.id)
+        except ValueError:
+            raise BadGame()
         return jsonify(result="ok")
 
     def leave_game(self):
