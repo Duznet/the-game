@@ -1012,7 +1012,7 @@ describe 'API using server', ->
     it 'should decrease players velocity if not getting moves', (done) ->
 
       expectedPlayer =
-        x: 1.5 + 0.02 + 0.04 - 0.02
+        x: 1.5 + 0.02 + 0.04 + 0.02
         y: 1.5
         vx: 0.02
         vy: 0
@@ -1028,7 +1028,7 @@ describe 'API using server', ->
         console.log data
         console.log "expected: ", expectedPlayer
         console.log "got: ", data.players[0]
-        if count == 3
+        if count == 4
           player = data.players[0]
           for key of player
             player[key] = parseFloat player[key].toFixed(6)
