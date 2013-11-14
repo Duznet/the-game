@@ -68,6 +68,7 @@ class MainWSHandler(websocket.WebSocketHandler):
             # return
 
     def on_close(self, message=None):
+        print("closed")
         self.application.websockets.remove(self)
 
 class MainHandler(web.RequestHandler):
@@ -119,9 +120,14 @@ class GameApp(web.Application):
             return
 
         for game in games.games.values():
-            if not game.next_tick(CommonController.WEBSOCKET_MODE_SYNC == "sync"):
+            if not game.next_tick(CommonController.WEBSOCKET_MODE_SYNC):
                 return
 
+        if CommonController.WEBSOCKET_MODE_SYNC:
+            for game in games.games.values():
+                game.update_players()
+
+        print("tick")
         for sock in self.websockets:
             sock.tick()
 

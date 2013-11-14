@@ -906,8 +906,17 @@ describe 'API using server', ->
       map =
         name: gen.getStr()
         maxPlayers: 4
-        map: ["#..",
-              "#$."]
+        map: [".............",
+              "#..##########",
+              "#$..........."]
+
+      teleport_map =
+        name: gen.getStr()
+        maxPlayers: 2
+        map: ['.1.',
+              '.##',
+              '$1.']
+
       hostUser.signup()
       .then ->
         hostUser.signin()
@@ -929,6 +938,7 @@ describe 'API using server', ->
           if g.name is game.name
             game = g
         gc = new GameplayConnector config.gameplayUrl
+
         gc.ws.onopen = ->
           gc.move hostUser.sid, 0, 0, 0
           done()
@@ -942,7 +952,7 @@ describe 'API using server', ->
 
       expectedPlayer =
         x: 1.5
-        y: 1.5
+        y: 2.5
         vx: 0
         vy: 0
         hp: 100
@@ -961,7 +971,7 @@ describe 'API using server', ->
 
       expectedPlayer =
         x: 1.52
-        y: 1.5
+        y: 2.5
         vx: 0.02
         vy: 0
         hp: 100
@@ -983,11 +993,30 @@ describe 'API using server', ->
           expect(data.players[0]).to.eql expectedPlayer
           done()
 
+    it 'should not allow player to gain velocity more than maximum value', (done) ->
+      count = 0
+
+      gc.ws.onmessage = (event) ->
+        count++
+        data = JSON.parse event.data
+        gc.move(hostUser.sid, data.tick, 1, 0)
+        console.log "got: ", data.players[0]
+        if count > 10
+          player = data.players[0]
+          for key of player
+            player[key] = parseFloat player[key].toFixed(6)
+
+          expect(player.vx).to.eql 0.2
+
+        if count == 20
+          done()
+
+
     it 'should not allow player to move through the wall', (done) ->
 
       expectedPlayer =
         x: 1.5
-        y: 1.5
+        y: 2.5
         vx: 0
         vy: 0
         hp: 100
@@ -1013,7 +1042,7 @@ describe 'API using server', ->
 
       expectedPlayer =
         x: 1.5 + 0.02 + 0.04 + 0.02
-        y: 1.5
+        y: 2.5
         vx: 0.02
         vy: 0
         hp: 100
@@ -1041,7 +1070,7 @@ describe 'API using server', ->
 
       expectedPlayer =
         x: 1.52
-        y: 1.5
+        y: 2.5
         vx: 0
         vy: 0
         hp: 100
@@ -1070,13 +1099,14 @@ describe 'API using server', ->
     it 'should not allow player to move through the wall after several moves', (done) ->
 
       expectedPlayer =
-        x: 2.5
-        y: 1.5
+        x: 12.5
+        y: 2.5
         vx: 0
         vy: 0
         hp: 100
 
       count = 0
+      @timeout 5000
 
       gc.ws.onmessage = (event) ->
         count++
@@ -1085,20 +1115,20 @@ describe 'API using server', ->
         console.log data
         console.log "expected: ", expectedPlayer
         console.log "got: ", data.players[0]
-        if count > 10
+        if count > 90
           player = data.players[0]
           for key of player
             player[key] = parseFloat player[key].toFixed(6)
 
           expect(data.players[0]).to.eql expectedPlayer
-        if count == 20
+        if count == 100
           done()
 
     it 'should make player jump correctly', (done) ->
 
       expectedPlayer =
         x: 1.5
-        y: 1.5 - 0.2
+        y: 2.5 - 0.2
         vx: 0
         vy: -0.2
         hp: 100
@@ -1124,7 +1154,7 @@ describe 'API using server', ->
 
       expectedPlayer =
         x: 1.5
-        y: 1.5 - 0.2 - 0.2 + 0.02
+        y: 2.5 - 0.2 - 0.2 + 0.02
         vx: 0
         vy: -0.2 + 0.02
         hp: 100
@@ -1153,7 +1183,7 @@ describe 'API using server', ->
 
       expectedPlayer =
         x: 1.5
-        y: 1.5
+        y: 2.5
         vx: 0
         vy: 0
         hp: 100
@@ -1179,4 +1209,28 @@ describe 'API using server', ->
           expect(data.players[0]).to.eql expectedPlayer
 
         if count == 40
+          done()
+
+    it 'should loose only vy after with the horizontal part of the wall', (done) ->
+      @timeout 5000
+
+      count = 0
+
+      gc.ws.onmessage = (event) ->
+        count++
+        data = JSON.parse event.data
+        if count < 20
+          gc.move(hostUser.sid, data.tick, 1, 0)
+
+        if count == 20
+          gc.move(hostUser.sid, data.tick, 0, 1)
+
+        console.log "got: ", data.players[0]
+        if count == 21
+          player = data.players[0]
+          for key of player
+            player[key] = parseFloat player[key].toFixed(6)
+
+          expect(player.vy).to.eql 0
+          expect(player.vx).to.eql 0.2
           done()

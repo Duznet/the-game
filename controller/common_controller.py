@@ -15,6 +15,7 @@ class CommonController(BasicController):
         self.models.flush()
         self.games.flush()
 
-        self.WEBSOCKET_MODE_SYNC = True if self.json.get("websocketMode") == "sync" else False
+        CommonController.WEBSOCKET_MODE_SYNC = True if self.json.get("websocketMode") == "sync" else False
+        print("websocketMode: ", self.json["websocketMode"])
 
         return jsonify(result="ok")

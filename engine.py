@@ -108,6 +108,7 @@ class Game:
 
     def next_tick(self, is_sync):
         for player in self.players_.values():
+            # print(player.got_action)
             if not player.got_action and is_sync:
                 return False
 
@@ -115,6 +116,10 @@ class Game:
         self.moveall()
 
         return True
+
+    def update_players(self):
+        for player in self.players_.values():
+            player.got_action = False
 
     @staticmethod
     def is_on_my_way(path_bound, cell):
@@ -185,6 +190,7 @@ class Game:
     def add_player(self, id):
         self.players_[id] = Player(self.first_spawn + self.PLAYER_POS)
         self.players_order.append(id)
+        print("add player: ", self.players_[id].got_action)
         return self.players_[id]
 
     def remove_player(self, id):
@@ -286,21 +292,20 @@ class Game:
         vy = player.velocity.y
         endx = end.x
         endy = end.y
-        print(end_cell)
-        print(self.map[vcell.y][vcell.x])
+
+        wallh = False
+        wallv = False
         if self.map[vcell.y][vcell.x] == self.WALL:
-            print("WALLV")
+            wallv = True
             endy = start_cell.y + self.SIDE
             vy = 0
 
-        print(self.map[hcell.y][hcell.x])
         if self.map[hcell.y][hcell.x] == self.WALL:
-            print("WALLH")
+            walh = True
             endx = start_cell.x + self.SIDE
             vx = 0
 
 
-        print(self.map[vcell.y][hcell.x])
         if self.map[vcell.y][hcell.x] == self.WALL and start_cell.x != end_cell.x and start_cell.y != end_cell.y:
             cell_center = end_cell + Point(self.SIDE, self.SIDE)
             centers = cell_center - player.point
@@ -310,12 +315,12 @@ class Game:
             wcorner = cell_center - centers * self.SIDE
 
             corners = wcorner - pcorner
-
-            if vy * corners.x <= vx * corners.y:
+            print(vx, " ", vy, " ", corners)
+            if vy * corners.x <= vx * corners.y and not wallh:
                 vy = 0
                 endy = start_cell.y + self.SIDE
 
-            if vy * corners.x >= vx * corners.y:
+            if vy * corners.x >= vx * corners.y and not wallv:
                 vx = 0
                 endx = start_cell.x + self.SIDE
 
