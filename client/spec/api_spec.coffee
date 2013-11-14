@@ -4,8 +4,12 @@ describe 'API using server', ->
 
   conn = new GameConnector(config.gameUrl)
   gen = new Generator
+
   before (done) ->
-    conn.startTesting().then done()
+    conn.startTesting(config.websocketMode).then (data) ->
+      if data.result isnt "ok"
+        throw new Error('Could not start testing')
+      done()
 
   it 'should respond with Object containing string field "result"', (done) ->
     conn.send('some string').then (data) ->

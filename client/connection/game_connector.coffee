@@ -9,8 +9,8 @@ class window.GameConnector extends Connector
       contentType: "application/json"
       data: requestData
 
-  startTesting: ->
-    @request "startTesting"
+  startTesting: (websocketMode) ->
+    @request "startTesting", websocketMode: websocketMode
 
   signup: (login, password) ->
     @request "signup",
