@@ -31,8 +31,11 @@ class Player:
         self.velocity = Point(x, y)
         return self
 
-def pfloor(point):
+def cell_coords(point):
     return Point(floor(point.x), floor(point.y))
+
+def sign(x):
+    return 0 if x == 0 else x / abs(x)
 
 def normalize_map(map, wall):
     if not map or not map[0]:
@@ -156,11 +159,7 @@ class Game:
         return len(self.players_order)
 
     def add_player(self, id):
-        print(self.first_spawn)
-        print("before add")
-
         self.players_[id] = Player(self.first_spawn + self.PLAYER_POS)
-        print("after")
         self.players_order.append(id)
         return self.players_[id]
 
@@ -242,17 +241,52 @@ class Game:
             return self
 
         end = player.velocity + player.point
+        direction = Point(sign(player.velocity.x), sign(player.velocity.y))
 
         print(end.evalf())
-        path = self.cells_path(player.point, end)
+        end_cell = cell_coords(end + direction * self.SIDE)
+        start_cell = cell_coords(player.point)
+        vcell = Point(start_cell.x, end_cell.y)
+        hcell = Point(end_cell.x, start_cell.y)
+        vx = player.velocity.x
+        vy = player.velocity.y
+        endx = end.x
+        endy = end.y
+        print(end_cell)
+        print(self.map[vcell.y][vcell.x])
+        if self.map[vcell.y][vcell.x] == self.WALL:
+            print("WALLV")
+            endy = start_cell.y + self.SIDE
+            vy = 0
 
-        for id, cell in enumerate(path):
-            if self.map[cell.y][cell.x] == self.WALL:
-                player.point = path[id - 1] + self.PLAYER_POS
-                player.velocity = Point(0, 0)
-                return self
+        print(self.map[hcell.y][hcell.x])
+        if self.map[hcell.y][hcell.x] == self.WALL:
+            print("WALLH")
+            endx = start_cell.x + self.SIDE
+            vx = 0
 
-        player.point = end
+
+        print(self.map[vcell.y][hcell.x])
+        if self.map[vcell.y][hcell.x] == self.WALL and start_cell.x != end_cell.x and start_cell.y != end_cell.y:
+            cell_center = end_cell + Point(self.SIDE, self.SIDE)
+            centers = cell_center - player.point
+            centers = Point(sign(centers.x), sign(centers.y))
+
+            pcorner = player.point + centers * self.SIDE
+            wcorner = cell_center - centers * self.SIDE
+
+            corners = wcorner - pcorner
+
+            if vy * corners.x <= vx * corners.y:
+                vy = 0
+                endy = start_cell.y + self.SIDE
+
+            if vy * corners.x >= vx * corners.y:
+                vx = 0
+                endx = start_cell.x + self.SIDE
+
+        player.point = Point(endx, endy)
+        player.velocity = Point(vx, vy)
 
         player.moved = False
 

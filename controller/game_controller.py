@@ -1,6 +1,6 @@
 from controller.basic_controller import BasicController
 from stdnet import odm
-from stdnet.utils.exceptions import CommitException
+from stdnet.utils.exceptions import CommitException, ObjectNotFound
 from game_exception import *
 from common import jsonify
 
@@ -19,10 +19,7 @@ class GameController(BasicController):
 
         try:
             map = self.maps.get(id=int(self.json['map']))
-        except ValueError:
-            raise BadMap()
-
-        if not map:
+        except (ValueError, ObjectNotFound):
             raise BadMap()
 
         try:
