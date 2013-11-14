@@ -119,7 +119,8 @@ class GameApp(web.Application):
             return
 
         for game in games.games.values():
-            game.next_tick()
+            if not game.next_tick(CommonController.WEBSOCKET_MODE_SYNC == "sync"):
+                return
 
         for sock in self.websockets:
             sock.tick()

@@ -16,6 +16,7 @@ class Player:
         self.hp = self.DEFAULT_HP
         self.score = 0
         self.moved = False
+        self.got_action = False
 
     def normalize_v(self):
         x = self.velocity.x
@@ -105,10 +106,15 @@ class Game:
             if lp:
                 self.NEXT_PORTAL[lp] = self.first_portal[key]
 
-    def next_tick(self):
+    def next_tick(self, is_sync):
+        for player in self.players_.values():
+            if not player.got_action and is_sync:
+                return False
+
         self.tick += 1
         self.moveall()
 
+        return True
 
     @staticmethod
     def is_on_my_way(path_bound, cell):
@@ -210,7 +216,7 @@ class Game:
         print(player.velocity)
 
         if delta.distance(Point(0, 0)) == 0:
-            return self
+            return player
 
         delta /= delta.distance(Point(0, 0))
 
@@ -220,7 +226,7 @@ class Game:
         player.normalize_v()
         player.moved = True
 
-        return self
+        return player
 
 
     def brake_if_not_moved(self, id):
