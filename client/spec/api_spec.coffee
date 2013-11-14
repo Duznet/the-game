@@ -956,9 +956,9 @@ describe 'API using server', ->
       @timeout 5000
 
       expectedPlayer =
-        x: 1.6
+        x: 1.52
         y: 1.5
-        vx: 0.1
+        vx: 0.02
         vy: 0
         hp: 100
 
