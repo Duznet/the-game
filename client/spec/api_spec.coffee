@@ -1005,6 +1005,91 @@ describe 'API using server', ->
           expect(data.players[0]).to.eql expectedPlayer
           done()
 
+    it 'should decrease players velocity if not getting moves', (done) ->
+
+      expectedPlayer =
+        x: 1.5 + 0.02 + 0.04 - 0.02
+        y: 1.5
+        vx: 0.02
+        vy: 0
+        hp: 100
+
+      count = 0
+
+      gc.ws.onmessage = (event) ->
+        count++
+        data = JSON.parse event.data
+        if count < 3
+          gc.move(hostUser.sid, data.tick, 1, 0)
+        console.log data
+        console.log "expected: ", expectedPlayer
+        console.log "got: ", data.players[0]
+        if count == 3
+          player = data.players[0]
+          for key of player
+            player[key] = parseFloat player[key].toFixed(6)
+
+          console.log "Assert. Expected: ", expectedPlayer, ", got:", player
+          expect(data.players[0]).to.eql expectedPlayer
+          done()
+
+    it 'should stop player if not getting moves', (done) ->
+
+      expectedPlayer =
+        x: 1.52
+        y: 1.5
+        vx: 0
+        vy: 0
+        hp: 100
+
+      count = 0
+
+      gc.ws.onmessage = (event) ->
+        count++
+        data = JSON.parse event.data
+        if count == 1
+          gc.move(hostUser.sid, data.tick, 1, 0)
+        console.log data
+        console.log "expected: ", expectedPlayer
+        console.log "got: ", data.players[0]
+        if count > 2
+          player = data.players[0]
+          for key of player
+            player[key] = parseFloat player[key].toFixed(6)
+
+          console.log "Assert. Expected: ", expectedPlayer, ", got:", player
+          expect(data.players[0]).to.eql expectedPlayer
+
+        if count == 10
+          done()
+
+    it 'should not allow player to move through the wall after several moves', (done) ->
+
+      expectedPlayer =
+        x: 2.5
+        y: 1.5
+        vx: 0
+        vy: 0
+        hp: 100
+
+      count = 0
+
+      gc.ws.onmessage = (event) ->
+        count++
+        data = JSON.parse event.data
+        gc.move(hostUser.sid, data.tick, 1, 0)
+        console.log data
+        console.log "expected: ", expectedPlayer
+        console.log "got: ", data.players[0]
+        if count > 10
+          player = data.players[0]
+          for key of player
+            player[key] = parseFloat player[key].toFixed(6)
+
+          expect(data.players[0]).to.eql expectedPlayer
+        if count == 20
+          done()
+
     it 'should make player jump correctly', (done) ->
 
       expectedPlayer =
