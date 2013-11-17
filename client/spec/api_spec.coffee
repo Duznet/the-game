@@ -946,7 +946,9 @@ describe 'API using server', ->
     afterEach (done) ->
       gc.close()
       gc.onclose = ->
-        done()
+        hostUser.leaveGame()
+        .then ->
+          done()
 
     it 'should get correct game state every tick', (done) ->
 
