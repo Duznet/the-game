@@ -894,7 +894,6 @@ describe 'API using server', ->
     game = null
     map = null
 
-
     maps = null
 
     beforeEach (done) ->
@@ -939,13 +938,13 @@ describe 'API using server', ->
             game = g
         gc = new GameplayConnector config.gameplayUrl
 
-        gc.ws.onopen = ->
+        gc.onopen = ->
           gc.move hostUser.sid, 0, 0, 0
           done()
 
     afterEach (done) ->
-      gc.ws.close()
-      gc.ws.onclose = ->
+      gc.close()
+      gc.onclose = ->
         done()
 
     it 'should get correct game state every tick', (done) ->
@@ -957,11 +956,10 @@ describe 'API using server', ->
         vy: 0
         hp: 100
 
-      gc.ws.onmessage = (event) ->
-        data = JSON.parse event.data
+      gc.onmessage = (data) ->
         console.log "data: ", data
         console.log "expected: ", expectedPlayer
-        console.log "got: ",data.players[0]
+        console.log "got: ", data.players[0]
         expect(data.players[0]).to.eql expectedPlayer
         done()
 
@@ -978,14 +976,12 @@ describe 'API using server', ->
 
       count = 0
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        console.log event.data
-        data = JSON.parse event.data
         console.log data
         console.log "expected: ", expectedPlayer
         console.log "got: ", data.players[0]
-        gc.move(hostUser.sid, data.tick, 1, 0)
+        gc.move hostUser.sid, data.tick, 1, 0
         if count == 2
           player = data.players[0]
           for key of player
@@ -996,9 +992,8 @@ describe 'API using server', ->
     it 'should not allow player to gain velocity more than maximum value', (done) ->
       count = 0
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        data = JSON.parse event.data
         gc.move(hostUser.sid, data.tick, 1, 0)
         console.log "got: ", data.players[0]
         if count > 10
@@ -1023,9 +1018,8 @@ describe 'API using server', ->
 
       count = 0
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        data = JSON.parse event.data
         gc.move(hostUser.sid, data.tick, -1, 0)
         console.log data
         console.log "expected: ", expectedPlayer
@@ -1049,9 +1043,8 @@ describe 'API using server', ->
 
       count = 0
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        data = JSON.parse event.data
         if count < 3
           gc.move(hostUser.sid, data.tick, 1, 0)
         console.log data
@@ -1077,9 +1070,8 @@ describe 'API using server', ->
 
       count = 0
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        data = JSON.parse event.data
         if count == 1
           gc.move(hostUser.sid, data.tick, 1, 0)
         console.log data
@@ -1108,9 +1100,8 @@ describe 'API using server', ->
       count = 0
       @timeout 5000
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        data = JSON.parse event.data
         gc.move(hostUser.sid, data.tick, 1, 0)
         console.log data
         console.log "expected: ", expectedPlayer
@@ -1135,9 +1126,8 @@ describe 'API using server', ->
 
       count = 0
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        data = JSON.parse event.data
         gc.move(hostUser.sid, data.tick, 0, -1)
         console.log data
         console.log "expected: ", expectedPlayer
@@ -1161,9 +1151,8 @@ describe 'API using server', ->
 
       count = 0
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        data = JSON.parse event.data
         gc.move(hostUser.sid, data.tick, 0, -1)
         console.log data
         console.log "expected: ", expectedPlayer
@@ -1190,9 +1179,8 @@ describe 'API using server', ->
 
       count = 0
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        data = JSON.parse event.data
         if count == 1
           gc.move(hostUser.sid, data.tick, 0, -1)
         console.log data
@@ -1216,9 +1204,8 @@ describe 'API using server', ->
 
       count = 0
 
-      gc.ws.onmessage = (event) ->
+      gc.onmessage = (data) ->
         count++
-        data = JSON.parse event.data
         if count < 20
           gc.move(hostUser.sid, data.tick, 1, 0)
 
