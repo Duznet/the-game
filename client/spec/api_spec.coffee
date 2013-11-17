@@ -893,8 +893,9 @@ describe 'API using server', ->
     gc = null
     game = null
     map = null
-
     maps = null
+
+    precision = Math.round Math.abs Math.log(config.defaultGameConsts.accuracy) / Math.LN10
 
     beforeEach (done) ->
       hostUser = gen.getUser()
@@ -960,7 +961,7 @@ describe 'API using server', ->
         console.log "data: ", data
         console.log "expected: ", expectedPlayer
         console.log "got: ", data.players[0]
-        expect(data.players[0]).to.eql expectedPlayer
+        expect(data.players[0]).to.almost.eql expectedPlayer, precision
         done()
 
     it 'should move player correctly for one move', (done) ->
@@ -983,10 +984,7 @@ describe 'API using server', ->
         console.log "got: ", data.players[0]
         gc.move hostUser.sid, data.tick, 1, 0
         if count == 2
-          player = data.players[0]
-          for key of player
-            player[key] = parseFloat player[key].toFixed(6)
-          expect(data.players[0]).to.eql expectedPlayer
+          expect(data.players[0]).to.almost.eql expectedPlayer, precision
           done()
 
     it 'should not allow player to gain velocity more than maximum value', (done) ->
@@ -998,10 +996,7 @@ describe 'API using server', ->
         console.log "got: ", data.players[0]
         if count > 10
           player = data.players[0]
-          for key of player
-            player[key] = parseFloat player[key].toFixed(6)
-
-          expect(player.vx).to.eql 0.2
+          expect(player.vx).to.almost.equal 0.2, precision
 
         if count == 20
           done()
@@ -1025,11 +1020,7 @@ describe 'API using server', ->
         console.log "expected: ", expectedPlayer
         console.log "got: ", data.players[0]
         if count == 2
-          player = data.players[0]
-          for key of player
-            player[key] = parseFloat player[key].toFixed(6)
-
-          expect(data.players[0]).to.eql expectedPlayer
+          expect(data.players[0]).to.almost.eql expectedPlayer, precision
           done()
 
     it 'should decrease players velocity if not getting moves', (done) ->
@@ -1052,11 +1043,8 @@ describe 'API using server', ->
         console.log "got: ", data.players[0]
         if count == 4
           player = data.players[0]
-          for key of player
-            player[key] = parseFloat player[key].toFixed(6)
-
           console.log "Assert. Expected: ", expectedPlayer, ", got:", player
-          expect(data.players[0]).to.eql expectedPlayer
+          expect(data.players[0]).to.almost.eql expectedPlayer, precision
           done()
 
     it 'should stop player if not getting moves', (done) ->
@@ -1079,11 +1067,8 @@ describe 'API using server', ->
         console.log "got: ", data.players[0]
         if count > 2
           player = data.players[0]
-          for key of player
-            player[key] = parseFloat player[key].toFixed(6)
-
           console.log "Assert. Expected: ", expectedPlayer, ", got:", player
-          expect(data.players[0]).to.eql expectedPlayer
+          expect(data.players[0]).to.almost.eql expectedPlayer, precision
 
         if count == 10
           done()
@@ -1108,10 +1093,7 @@ describe 'API using server', ->
         console.log "got: ", data.players[0]
         if count > 90
           player = data.players[0]
-          for key of player
-            player[key] = parseFloat player[key].toFixed(6)
-
-          expect(data.players[0]).to.eql expectedPlayer
+          expect(data.players[0]).to.almost.eql expectedPlayer, precision
         if count == 100
           done()
 
@@ -1133,11 +1115,7 @@ describe 'API using server', ->
         console.log "expected: ", expectedPlayer
         console.log "got: ", data.players[0]
         if count == 2
-          player = data.players[0]
-          for key of player
-            player[key] = parseFloat player[key].toFixed(6)
-
-          expect(data.players[0]).to.eql expectedPlayer
+          expect(data.players[0]).to.almost.eql expectedPlayer, precision
           done()
 
     it 'should make player fall down while jumping', (done) ->
@@ -1160,12 +1138,8 @@ describe 'API using server', ->
         console.log "count: ", count
         if count == 3
           player = data.players[0]
-          for key of player
-            expectedPlayer[key] = parseFloat expectedPlayer[key].toFixed(6)
-            player[key] = parseFloat player[key].toFixed(6)
-
           console.log "Assert. Expected: ", expectedPlayer, ", got:", player
-          expect(data.players[0]).to.eql expectedPlayer
+          expect(data.players[0]).to.almost.eql expectedPlayer, precision
           done()
 
     it 'should make player fall down to the wall after jumping', (done) ->
@@ -1189,12 +1163,8 @@ describe 'API using server', ->
         console.log "count: ", count
         if count > 30
           player = data.players[0]
-          for key of player
-            expectedPlayer[key] = parseFloat expectedPlayer[key].toFixed(6)
-            player[key] = parseFloat player[key].toFixed(6)
-
           console.log "Assert. Expected: ", expectedPlayer, ", got:", player
-          expect(data.players[0]).to.eql expectedPlayer
+          expect(data.players[0]).to.almost.eql expectedPlayer, precision
 
         if count == 40
           done()
@@ -1215,9 +1185,7 @@ describe 'API using server', ->
         console.log "got: ", data.players[0]
         if count == 21
           player = data.players[0]
-          for key of player
-            player[key] = parseFloat player[key].toFixed(6)
 
-          expect(player.vy).to.eql 0
-          expect(player.vx).to.eql 0.2
+          expect(player.vy).to.almost.equal 0, precision
+          expect(player.vx).to.almost.equal 0.2, precision
           done()
