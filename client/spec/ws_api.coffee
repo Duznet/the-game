@@ -154,6 +154,8 @@ describe 'Websocket API using server', ->
       count++
       if count < 3
         gc.move(hostUser.sid, data.tick, 1, 0)
+      if count is 3
+        gc.move hostUser.sid, data.tick, 0, 0
       console.log data
       console.log "expected: ", expectedPlayer
       console.log "got: ", data.players[0]
@@ -177,7 +179,9 @@ describe 'Websocket API using server', ->
     gc.onmessage = (data) ->
       count++
       if count == 1
-        gc.move(hostUser.sid, data.tick, 1, 0)
+        gc.move hostUser.sid, data.tick, 1, 0
+      if count is 2
+        gc.move hostUser.sid, data.tick, 0, 0
       console.log data
       console.log "expected: ", expectedPlayer
       console.log "got: ", data.players[0]
@@ -185,6 +189,7 @@ describe 'Websocket API using server', ->
         player = data.players[0]
         console.log "Assert. Expected: ", expectedPlayer, ", got:", player
         expect(data.players[0]).to.almost.eql expectedPlayer, precision
+        gc.move hostUser.sid, data.tick, 0, 0
 
       if count == 10
         done()
@@ -271,8 +276,13 @@ describe 'Websocket API using server', ->
 
     gc.onmessage = (data) ->
       count++
+      if count == 40
+        done()
+
       if count == 1
-        gc.move(hostUser.sid, data.tick, 0, -1)
+        gc.move hostUser.sid, data.tick, 0, -1
+      if 1 < count < 31
+        gc.move hostUser.sid, data.tick, 0, 0
       console.log data
       console.log "expected: ", expectedPlayer
       console.log "got: ", data.players[0]
@@ -281,9 +291,8 @@ describe 'Websocket API using server', ->
         player = data.players[0]
         console.log "Assert. Expected: ", expectedPlayer, ", got:", player
         expect(data.players[0]).to.almost.eql expectedPlayer, precision
+        gc.move hostUser.sid, data.tick, 0, 0
 
-      if count == 40
-        done()
 
   it 'should loose only vy after with the horizontal part of the wall', (done) ->
     @timeout 5000
