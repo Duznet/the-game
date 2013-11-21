@@ -286,8 +286,10 @@ class Game:
         print(end.evalf())
         end_cell = cell_coords(end + direction * self.SIDE)
         start_cell = cell_coords(player.point)
+
         vcell = Point(start_cell.x, end_cell.y)
         hcell = Point(end_cell.x, start_cell.y)
+
         vx = player.velocity.x
         vy = player.velocity.y
         endx = end.x

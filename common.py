@@ -2,10 +2,7 @@ import re
 import json
 
 def jsonify(*args, **named):
-    if len(args) == 1:
-        return json.dumps(args[0])
-    else:
-        return json.dumps(named)
+    return named
 
 def lower(matchobj):
     return "_" + matchobj.group(0).lower()
