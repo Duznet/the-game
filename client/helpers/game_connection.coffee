@@ -1,4 +1,4 @@
-class window.GameConnection extends Connection
+class Psg.GameConnection extends Psg.Connection
   constructor: (@url) ->
 
   send: (requestData) ->

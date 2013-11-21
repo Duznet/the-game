@@ -1,4 +1,4 @@
-class window.GameplayConnection extends Connection
+class Psg.GameplayConnection extends Psg.Connection
 
   constructor: (@url) ->
     @ws = new WebSocket @url

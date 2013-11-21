@@ -1,6 +1,6 @@
 class window.User
   constructor: (@login, @password) ->
-    @conn = new GameConnection(config.gameUrl)
+    @conn = new Psg.GameConnection config.gameUrl
     # available values: "notSignedUp", "offline", "online", "playing"
     @status = "notSignedUp"
 

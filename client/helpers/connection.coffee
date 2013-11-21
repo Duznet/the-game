@@ -1,7 +1,4 @@
-class window.GameError
-  constructor: (@message) ->
-
-class window.Connection
+class Psg.Connection
   constructor: (@url) ->
 
   request: (action, params) ->
