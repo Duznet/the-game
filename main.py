@@ -91,13 +91,16 @@ class MainHandler(web.RequestHandler):
         print(data)
         try:
             data = json.loads(data)
+            print(data)
         except (ValueError):
             self.write(BadJSON().msg())
             return
 
         try:
             action = camel_to_underscores(str(data['action']))
-            self.write(self.processer.process_action(action, data.get("params", {})))
+            response = self.processer.process_action(action, data.get("params", {}))
+            print(response)
+            self.write(response)
         except (KeyError, TypeError):
             self.write(BadRequest().msg())
             return
