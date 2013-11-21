@@ -3,7 +3,7 @@ class window.Drawer
   constructor: (@canvas) ->
     @dfd = new $.Deferred
     @conn = new GameConnector config.gameUrl
-    @gen = new Generator 'demo'
+    @gen = new Psg.Generator 'demo'
 
     @map =
       name: @gen.getStr()

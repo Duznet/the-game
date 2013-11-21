@@ -1,4 +1,4 @@
-class window.Generator
+class Psg.Generator
   constructor: (@salt = "") ->
     @callCount = 0
 
@@ -14,3 +14,6 @@ class window.Generator
   getUser: (strSalt = "") ->
     prefix = @getStr strSalt
     new User "#{prefix}Login", "#{prefix}Pass"
+
+
+@gen = new Psg.Generator

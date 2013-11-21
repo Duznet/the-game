@@ -1,5 +1,4 @@
 window.conn = new GameConnector(config.gameUrl)
-window.gen = new Generator
 window.expect = chai.expect
 
 window.startTesting = (done) ->
