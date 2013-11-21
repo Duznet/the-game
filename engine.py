@@ -90,7 +90,7 @@ class Game:
 
                     last_spawn = Point(x, y)
 
-                if re.match('[0-9]', cell):
+                if re.match(self.PORTAL, cell):
                     if last_portal.get(cell):
                         self.NEXT_PORTAL[last_portal[cell]] = Point(x, y)
                     else:
@@ -145,9 +145,9 @@ class Game:
                 pts.append(Point(start.x + signx * Game.SIDE, start.y + signy * Game.SIDE))
 
     def can_teleport(self, player):
-        tp = cell_coords(player.point)
+        tp = cell_coords(player)
 
-        if self.map[tp.y][tp.x] != self.PORTAL:
+        if not re.match(self.PORTAL, self.map[tp.y][tp.x]):
             return False
 
         tp = Point(tp.x + self.SIDE, tp.y + self.SIDE)
@@ -274,7 +274,7 @@ class Game:
         return self
 
     def move(self, id):
-        player = self.brake_if_not_moved(id)
+        # player = self.brake_if_not_moved(id)
         player = self.fall_down_if_need(id)
 
         if player.velocity == Point(0, 0):
@@ -329,9 +329,10 @@ class Game:
         player.point = Point(endx, endy)
         player.velocity = Point(vx, vy)
 
-        if self.can_teleport(player):
+        if self.can_teleport(player.point):
             cell = cell_coords(player.point)
-            player.point = self.NEXT_PORTAL[cell] + Point(self.SIDE, self.SIDE)
+            if cell != start_cell:
+                player.point = self.NEXT_PORTAL[cell] + Point(self.SIDE, self.SIDE)
 
         player.moved = False
 
