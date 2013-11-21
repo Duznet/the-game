@@ -51,7 +51,7 @@ describe 'Websocket API using server', ->
       for g in data.games
         if g.name is game.name
           game = g
-      gc = new GameplayConnector config.gameplayUrl
+      gc = new GameplayConnection config.gameplayUrl
 
       gc.onopen = ->
         gc.move hostUser.sid, 0, 0, 0

@@ -1,4 +1,4 @@
-class window.GameplayConnector extends Connector
+class window.GameplayConnection extends Connection
 
   constructor: (@url) ->
     @ws = new WebSocket @url

@@ -2,7 +2,7 @@ class window.Drawer
 
   constructor: (@canvas) ->
     @dfd = new $.Deferred
-    @conn = new GameConnector config.gameUrl
+    @conn = new GameConnection config.gameUrl
     @gen = new Psg.Generator 'demo'
 
     @map =
@@ -66,7 +66,7 @@ class window.Drawer
     player.fillColor = 'red'
     @playerPosition = new Point(0, 0)
     @v = new Point(0, 0)
-    @gc = new GameplayConnector config.gameplayUrl
+    @gc = new GameplayConnection config.gameplayUrl
     @tick = 0
     @gc.ws.onopen = =>
       @gc.move @user.sid, @tick, 0, 0

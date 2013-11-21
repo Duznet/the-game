@@ -1,4 +1,4 @@
-class window.GameConnector extends Connector
+class window.GameConnection extends Connection
   constructor: (@url) ->
 
   send: (requestData) ->

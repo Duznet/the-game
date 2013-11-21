@@ -1,4 +1,4 @@
-window.conn = new GameConnector(config.gameUrl)
+window.conn = new GameConnection(config.gameUrl)
 window.expect = chai.expect
 
 window.startTesting = (done) ->

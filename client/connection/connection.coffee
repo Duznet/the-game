@@ -1,7 +1,7 @@
 class window.GameError
   constructor: (@message) ->
 
-class window.Connector
+class window.Connection
   constructor: (@url) ->
 
   request: (action, params) ->
