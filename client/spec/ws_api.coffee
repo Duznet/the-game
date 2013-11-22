@@ -314,3 +314,22 @@ describe 'Websocket API using server', ->
         expect(player.vy).to.almost.equal 0, precision
         expect(player.vx).to.almost.equal 0.2, precision
         done()
+
+  it 'should touch down after continious jump', (done) ->
+    @timeout 5000
+
+    count = 0
+
+    touched = false
+
+    gc.onmessage = (data) ->
+      count++
+      player = data.players[0]
+      if count < 20
+        gc.move(hostUser.sid, data.tick, 0, -1)
+      if count > 2 and Math.abs(player.y - 2.5) < config.defaultGameConsts.accuracy
+        touched = true
+
+      if count is 20
+        expect(touched).to.be.ok
+        done()
