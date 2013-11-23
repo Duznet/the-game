@@ -325,11 +325,13 @@ describe 'Websocket API using server', ->
     gc.onmessage = (data) ->
       count++
       player = data.players[0]
+      console.log "got: ", data.players[0]
       if count < 20
         gc.move(hostUser.sid, data.tick, 0, -1)
       if count > 2 and Math.abs(player.y - 2.5) < config.defaultGameConsts.accuracy
         touched = true
 
       if count is 20
+        console.log "count is 20; player: ", data.players[0]
         expect(touched).to.be.ok
         done()
