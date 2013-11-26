@@ -3,9 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Index page</title>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+
+    <script src="/static/lib/underscore.js"></script>
+    <script src="/static/lib/jquery-2.0.3.min.js"></script>
+    <script src="/static/lib/backbone.js"></script>
+
+    <script src="/static/src/config.js"></script>
+    <script src="/static/src/namespace.js"></script>
+    <script src="/static/src/helpers/connection.js"></script>
+    <script src="/static/src/helpers/game_connection.js"></script>
+    <script src="/static/src/models/user.js"></script>
+    <script src="/static/src/models/application.js"></script>
+    <script src="/static/src/views/application_view.js"></script>
+
+    <script>
+        window.onload = function () {
+            var appView = new Psg.ApplicationView({ model: new Psg.Application });
+            appView.render();
+        }
+    </script>
 </head>
 <body>
     <h1>Hello, world</h1>
-    <p>Draft page, for routing testing</p>
+    <div id="application"></div>
 </body>
 </html>

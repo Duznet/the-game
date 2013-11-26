@@ -115,6 +115,16 @@ class DemoHandler(web.RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "Content-Type, X-Requested-With")
         self.write("")
 
+class UIHandler(web.RequestHandler):
+
+    def get(self):
+        self.render("templates/index.html")
+
+    def options(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type, X-Requested-With")
+        self.write("")
+
 class GameApp(web.Application):
     def __init__(self):
         self.websockets = set()
@@ -124,6 +134,7 @@ class GameApp(web.Application):
             (r"/", MainHandler),
             (r'/websocket', MainWSHandler),
             (r'/demo', DemoHandler),
+            (r'/ui', UIHandler),
         ]
 
         super(GameApp, self).__init__(handlers)
