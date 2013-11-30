@@ -21,8 +21,3 @@ class Psg.Router extends Backbone.Router
     $app = $('#application')
     $app.empty()
     $app.append wv.$el
-
-new Psg.Router
-Backbone.history.start()
-
-

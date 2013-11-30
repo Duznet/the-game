@@ -20,6 +20,13 @@
     <script src="/static/src/views/welcome_view.js"></script>
     <script src="/static/src/router.js"></script>
 
+    <script>
+        window.onload = function () {
+            new Psg.Router
+            Backbone.history.start()
+        }
+    </script>
+
 </head>
 <body>
     <h1>Hello, world</h1>
