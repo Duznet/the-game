@@ -16,8 +16,7 @@ class Psg.Router extends Backbone.Router
   welcome: ->
     console.log 'welcome'
     wv = new Psg.WelcomeView
-    console.log wv
-    console.log wv.$el
-    $app = $('#application')
-    $app.empty()
-    $app.append wv.$el
+    $body = $('body')
+    $body.empty()
+    $body.append wv.$el
+    console.log wv.el
