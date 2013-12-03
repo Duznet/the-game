@@ -12,22 +12,36 @@ class Psg.WelcomeView extends Backbone.View
   events:
     'click #nav-signin': 'navSignin'
     'click #nav-signup': 'navSignup'
+    'click #submit-btn': 'submit'
+
+  switchFormState: (state, event) ->
+    if event then event.preventDefault()
+    stateData =
+      signin:
+        btnName: 'Sign in'
+        opposite: 'signup'
+      signup:
+        btnName: 'Sign up'
+        opposite: 'signin'
+
+    @formState = state
+    console.log "formState: ", @formState
+    formData = @dataInputTemplate()
+    formData += if @formState is 'signup' then @repeatPasswordInputTemplate() else ''
+    formData += @submitBtnTemplate(btnName: stateData[state].btnName)
+    @$el.html @template formData: formData
+    $("#nav-#{state}").addClass 'active'
+    $("#nav-#{stateData[state].opposite}").removeClass 'active'
 
   navSignin: (e) ->
-    if e then e.preventDefault()
-    console.log 'navSignin'
-    @$el.html @template formData: "#{@dataInputTemplate()}\n#{@submitBtnTemplate()}"
-    $('#nav-signup').removeClass 'active'
-    $('#nav-signin').addClass 'active'
-    $('#submit-btn').html 'Sign in'
+    @switchFormState 'signin', e
 
   navSignup: (e) ->
+    @switchFormState 'signup', e
+
+  submit: (e) ->
     if e then e.preventDefault()
-    console.log 'navSignup'
-    @$el.html @template formData: "#{@dataInputTemplate()}\n#{@repeatPasswordInputTemplate()}\n#{@submitBtnTemplate()}"
-    $('#nav-signin').removeClass 'active'
-    $('#nav-signup').addClass 'active'
-    $('#submit-btn').html 'Sign up'
+    console.log 'submit'
 
 
   initialize: ->
