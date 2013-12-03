@@ -6,6 +6,16 @@ class Psg.WelcomeView extends Backbone.View
 
   template: _.template $('#welcome-template').html()
 
+  events:
+    'click #nav-signin': 'navSignin'
+    'click #nav-signup': 'navSignup'
+
+  navSignin: ->
+    alert 'clicked signin'
+
+  navSignup: ->
+    alert 'clicked signup'
+
   initialize: ->
     @render()
 
