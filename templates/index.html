@@ -27,30 +27,49 @@
         </div>
         <div class="col-lg-6 col-lg-offset-3">
             <ul class="nav nav-tabs">
-                <li class="active" id="nav-signin"><a href="#">Sign in</a></li>
-                <li><a href="#" id="nav-signup">Sign up</a></li>
+                <li id="nav-signin" class="active"><a href="#">Sign in</a></li>
+                <li id="nav-signup"><a href="#">Sign up</a></li>
             </ul>
-            <form action="#" class="form-horizontal well">
-                <div class="form-group">
-                    <label for="input-login" class="col-lg-2 control-label">Login</label>
-                    <div class="col-lg-10">
-                        <input type="text" class="form-control" id="input-login" placeholder="Login">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="input-password" class="col-lg-2 control-label">Password</label>
-                    <div class="col-lg-10">
-                        <input type="password" class="form-control" id="input-password" placeholder="Password">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-lg-10 col-lg-offset-2">
-                        <button type="submit" class="btn btn-default">Submit</button>
-                    </div>
-                </div>
+            <form id="welcome-form" action="#" class="form-horizontal well">
+
+                <%= formData %>
+
             </form>
         </div>
     </script>
+
+    <script id="welcome-data-input" type="text/template">
+        <div class="form-group">
+            <label for="input-login" class="col-lg-4 control-label">Login</label>
+            <div class="col-lg-8">
+                <input type="text" class="form-control" id="input-login" placeholder="Login">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="input-password" class="col-lg-4 control-label">Password</label>
+            <div class="col-lg-8">
+                <input type="password" class="form-control" id="input-password" placeholder="Password">
+            </div>
+        </div>
+    </script>
+
+    <script id="welcome-repeat-password-input" type="text/template">
+        <div class="form-group">
+            <label for="repeat-password" class="col-lg-4 control-label">Repeat password</label>
+            <div class="col-lg-8">
+                <input type="password" class="form-control" id="repeat-password" placeholder="Repeat password">
+            </div>
+        </div>
+    </script>
+
+    <script id="welcome-submit-btn" type="text/template">
+        <div class="form-group">
+            <div class="col-lg-8 col-lg-offset-4">
+                <button id="submit-btn" type="submit" class="btn btn-default">Submit</button>
+            </div>
+        </div>
+    </script>
+
     <script src="/static/src/config.js"></script>
     <script src="/static/src/namespace.js"></script>
     <script src="/static/src/helpers/connection.js"></script>
