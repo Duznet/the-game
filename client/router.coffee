@@ -9,7 +9,7 @@ class Psg.Router extends Backbone.Router
 
   home: ->
     if @app.user is null
-      window.location.hash = 'welcome'
+      @navigate 'welcome'
     else
       console.log 'home!'
 
