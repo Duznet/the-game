@@ -68,13 +68,22 @@ class window.Drawer
     @v = new Point(0, 0)
     @gc = new Psg.GameplayConnection config.gameplayUrl
     @tick = 0
+    teorFps = Math.round 1000 / config.defaultGameConsts.tickSize
+    fps = 0
+    setInterval ->
+      console.log 'fps: ', fps
+      fps = 0
+    , 1000
+    @playerVelocity = new Point(0, 0)
     @gc.ws.onopen = =>
       @gc.move @user.sid, @tick, 0, 0
     @gc.ws.onmessage = (event) =>
+      fps++
       data = JSON.parse event.data
       @tick = data.tick
       # @v = x: data.players[0].x * @scale, y: data.players[0].y * @scale
       @playerPosition = new Point(@scale * data.players[0].x, @scale * data.players[0].y)
+      @playerVelocity = new Point(@scale * data.players[0].vx, @scale * data.players[0].vy)
 
     onKeyDown = (event) =>
       dx = 0
@@ -89,9 +98,15 @@ class window.Drawer
         dx++
       @gc.move @user.sid, @tick, dx, dy
 
-    onFrame = =>
+    onFrame = (event) =>
       if @playerPosition.x isnt player.position.x or @playerPosition.y isnt player.position.y
         player.position = @playerPosition
+      else
+        t = 1000 / config.defaultGameConsts.tickSize * event.delta
+        if config.interpolate
+          player.position.x += t * @playerVelocity.x / (teorFps / fps)
+          player.position.y += t * @playerVelocity.y / (teorFps / fps)
+          @playerPosition = player.position
 
     tool.attach 'keydown', onKeyDown
     view.attach 'frame', onFrame
