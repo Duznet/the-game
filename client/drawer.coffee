@@ -77,14 +77,17 @@ class window.Drawer
       @playerPosition = new Point(@scale * data.players[0].x, @scale * data.players[0].y)
 
     onKeyDown = (event) =>
-      if event.key is "w"
-        @gc.move @user.sid, @tick, 0, -1
-      if event.key is "a"
-        @gc.move @user.sid, @tick, -1, 0
-      if event.key is "s"
-        @gc.move @user.sid, @tick, 0, 1
-      if event.key is "d"
-        @gc.move @user.sid, @tick, 1, 0
+      dx = 0
+      dy = 0
+      if /^[wц]$|up|space/.test event.key
+        dy--
+      if /^[aф]$/.test event.key
+        dx--
+      if /^[sы]$/.test event.key
+        dy++
+      if /^[dв]$/.test event.key
+        dx++
+      @gc.move @user.sid, @tick, dx, dy
 
     onFrame = =>
       if @playerPosition.x isnt player.position.x or @playerPosition.y isnt player.position.y
