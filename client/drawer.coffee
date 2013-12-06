@@ -22,7 +22,7 @@ class window.Drawer
     console.log "generated user: ", @user
     @conn.startTesting('async')
     .then =>
-    @user.signup()
+      @user.signup()
     .then (data) =>
       @user.signin()
     .then =>
