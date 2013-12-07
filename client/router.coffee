@@ -9,7 +9,7 @@ class Psg.Router extends Backbone.Router
 
   home: ->
     if @app.user is null
-      @navigate 'welcome'
+      @navigate 'welcome', trigger: true
     else
       console.log 'home!'
 

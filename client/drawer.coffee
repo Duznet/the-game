@@ -22,7 +22,7 @@ class window.Drawer
     console.log "generated user: ", @user
     @conn.startTesting('async')
     .then =>
-    @user.signup()
+      @user.signup()
     .then (data) =>
       @user.signin()
     .then =>
@@ -68,27 +68,47 @@ class window.Drawer
     @v = new Point(0, 0)
     @gc = new Psg.GameplayConnection config.gameplayUrl
     @tick = 0
+    teorFps = Math.round 1000 / config.defaultGameConsts.tickSize
+    fps = 0
+    lastFps = 0
+    setInterval ->
+      lastFps = Math.min Math.round(fps * 1000 / config.fpsCalcInterval), teorFps
+      console.log 'fps: ', lastFps
+      fps = 0
+    , config.fpsCalcInterval
+    @playerVelocity = new Point(0, 0)
     @gc.ws.onopen = =>
       @gc.move @user.sid, @tick, 0, 0
     @gc.ws.onmessage = (event) =>
+      fps++
       data = JSON.parse event.data
       @tick = data.tick
       # @v = x: data.players[0].x * @scale, y: data.players[0].y * @scale
       @playerPosition = new Point(@scale * data.players[0].x, @scale * data.players[0].y)
+      @playerVelocity = new Point(@scale * data.players[0].vx, @scale * data.players[0].vy)
 
     onKeyDown = (event) =>
-      if event.key is "w"
-        @gc.move @user.sid, @tick, 0, -1
-      if event.key is "a"
-        @gc.move @user.sid, @tick, -1, 0
-      if event.key is "s"
-        @gc.move @user.sid, @tick, 0, 1
-      if event.key is "d"
-        @gc.move @user.sid, @tick, 1, 0
+      dx = 0
+      dy = 0
+      if /^[wц]$|up|space/.test event.key
+        dy--
+      if /^[aф]$/.test event.key
+        dx--
+      if /^[sы]$/.test event.key
+        dy++
+      if /^[dв]$/.test event.key
+        dx++
+      @gc.move @user.sid, @tick, dx, dy
 
-    onFrame = =>
+    onFrame = (event) =>
       if @playerPosition.x isnt player.position.x or @playerPosition.y isnt player.position.y
         player.position = @playerPosition
+      else
+        t = 1000 / config.defaultGameConsts.tickSize * event.delta
+        if config.interpolate
+          player.position.x += t * @playerVelocity.x * (lastFps / teorFps)
+          player.position.y += t * @playerVelocity.y * (lastFps / teorFps)
+          @playerPosition = player.position
 
     tool.attach 'keydown', onKeyDown
     view.attach 'frame', onFrame
