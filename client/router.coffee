@@ -15,5 +15,5 @@ class Psg.Router extends Backbone.Router
 
   welcome: ->
     console.log 'welcome'
-    wv = new Psg.AuthView
+    wv = new Psg.AuthView model: new Psg.Auth
     $('#nav-signin').click()
