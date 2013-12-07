@@ -87,6 +87,8 @@ class MainHandler(web.RequestHandler):
         self.write("")
 
     def post(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type, X-Requested-With")
         data = self.request.body.decode("utf-8", "replace")
         print(data)
         try:
