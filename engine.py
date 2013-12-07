@@ -1,14 +1,78 @@
 
-from sympy.geometry import *
+# from sympy.geometry import Point
 from sympy.geometry.util import *
 import re
 
 import copy
 from math import *
 
+EPS = 1e-6
+
+class Segment:
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+
+    def __repr__(self):
+        return str([self.p1, self.p2])
+
+
+class Point:
+    def __init__(self, x, y=None):
+        if y is None:
+            self.x = x[0]
+            self.y = x[1]
+        else:
+            self.x = x
+            self.y = y
+
+    def norm(self):
+        return Point(-self.y, self.x)
+
+    def dot(self, other):
+        return self.x * other.x + self.y * other.y
+
+    @property
+    def args(self):
+        return [self.x, self.y]
+
+    def __repr__(self):
+        return "Point" + str(self.args)
+
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __mul__(self, num):
+        return Point(self.x * num, self.y * num)
+
+    def __neg__(self):
+        return self * (-1)
+
+    def __sub__(self, other):
+        return self + (-other)
+
+    def __abs__(self):
+        return sqrt(self.dot(self))
+
+    def __div__(self, num):
+        return Point(self.x / num, self.y / num)
+
+    def __truediv__(self, num):
+        self.x /= num
+        self.y /= num
+        return self
+
+    def distance(self, other):
+        return abs(self - other)
+
+    def midpoint(self, other):
+        return (self + other) / 2
+
+
+
 class Player:
     DEFAULT_HP = 100
-    MAX_VELOCITY = 0.2
+    MAX_VELOCITY = 0.3
 
     def __init__(self, point):
         self.point = point
@@ -51,7 +115,14 @@ def normalize_map(map, wall):
     result.append(wallstr)
     return result
 
+class Collision:
+    def __init__(self, time, offset, segment):
+        self.time = time
+        self.offset = offset
+        self.segment = segment
 
+    def __repr__(self):
+        return "Collision" + str([self.time, self.offset, self.segment])
 
 class Game:
     DEFAULT_VELOCITY = 0.02
@@ -108,7 +179,6 @@ class Game:
 
     def next_tick(self, is_sync):
         for player in self.players_.values():
-            # print(player.got_action)
             if not player.got_action and is_sync:
                 return False
 
@@ -144,6 +214,112 @@ class Game:
             for signy in [-1 * signx, 1 * signx]:
                 pts.append(Point(start.x + signx * Game.SIDE, start.y + signy * Game.SIDE))
 
+    @staticmethod
+    def collision_time(player, segment, v):
+        minp = player - Point(Game.SIDE, Game.SIDE)
+        maxp = player + Point(Game.SIDE, Game.SIDE)
+
+        d = [0, 0]
+        is_one_point_collision = [False, False]
+
+        for i in range(2):
+            d1 = minp.args[i] - max(segment.p1.args[i], segment.p2.args[i])
+            d2 = min(segment.p1.args[i], segment.p2.args[i]) - maxp.args[i]
+
+            if d1 > 0:
+                d[i] = -d1
+            elif d2 > 0:
+                d[i] = d2
+            else:
+                d[i] = 0
+
+            is_one_point_collision[i] = d1 == 0 or d2 == 0
+
+        print("delta: ", d)
+
+        t = [0, 0]
+        for i in range(2):
+            if d[i] == 0:
+                continue
+
+            if (v.args[i] == 0):
+                return None
+
+            t[i] = d[i] / v.args[i]
+
+            if (t[i] < 0 or t[i] > 1):
+                return None
+
+        for i in range(2):
+            if segment.p1.args[i] == segment.p2.args[i]:
+                if (t[i] < t[(i + 1) % 2] or d[(i + 1) % 2] == 0 and
+                    v.args[(i + 1) % 2] == 0 and is_one_point_collision[(i + 1) % 2]):
+                    return None
+                else:
+                    return Collision(t[i], Point(d), segment)
+
+        return Collision(t[0], Point(d), segment)
+
+    @staticmethod
+    def is_vertical(segment):
+        return segment.p1.x == segment.p2.x
+
+    @staticmethod
+    def is_inner_side(map_, segment):
+        mid = segment.p1.midpoint(segment.p2)
+
+        fd = Point(-0.5, 0) if Game.is_vertical(segment) else Point(0, -0.5)
+        sd = Point(0.5, 0) if Game.is_vertical(segment) else Point(0, 0.5)
+
+        first = cell_coords(mid + fd)
+        second = cell_coords(mid + sd)
+
+        return map_[first.y][first.x] == Game.WALL and map_[second.y][second.x] == Game.WALL
+
+    @staticmethod
+    def get_sides(cell):
+        points = [cell, cell + Point(1, 0), cell + Point(1, 1), cell + Point(0, 1)]
+        sides = []
+        for i in range(len(points)):
+            sides.append(Segment(points[i], points[(i + 1) % len(points)]))
+
+        return sides
+
+    @staticmethod
+    def get_visible_sides(cell, v):
+        sides = Game.get_sides(cell)
+
+        return list(filter(lambda side: (side.p2 - side.p1).norm().dot(v) > 0, sides))
+
+    @staticmethod
+    def get_wall_collisions(map_, player, v):
+        cur_cell = cell_coords(player)
+        print("player: ", cur_cell)
+        walls = []
+
+        for i in [-1, 0, 1]:
+            for j in [-1, 0, 1]:
+                cell = cur_cell + Point(i, j)
+                if (i != 0 or j != 0) and map_[cell.y][cell.x] == Game.WALL:
+                    walls.append(cell)
+
+        sides = []
+        for wall in walls:
+            sides += Game.get_visible_sides(wall, v)
+
+        sides = [side for side in sides if not Game.is_inner_side(map_, side)]
+        print("sides count: ", len(sides))
+
+        collisions = [col for col in map(lambda side: Game.collision_time(player, side, v), sides) if col]
+
+        if collisions:
+            first = min(collisions, key=lambda x: x.time)
+            print("first: ", first.time, first.offset, first.segment)
+
+            collisions = [col for col in collisions if col.time == first.time]
+
+        return collisions
+
     def can_teleport(self, player):
         tp = cell_coords(player)
 
@@ -152,8 +328,8 @@ class Game:
 
         tp = Point(tp.x + self.SIDE, tp.y + self.SIDE)
 
-        return (tp.x < player.x + Game.SIDE and tp.x > player.x - Game.SIDE and
-            tp.y < player.y + Game.SIDE and tp.y > player.y - Game.SIDE)
+        return (tp.x <= player.x + Game.SIDE and tp.x >=     player.x - Game.SIDE and
+            tp.y <= player.y + Game.SIDE and tp.y >= player.y - Game.SIDE)
 
 
     def cells_path(self, start, end):
@@ -167,10 +343,6 @@ class Game:
         return path
 
     def players(self):
-        for player in self.players_.values():
-            player.point = player.point.evalf()
-            player.velocity = player.velocity.evalf()
-
         result = [{
             'x': float(self.players_[id].point.x - 1),
             'y': float(self.players_[id].point.y - 1),
@@ -199,21 +371,22 @@ class Game:
 
     @staticmethod
     def underpoint(player):
-        return Point(floor(player.point.x), floor(player.point.y + Game.SIDE))
+        return Point(floor(player.x), floor(player.y + Game.SIDE))
 
     def update_v(self, id, dx, dy):
         player = self.players_[id]
 
-        delta = Point(dx, dy)
+        delta = Point(dx, 0)
 
-        print(delta)
-
-        underpoint_ = self.underpoint(player)
+        uleft = self.underpoint(player.point - Point(self.SIDE - EPS, 0))
+        uright = self.underpoint(player.point + Point(self.SIDE - EPS, 0))
 
         y = player.velocity.y
-        print("underpoint is: ", underpoint_, " ", self.map[underpoint_.y][underpoint_.x])
-        if delta.y < 0 and self.map[underpoint_.y][underpoint_.x] == self.WALL:
+
+        if dy < 0 and (self.map[uleft.y][uleft.x] == self.WALL or self.map[uright.y][uright.x] == self.WALL):
+            print("JUMP", -Player.MAX_VELOCITY)
             y = -Player.MAX_VELOCITY
+            player.moved = True
 
         player.velocity = Point(player.velocity.x, y)
         print(player.velocity)
@@ -224,7 +397,6 @@ class Game:
         delta /= delta.distance(Point(0, 0))
 
         player.velocity += delta * self.DEFAULT_VELOCITY
-        print(player.velocity)
 
         player.normalize_v()
         player.moved = True
@@ -235,8 +407,11 @@ class Game:
         player = self.players_[id]
 
         y = player.velocity.y
-        underpoint_ = self.underpoint(player)
-        if self.map[underpoint_.y][underpoint_.x] != self.WALL:
+
+        uleft = self.underpoint(player.point - Point(self.SIDE - EPS, 0))
+        uright = self.underpoint(player.point + Point(self.SIDE - EPS, 0))
+
+        if self.map[uleft.y][uleft.x] != self.WALL and self.map[uright.y][uright.x] != self.WALL:
             print("gravity")
             y += self.GRAVITY
 
@@ -252,9 +427,10 @@ class Game:
 
         norm = player.velocity.distance(Point(0, 0))
 
-        underpoint = self.underpoint(player)
+        uleft = self.underpoint(player.point - Point(self.SIDE - EPS, 0))
+        uright = self.underpoint(player.point + Point(self.SIDE - EPS, 0))
 
-        if norm == 0 or self.map[underpoint.y][underpoint.x] != self.WALL:
+        if norm == 0 or self.map[uleft.y][uleft.x] != self.WALL and self.map[uright.y][uright.x] != self.WALL:
             return player
 
         brake_v = player.velocity * self.DEFAULT_VELOCITY / norm
@@ -274,7 +450,7 @@ class Game:
         return self
 
     def move(self, id):
-        # player = self.brake_if_not_moved(id)
+        player = self.brake_if_not_moved(id)
         player = self.fall_down_if_need(id)
 
         if player.velocity == Point(0, 0):
@@ -283,56 +459,20 @@ class Game:
         end = player.velocity + player.point
         direction = Point(sign(player.velocity.x), sign(player.velocity.y))
 
-        print(end.evalf())
-        end_cell = cell_coords(end + direction * self.SIDE)
-        start_cell = cell_coords(player.point)
+        collisions = self.get_wall_collisions(self.map, player.point, player.velocity)
 
-        vcell = Point(start_cell.x, end_cell.y)
-        hcell = Point(end_cell.x, start_cell.y)
-
-        vx = player.velocity.x
-        vy = player.velocity.y
-        endx = end.x
-        endy = end.y
-
-        wallh = False
-        wallv = False
-        if self.map[vcell.y][vcell.x] == self.WALL:
-            wallv = True
-            endy = start_cell.y + self.SIDE
-            vy = 0
-
-        if self.map[hcell.y][hcell.x] == self.WALL:
-            walh = True
-            endx = start_cell.x + self.SIDE
-            vx = 0
-
-
-        if self.map[vcell.y][hcell.x] == self.WALL and start_cell.x != end_cell.x and start_cell.y != end_cell.y:
-            cell_center = end_cell + Point(self.SIDE, self.SIDE)
-            centers = cell_center - player.point
-            centers = Point(sign(centers.x), sign(centers.y))
-
-            pcorner = player.point + centers * self.SIDE
-            wcorner = cell_center - centers * self.SIDE
-
-            corners = wcorner - pcorner
-            print(vx, " ", vy, " ", corners)
-            if vy * corners.x <= vx * corners.y and not wallh:
-                vy = 0
-                endy = start_cell.y + self.SIDE
-
-            if vy * corners.x >= vx * corners.y and not wallv:
-                vx = 0
-                endx = start_cell.x + self.SIDE
-
-        player.point = Point(endx, endy)
-        player.velocity = Point(vx, vy)
-
-        if self.can_teleport(player.point):
-            cell = cell_coords(player.point)
-            if cell != start_cell:
-                player.point = self.NEXT_PORTAL[cell] + Point(self.SIDE, self.SIDE)
+        print("collisions count: ", len(collisions))
+        if collisions:
+            print(collisions)
+            player.point += collisions[0].offset
+            for collision in collisions:
+                if self.is_vertical(collision.segment):
+                    print("vertical")
+                    player.velocity = Point(0, player.velocity.y)
+                else:
+                    player.velocity = Point(player.velocity.x, 0)
+        else:
+            player.point = end
 
         player.moved = False
 
