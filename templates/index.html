@@ -25,7 +25,7 @@
             <h1>Square war</h1>
             <p>The brand new platform shooter game</p>
         </div>
-        <div class="col-lg-6 col-lg-offset-3">
+        <div class="col-lg-8 col-lg-offset-2">
             <ul class="nav nav-tabs">
                 <li id="nav-signin" class="active"><a href="#">Sign in</a></li>
                 <li id="nav-signup"><a href="#">Sign up</a></li>
@@ -39,26 +39,29 @@
     </script>
 
     <script id="welcome-data-input" type="text/template">
-        <div class="form-group">
-            <label for="input-login" class="col-lg-4 control-label">Login</label>
-            <div class="col-lg-8">
+        <div class="form-group" id="login-group">
+            <label for="input-login" class="col-lg-3 control-label">Login</label>
+            <div class="col-lg-6">
                 <input type="text" class="form-control" id="input-login" placeholder="Login">
             </div>
+            <div class="row text-right col-lg-3 control-label" id="login-error"></div>
         </div>
-        <div class="form-group">
-            <label for="input-password" class="col-lg-4 control-label">Password</label>
-            <div class="col-lg-8">
+        <div class="form-group" id="password-group">
+            <label for="input-password" class="col-lg-3 control-label">Password</label>
+            <div class="col-lg-6">
                 <input type="password" class="form-control" id="input-password" placeholder="Password">
             </div>
+            <div class="row text-right col-lg-3 control-label" id="password-error"></div>
         </div>
     </script>
 
     <script id="welcome-repeat-password-input" type="text/template">
-        <div class="form-group">
-            <label for="repeat-password" class="col-lg-4 control-label">Repeat password</label>
-            <div class="col-lg-8">
+        <div class="form-group" id="repeat-password-group">
+            <label for="repeat-password" class="col-lg-3 control-label">Repeat password</label>
+            <div class="col-lg-6">
                 <input type="password" class="form-control" id="repeat-password" placeholder="Repeat password">
             </div>
+            <div class="row text-right col-lg-3 control-label" id="repeat-password-error"></div>
         </div>
     </script>
 
