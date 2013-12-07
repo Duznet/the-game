@@ -77,11 +77,11 @@ class window.Drawer
       fps = 0
     , config.fpsCalcInterval
     @playerVelocity = new Point(0, 0)
-    @gc.ws.onopen = =>
+    @gc.onopen = =>
       @gc.move @user.sid, @tick, 0, 0
-    @gc.ws.onmessage = (event) =>
+    @gc.onmessage = (data) =>
+      if data.tick < @tick then return
       fps++
-      data = JSON.parse event.data
       @tick = data.tick
       # @v = x: data.players[0].x * @scale, y: data.players[0].y * @scale
       @playerPosition = new Point(@scale * data.players[0].x, @scale * data.players[0].y)
