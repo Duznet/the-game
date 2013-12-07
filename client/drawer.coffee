@@ -71,11 +71,16 @@ class window.Drawer
     teorFps = Math.round 1000 / config.defaultGameConsts.tickSize
     fps = 0
     lastFps = 0
+    dx = 0
+    dy = 0
     setInterval ->
       lastFps = Math.min Math.round(fps * 1000 / config.fpsCalcInterval), teorFps
       console.log 'fps: ', lastFps
       fps = 0
     , config.fpsCalcInterval
+    setInterval =>
+      if dx isnt 0 or dy isnt 0 then @gc.move @user.sid, @tick, dx, dy
+    , config.defaultGameConsts.tickSize / 2
     @playerVelocity = new Point(0, 0)
     @gc.onopen = =>
       @gc.move @user.sid, @tick, 0, 0
@@ -88,8 +93,6 @@ class window.Drawer
       @playerVelocity = new Point(@scale * data.players[0].vx, @scale * data.players[0].vy)
 
     onKeyDown = (event) =>
-      dx = 0
-      dy = 0
       if /^[wц]$|up|space/.test event.key
         dy--
       if /^[aф]$/.test event.key
@@ -98,7 +101,18 @@ class window.Drawer
         dy++
       if /^[dв]$/.test event.key
         dx++
-      @gc.move @user.sid, @tick, dx, dy
+      dx = if dx > 0 then 1 else if dx < 0 then -1 else 0
+      dy = if dy > 0 then 1 else if dy < 0 then -1 else 0
+
+    onKeyUp = (event) =>
+      if /^[wц]$|up|space/.test event.key
+        dy = 0
+      if /^[aф]$/.test event.key
+        dx = 0
+      if /^[sы]$/.test event.key
+        dy = 0
+      if /^[dв]$/.test event.key
+        dx = 0
 
     onFrame = (event) =>
       if @playerPosition.x isnt player.position.x or @playerPosition.y isnt player.position.y
@@ -111,6 +125,7 @@ class window.Drawer
           @playerPosition = player.position
 
     tool.attach 'keydown', onKeyDown
+    tool.attach 'keyup', onKeyUp
     view.attach 'frame', onFrame
     console.log "game started"
 
