@@ -10,4 +10,5 @@ window.config =
     friction: 0.02
     gravity: 0.02
   interpolate: true
+  fpsCalcInterval: 250
 

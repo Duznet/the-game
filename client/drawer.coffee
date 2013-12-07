@@ -70,10 +70,12 @@ class window.Drawer
     @tick = 0
     teorFps = Math.round 1000 / config.defaultGameConsts.tickSize
     fps = 0
+    lastFps = 0
     setInterval ->
-      console.log 'fps: ', fps
+      lastFps = Math.min Math.round(fps * 1000 / config.fpsCalcInterval), teorFps
+      console.log 'fps: ', lastFps
       fps = 0
-    , 1000
+    , config.fpsCalcInterval
     @playerVelocity = new Point(0, 0)
     @gc.ws.onopen = =>
       @gc.move @user.sid, @tick, 0, 0
@@ -104,8 +106,8 @@ class window.Drawer
       else
         t = 1000 / config.defaultGameConsts.tickSize * event.delta
         if config.interpolate
-          player.position.x += t * @playerVelocity.x / (teorFps / fps)
-          player.position.y += t * @playerVelocity.y / (teorFps / fps)
+          player.position.x += t * @playerVelocity.x * (lastFps / teorFps)
+          player.position.y += t * @playerVelocity.y * (lastFps / teorFps)
           @playerPosition = player.position
 
     tool.attach 'keydown', onKeyDown
