@@ -1,4 +1,4 @@
-class Psg.WelcomeView extends Backbone.View
+class Psg.AuthView extends Backbone.View
 
   tagName: 'div'
   className: 'container'
@@ -39,9 +39,12 @@ class Psg.WelcomeView extends Backbone.View
   navSignup: (e) ->
     @switchFormState 'signup', e
 
+  isValid: -> true
+
   submit: (e) ->
     if e then e.preventDefault()
-    console.log 'submit'
+    if @isValid()
+      console.log 'submit'
 
 
   initialize: ->
