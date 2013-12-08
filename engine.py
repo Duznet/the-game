@@ -81,6 +81,7 @@ class Player:
         self.score = 0
         self.moved = False
         self.got_action = False
+        self.delta = Point(0, 0)
 
     def normalize_v(self):
         x = self.velocity.x
@@ -226,6 +227,10 @@ class Game:
             d1 = minp.args[i] - max(segment.p1.args[i], segment.p2.args[i])
             d2 = min(segment.p1.args[i], segment.p2.args[i]) - maxp.args[i]
 
+
+            if (segment.p1.args[i] == segment.p2.args[i]) and d1 < -EPS and d2 < -EPS:
+                return None
+
             if d1 > 0:
                 d[i] = -d1
             elif d2 > 0:
@@ -234,8 +239,6 @@ class Game:
                 d[i] = 0
 
             is_one_point_collision[i] = d1 == 0 or d2 == 0
-
-        print("delta: ", d)
 
         t = [0, 0]
         for i in range(2):
@@ -255,6 +258,8 @@ class Game:
                 if (t[i] < t[(i + 1) % 2] or d[(i + 1) % 2] == 0 and
                     v.args[(i + 1) % 2] == 0 and is_one_point_collision[(i + 1) % 2]):
                     return None
+                # else if :
+                #     return None
                 else:
                     return Collision(t[i], Point(d), segment)
 
@@ -378,12 +383,8 @@ class Game:
 
 
         if (dx != 0):
-            delta = Point(dx, 0)
-            delta /= abs(delta)
-
-            player.velocity += delta * self.DEFAULT_VELOCITY
-
-            player.normalize_v()
+            player.delta = Point(dx, 0)
+            player.delta /= abs(player.delta)
 
         player.moved = True
 
@@ -394,7 +395,8 @@ class Game:
         if self.map[uleft.y][uleft.x] != self.WALL and self.map[uright.y][uright.x] != self.WALL:
             return player
 
-        player.velocity.y = -Player.MAX_VELOCITY if dy < 0 else 0
+        player.delta.y = dy
+        # player.velocity.y = -Player.MAX_VELOCITY if dy < 0 else 0
 
         return player
 
@@ -417,10 +419,11 @@ class Game:
     def brake_if_not_moved(self, id):
         player = self.players_[id]
 
-        if player.moved:
+        print("delta: ", player.delta)
+        if abs(player.delta.x) > EPS:
             return player
-
-        norm = player.velocity.distance(Point(0, 0))
+        print("BRAKE")
+        norm = abs(player.velocity)
 
         uleft = self.underpoint(player.point - Point(self.SIDE - EPS, 0))
         uright = self.underpoint(player.point + Point(self.SIDE - EPS, 0))
@@ -433,8 +436,9 @@ class Game:
         x = player.velocity.x
         y = player.velocity.y
         x = 0 if brake_v.x > x else x - brake_v.x
-        y = 0 if brake_v.y > y else y - brake_v.y
         player.velocity = Point(x, y)
+
+        print("result v: ", player.velocity)
 
         return player
 
@@ -446,6 +450,12 @@ class Game:
 
     def move(self, id):
         player = self.brake_if_not_moved(id)
+        player.velocity += player.delta * self.DEFAULT_VELOCITY
+        if player.delta.y < 0:
+            player.velocity.y = -Player.MAX_VELOCITY
+
+        player.normalize_v()
+
         player = self.fall_down_if_need(id)
 
         if player.velocity == Point(0, 0):
@@ -456,18 +466,25 @@ class Game:
         collisions = self.get_wall_collisions(self.map, player.point, player.velocity)
 
         print("collisions count: ", len(collisions))
-        if collisions:
+        t = 0
+        while collisions and t < 1:
             print(collisions)
             player.point += collisions[0].offset
             for collision in collisions:
                 if self.is_vertical(collision.segment):
                     print("vertical")
-                    player.velocity = Point(0, player.velocity.y)
+                    player.velocity.x = 0
                 else:
-                    player.velocity = Point(player.velocity.x, 0)
+                    player.velocity.y = 0
 
-        player.point = player.velocity + player.point
+            t += collisions[0].time
+            if t < 1:
+                collisions = self.get_wall_collisions(self.map, player.point, player.velocity * (1 - t))
+
+        if t < 1:
+            player.point = player.velocity * (1 - t) + player.point
 
         player.moved = False
+        player.delta = Point(0, 0)
 
         return self
