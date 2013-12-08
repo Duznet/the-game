@@ -376,30 +376,25 @@ class Game:
     def update_v(self, id, dx, dy):
         player = self.players_[id]
 
-        delta = Point(dx, 0)
+
+        if (dx != 0):
+            delta = Point(dx, 0)
+            delta /= abs(delta)
+
+            player.velocity += delta * self.DEFAULT_VELOCITY
+
+            player.normalize_v()
+
+        player.moved = True
 
         uleft = self.underpoint(player.point - Point(self.SIDE - EPS, 0))
         uright = self.underpoint(player.point + Point(self.SIDE - EPS, 0))
 
-        y = player.velocity.y
 
-        if dy < 0 and (self.map[uleft.y][uleft.x] == self.WALL or self.map[uright.y][uright.x] == self.WALL):
-            print("JUMP", -Player.MAX_VELOCITY)
-            y = -Player.MAX_VELOCITY
-            player.moved = True
-
-        player.velocity = Point(player.velocity.x, y)
-        print(player.velocity)
-
-        if delta.distance(Point(0, 0)) == 0:
+        if self.map[uleft.y][uleft.x] != self.WALL and self.map[uright.y][uright.x] != self.WALL:
             return player
 
-        delta /= delta.distance(Point(0, 0))
-
-        player.velocity += delta * self.DEFAULT_VELOCITY
-
-        player.normalize_v()
-        player.moved = True
+        player.velocity.y = -Player.MAX_VELOCITY if dy < 0 else 0
 
         return player
 
@@ -456,7 +451,6 @@ class Game:
         if player.velocity == Point(0, 0):
             return self
 
-        end = player.velocity + player.point
         direction = Point(sign(player.velocity.x), sign(player.velocity.y))
 
         collisions = self.get_wall_collisions(self.map, player.point, player.velocity)
@@ -471,8 +465,8 @@ class Game:
                     player.velocity = Point(0, player.velocity.y)
                 else:
                     player.velocity = Point(player.velocity.x, 0)
-        else:
-            player.point = end
+
+        player.point = player.velocity + player.point
 
         player.moved = False
 
