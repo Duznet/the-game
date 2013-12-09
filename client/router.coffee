@@ -1,19 +1,32 @@
 class Psg.Router extends Backbone.Router
 
   routes:
-    '': 'home'
-    'welcome': 'welcome'
+    '': 'dashboard'
+    'auth': 'auth'
+    'dashboard': 'dashboard'
 
   initialize: ->
-    @app = new Psg.Application
 
-  home: ->
-    if @app.user is null
-      @navigate 'welcome', trigger: true
-    else
-      console.log 'home!'
+  checkAuth: ->
+    @user =
+      sid: sessionStorage.getItem 'sid'
+      login: sessionStorage.getItem 'login'
 
-  welcome: ->
-    console.log 'welcome'
+    @user.sid and @user.login
+
+  auth: ->
+    console.log 'auth'
     wv = new Psg.AuthView model: new Psg.Auth
     $('#nav-signin').click()
+
+  dashboard: ->
+    if not @checkAuth()
+      @navigate 'auth', trigger: true
+    console.log 'dashboard'
+
+
+
+
+
+
+
