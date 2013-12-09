@@ -1,7 +1,6 @@
-
-# from sympy.geometry import Point
 from sympy.geometry.util import *
 import re
+import sys
 
 import copy
 from math import *
@@ -56,6 +55,12 @@ class Point:
 
     def __div__(self, num):
         return Point(self.x / num, self.y / num)
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
 
     def __truediv__(self, num):
         self.x /= num
@@ -124,6 +129,47 @@ class Collision:
 
     def __repr__(self):
         return "Collision" + str([self.time, self.offset, self.segment])
+
+class Event:
+    def __init__(self, time):
+        self.time = time
+
+class WallCollisionEvent(Event):
+    def __init__(self, collisions):
+        super(WallCollisionEvent, self).__init__(collisions[0].time)
+        self.collisions = collisions
+
+    def __repr__(self):
+        return str(self.collisions)
+
+    @staticmethod
+    def require_event_refresh():
+        return True
+
+    def handle(self, player):
+        player.point += self.collisions[0].offset
+        for collision in self.collisions:
+            if Game.is_vertical(collision.segment):
+                player.velocity.x = 0
+            else:
+                player.velocity.y = 0
+
+class TeleportEvent(Event):
+    def __init__(self, time, next_point):
+        super(TeleportEvent, self).__init__(time)
+        self.next_point = next_point
+
+    @staticmethod
+    def require_event_refresh():
+        return True
+
+    def __repr__(self):
+        return "TeleportEvent" + str((self.time, self.next_point))
+
+    def handle(self, player):
+        player.point = self.next_point
+
+
 
 class Game:
     DEFAULT_VELOCITY = 0.02
@@ -258,8 +304,6 @@ class Game:
                 if (t[i] < t[(i + 1) % 2] or d[(i + 1) % 2] == 0 and
                     v.args[(i + 1) % 2] == 0 and is_one_point_collision[(i + 1) % 2]):
                     return None
-                # else if :
-                #     return None
                 else:
                     return Collision(t[i], Point(d), segment)
 
@@ -323,7 +367,79 @@ class Game:
 
             collisions = [col for col in collisions if col.time == first.time]
 
-        return collisions
+        if collisions:
+            return WallCollisionEvent(collisions)
+        else:
+            return None
+
+
+    @staticmethod
+    def collision_with_point(player, v, point):
+        minp = player - Point(Game.SIDE, Game.SIDE)
+        maxp = player + Point(Game.SIDE, Game.SIDE)
+
+        d = [0, 0]
+        t = [0, 0]
+        is_one_point_collision = [False, False]
+
+        for i in range(2):
+            d1 = minp.args[i] - point.args[i]
+            d2 = point.args[i] - maxp.args[i]
+
+            if d1 > 0:
+                d[i] = -d1
+            elif d2 > 0:
+                d[i] = d2
+            else:
+                d[i] = 0
+                continue
+
+            if (v.args[i] == 0):
+                return None
+
+            t[i] = d[i] / v.args[i]
+
+            if (t[i] < 0 or t[i] > 1):
+                return None
+
+
+        return Collision(max(t), Point(d), Segment(point, point))
+
+
+    def get_teleport_collisions(self, player, v):
+        curcell = cell_coords(player)
+
+        dir = Point(sign(v.x), sign(v.y))
+
+        cells = [curcell + Point(x, y) for x in [0, dir.x] for y in [0, dir.y] if x != 0 or y != 0]
+
+        collisions = []
+        for cell in cells:
+            cell = cell_coords(cell)
+            if Game.is_teleport(self.map[cell.y][cell.x]):
+                collisions.append(Game.collision_with_point(player, v, cell + Point(0.5, 0.5)))
+
+        collisions = list(filter(None, collisions))
+
+        if collisions:
+            first = min(collisions, key=lambda col: col.time)
+
+            return TeleportEvent(first.time, self.NEXT_PORTAL[cell_coords(first.segment.p1)] + Point(0.5, 0.5))
+        else:
+            return None
+
+
+    def get_events(self, player, v):
+        events = []
+        events.append(self.get_wall_collisions(self.map, player, v))
+        events.append(self.get_teleport_collisions(player, v))
+        print(events[-1])
+
+        return sorted(filter(None, events), key=lambda event: event.time)
+
+    @staticmethod
+    def is_teleport(sym):
+        return re.match(Game.PORTAL, sym)
 
     def can_teleport(self, player):
         tp = cell_coords(player)
@@ -461,25 +577,18 @@ class Game:
         if player.velocity == Point(0, 0):
             return self
 
-        direction = Point(sign(player.velocity.x), sign(player.velocity.y))
-
-        collisions = self.get_wall_collisions(self.map, player.point, player.velocity)
-
-        print("collisions count: ", len(collisions))
         t = 0
-        while collisions and t < 1:
-            print(collisions)
-            player.point += collisions[0].offset
-            for collision in collisions:
-                if self.is_vertical(collision.segment):
-                    print("vertical")
-                    player.velocity.x = 0
-                else:
-                    player.velocity.y = 0
+        events = self.get_events(player.point, player.velocity)
+        while events and t < 1:
+            for event in events:
+                event.handle(player)
+                if event.require_event_refresh():
+                    break
 
-            t += collisions[0].time
+            t += event.time
+
             if t < 1:
-                collisions = self.get_wall_collisions(self.map, player.point, player.velocity * (1 - t))
+                events = self.get_events(player.point, player.velocity * (1 - t))
 
         if t < 1:
             player.point = player.velocity * (1 - t) + player.point
