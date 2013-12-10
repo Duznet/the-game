@@ -3,6 +3,18 @@ class Psg.User extends Backbone.Model
   initialize: ->
     @conn = new Psg.GameConnection config.gameUrl
 
+  save: ->
+    sessionStorage.setItem 'login', @get 'login'
+    sessionStorage.setItem 'sid', @get 'sid'
+
+  fetch: ->
+    @set 'login', sessionStorage.getItem 'login'
+    @set 'sid', sessionStorage.getItem 'sid'
+
+  isAuthenticated: ->
+    @fetch()
+    @get('login') and @get('sid')
+
   signup: (login, password) ->
     @conn.signup(login, password).then (data) =>
       if data.result is 'ok'
@@ -13,8 +25,9 @@ class Psg.User extends Backbone.Model
   signin: (login, password) ->
     @conn.signin(login, password).then (data) =>
       if data.result is 'ok'
-        sessionStorage.setItem 'login', login
-        sessionStorage.setItem 'sid', data.sid
+        @set 'login', login
+        @set 'sid', data.sid
+        @save()
         @trigger 'authenticated'
       else
         @trigger 'submitFailed', data.result
@@ -22,6 +35,8 @@ class Psg.User extends Backbone.Model
   signout: (sid) ->
     @conn.signout(sid).then (data) =>
       if data.result is 'ok'
+        @set 'login', null
+        @set 'sid', null
         sessionStorage.clear()
       else
         @trigger 'submitFailed', data.result

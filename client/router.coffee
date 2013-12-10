@@ -6,27 +6,15 @@ class Psg.Router extends Backbone.Router
     'dashboard': 'dashboard'
 
   initialize: ->
-
-  checkAuth: ->
-    @user =
-      sid: sessionStorage.getItem 'sid'
-      login: sessionStorage.getItem 'login'
-
-    @user.sid and @user.login
+    @user = new Psg.User
 
   auth: ->
     console.log 'auth'
-    wv = new Psg.WelcomeView model: new Psg.User
+    wv = new Psg.WelcomeView model: @user
     $('#nav-signin').click()
 
   dashboard: ->
-    if not @checkAuth()
+    if not @user.isAuthenticated()
       @navigate 'auth', trigger: true
+      return
     console.log 'dashboard'
-
-
-
-
-
-
-
