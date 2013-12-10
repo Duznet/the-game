@@ -108,6 +108,8 @@ class Psg.WelcomeView extends Backbone.View
 
 
   render: ->
-    @$el.appendTo $('body')
     @$el.html @template(formData: "")
+    $body = $('body')
+    $body.empty()
+    $body.append @$el
     return this

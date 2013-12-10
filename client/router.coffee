@@ -17,4 +17,7 @@ class Psg.Router extends Backbone.Router
     if not @user.isAuthenticated()
       @navigate 'auth', trigger: true
       return
+    new Psg.ApplicationView
+      model: new Psg.Application
+        user: @user
     console.log 'dashboard'

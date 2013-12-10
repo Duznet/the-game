@@ -18,8 +18,6 @@
         }
     </script>
 
-</head>
-<body>
     <script id="welcome-template" type="text/template">
         <div class="jumbotron">
             <h1>Square war</h1>
@@ -73,6 +71,32 @@
         </div>
     </script>
 
+    <script id="application-template" type="text/template">
+
+        <div class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a href="/ui" class="navbar-brand">Square war</a>
+                </div>
+                <div class="navbar-collapse collapse" id="navbar-main">
+                    <ul class="nav navbar-nav">
+                        <li><a href="#join">Join game</a></li>
+                        <li><a href="#create">Create game</a></li>
+                        <li><a href="#upload-map">Upload map</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <p class="navbar-text"><%= login %></p>
+                        <li><a href="#signout">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="content" class="container">
+
+        </div>
+
+    </script>
+
     <script src="/static/src/config.js"></script>
     <script src="/static/src/namespace.js"></script>
     <script src="/static/src/helpers/connection.js"></script>
@@ -82,5 +106,14 @@
     <script src="/static/src/views/application_view.js"></script>
     <script src="/static/src/views/welcome_view.js"></script>
     <script src="/static/src/router.js"></script>
+</head>
+
+
+<body>
+
 </body>
+
 </html>
+
+
+
