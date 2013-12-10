@@ -1,4 +1,4 @@
-class Psg.AuthView extends Backbone.View
+class Psg.WelcomeView extends Backbone.View
 
   tagName: 'div'
   className: 'container'
