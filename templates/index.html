@@ -5,6 +5,7 @@
     <title>Index page</title>
 
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/main.css">
 
     <script src="/static/lib/jquery-2.0.3.min.js"></script>
     <script src="/static/lib/underscore.js"></script>
@@ -91,12 +92,41 @@
                 </div>
             </div>
         </div>
-
-        <div id="sidebar"></div>
-        <div id="content" class="container">
-
+        <div class="container">
+            <div class="page-header">
+                <div class="row">
+                    <h1></h1>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div id="sidebar" class="col-lg-4"></div>
+            <div id="content" class=""></div>
         </div>
 
+    </script>
+
+    <script id="message-template" type="text/template">
+        <li class="list-group-item">
+            <strong><%= login %>:</strong>
+            <span class="text-left"><%= text %></span>
+            <span class="pull-right"><%= time %></span>
+        </li>
+    </script>
+
+    <script id="chat-template" type="text/template">
+        <ul class="chat-log list-group well">
+        </ul>
+        <form action="" class="row">
+            <div class="form-group">
+                <div class="col-lg-8">
+                    <input type="text" class="form-control message-input" placeholder="Your text here">
+                </div>
+                <div class="col-lg-4 col-offset-8">
+                    <button class="submit-btn btn btn-default" type="submit">Submit</button>
+                </div>
+            </div>
+        </form>
     </script>
 
     <script src="/static/src/config.js"></script>
@@ -108,13 +138,13 @@
     <script src="/static/src/models/application.js"></script>
     <script src="/static/src/views/application_view.js"></script>
     <script src="/static/src/views/welcome_view.js"></script>
-    <script src="/static/src/views/chat.js"></script>
-    <script src="/static/src/models/chat.js"></script>
+    <script src="/static/src/views/chat_view.js"></script>
     <script src="/static/src/router.js"></script>
 </head>
 
 
 <body>
+
 
 </body>
 

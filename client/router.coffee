@@ -10,10 +10,10 @@ class Psg.Router extends Backbone.Router
     @user.on 'authenticated', @onAuthenticated
     @user.on 'signedOut', @onSignedOut
 
-  onAuthenticated: ->
+  onAuthenticated: =>
     @navigate 'dashboard', trigger: true
 
-  onSignedOut: ->
+  onSignedOut: =>
     @navigate 'auth', trigger: true
 
   auth: ->
@@ -28,4 +28,8 @@ class Psg.Router extends Backbone.Router
     new Psg.ApplicationView
       model: new Psg.Application
         user: @user
+    new Psg.ChatView
+      model: new Psg.Chat
+        sid: @user.get 'sid'
+        game: ""
     console.log 'dashboard'

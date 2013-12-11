@@ -12,7 +12,9 @@ class Psg.Chat extends Backbone.Model
     @conn = new Psg.GameConnection config.gameUrl
     @messages = new Psg.Messages
     @lastTime = @getCurrentTimestamp()
-    @fetch()
+    setInterval =>
+      @fetch()
+    , config.chatRefreshInterval
 
   getCurrentTimestamp: ->
     d = new Date()
@@ -21,10 +23,11 @@ class Psg.Chat extends Backbone.Model
   fetch: ->
     @conn.getMessages(@get('sid'), @get('game'), @lastTime).then (data) =>
       if data.result is 'ok'
-        console.log 'data.messages: ', data.messages
-        newMessages = if @messages.length > 0 then data.messages.splice(0, 1) else data.messages
-        @messages.add newMessages
+        newMessages = if @messages.models.length > 0 then _.rest data.messages else data.messages
         if newMessages.length > 0
+          @messages.add newMessages
+        if newMessages.length > 0
+          @lastTime = newMessages[newMessages.length - 1].time
           @trigger 'newMessages', newMessages
 
   sendMessage: (text) ->

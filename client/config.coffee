@@ -11,4 +11,5 @@ window.config =
     gravity: 0.02
   interpolate: true
   fpsCalcInterval: 250
+  chatRefreshInterval: 1000
 
