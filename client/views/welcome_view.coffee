@@ -17,7 +17,6 @@ class Psg.WelcomeView extends Backbone.View
   initialize: ->
     @render()
     @model.on 'submitFailed', @onSumbitFailed
-    @model.on 'authenticated', @onAuthenticated
 
   onSumbitFailed: (result) =>
     console.log 'submit failed'
@@ -31,9 +30,6 @@ class Psg.WelcomeView extends Backbone.View
       when 'incorrect'
         @writeStatus 'login', 'error', 'Incorrect login/password'
       else console.log result
-
-  onAuthenticated: =>
-    Backbone.history.navigate 'dashboard', trigger: true
 
   checkInputs: ->
     @inputIsValid = true

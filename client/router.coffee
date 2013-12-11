@@ -7,6 +7,14 @@ class Psg.Router extends Backbone.Router
 
   initialize: ->
     @user = new Psg.User
+    @user.on 'authenticated', @onAuthenticated
+    @user.on 'signedOut', @onSignedOut
+
+  onAuthenticated: ->
+    @navigate 'dashboard', trigger: true
+
+  onSignedOut: ->
+    @navigate 'auth', trigger: true
 
   auth: ->
     console.log 'auth'

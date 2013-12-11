@@ -38,5 +38,6 @@ class Psg.User extends Backbone.Model
         @set 'login', null
         @set 'sid', null
         sessionStorage.clear()
+        @trigger 'signedOut'
       else
         @trigger 'submitFailed', data.result
