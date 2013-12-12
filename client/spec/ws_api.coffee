@@ -319,11 +319,11 @@ describe 'Websocket API using server', ->
           player = data.players[0]
 
           expect(player.vy).to.almost.equal 0, precision
-          expect(player.vx).to.almost.equal 0.2, precision
+          expect(player.vx).to.almost.equal 0.18, precision
           done()
 
     it 'should touch down after continious jump', (done) ->
-      @timeout 5000
+      @timeout 10000
 
       count = 0
 
@@ -333,12 +333,12 @@ describe 'Websocket API using server', ->
         count++
         player = data.players[0]
         console.log "got: ", data.players[0]
-        if count < 20
+        if count < 30
           gc.move(hostUser.sid, data.tick, 0, -1)
         if count > 2 and Math.abs(player.y - 2.5) < config.defaultGameConsts.accuracy
           touched = true
 
-        if count is 20
-          console.log "count is 20; player: ", data.players[0]
+        if count is 30
+          console.log "count is 30; player: ", data.players[0]
           expect(touched).to.be.ok
           done()
