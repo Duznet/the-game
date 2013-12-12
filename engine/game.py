@@ -10,7 +10,7 @@ import copy
 
 class Player:
     DEFAULT_HP = 100
-    MAX_VELOCITY = 0.3
+    MAX_VELOCITY = 0.2
 
     def __init__(self, point):
         self.point = point

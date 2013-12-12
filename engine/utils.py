@@ -89,8 +89,11 @@ def is_inner_side(map_, segment):
 
     first = cell_coords(mid + fd)
     second = cell_coords(mid + sd)
-
-    return map_[first.y][first.x] == WALL and map_[second.y][second.x] == WALL
+    # print(first, second)
+    try:
+        return map_[first.y][first.x] == WALL and map_[second.y][second.x] == WALL
+    except IndexError:
+        return True
 
 def get_sides(cell):
     points = [cell, cell + Point(1, 0), cell + Point(1, 1), cell + Point(0, 1)]
@@ -113,6 +116,7 @@ def get_wall_collisions(map_, player, v):
     for i in [-1, 0, 1]:
         for j in [-1, 0, 1]:
             cell = cur_cell + Point(i, j)
+            print("cell: ", cell)
             if (i != 0 or j != 0) and map_[cell.y][cell.x] == WALL:
                 walls.append(cell)
 
