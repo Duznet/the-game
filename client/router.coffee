@@ -17,6 +17,9 @@ class Psg.Router extends Backbone.Router
       game: ''
       user: @user
 
+    @gameList = new Psg.GameList
+      user: @user
+
     @user.on 'authenticated', @onAuthenticated
     @user.on 'signedOut', @onSignedOut
 
@@ -30,6 +33,7 @@ class Psg.Router extends Backbone.Router
   auth: ->
     console.log 'auth'
     @globalChat.stopRefreshing()
+    @gameList.stopRefreshing()
     wv = new Psg.WelcomeView model: @user
     $('#nav-signin').click()
 
@@ -42,11 +46,15 @@ class Psg.Router extends Backbone.Router
       return
 
     @globalChat.startRefreshing()
+    @gameList.startRefreshing()
     new Psg.ApplicationView
       model: new Psg.Application
         user: @user
 
     new Psg.ChatView
       model: @globalChat
+
+    new Psg.GameListView
+      model: @gameList
 
     console.log 'dashboard'
