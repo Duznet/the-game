@@ -8,6 +8,8 @@ class GameplayController(BasicController):
         super(GameplayController, self).__init__(json, models.user)
         self.game = games.game(self.user.game.id)
 
+    def empty(self):
+        self.game.update_v(self.user.id, 0, 0).got_action = True
 
     def move(self):
         tick = int(self.json['tick'])
