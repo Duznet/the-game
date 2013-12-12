@@ -4,6 +4,7 @@ class Psg.Router extends Backbone.Router
     '': 'dashboard'
     'auth': 'auth'
     'dashboard': 'dashboard'
+    'signout': 'signout'
 
   initialize: ->
     @user = new Psg.User
@@ -20,6 +21,9 @@ class Psg.Router extends Backbone.Router
     console.log 'auth'
     wv = new Psg.WelcomeView model: @user
     $('#nav-signin').click()
+
+  signout: ->
+    @user.signout()
 
   dashboard: ->
     if not @user.isAuthenticated()

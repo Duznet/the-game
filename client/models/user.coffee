@@ -32,8 +32,8 @@ class Psg.User extends Backbone.Model
       else
         @trigger 'submitFailed', data.result
 
-  signout: (sid) ->
-    @conn.signout(sid).then (data) =>
+  signout: ->
+    @conn.signout(@get 'sid').then (data) =>
       if data.result is 'ok'
         @set 'login', null
         @set 'sid', null
