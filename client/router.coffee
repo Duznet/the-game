@@ -7,14 +7,27 @@ class Psg.Router extends Backbone.Router
     'signout': 'signout'
 
   initialize: ->
+    @conn = new Psg.GameConnection
+      url: config.gameUrl
+      sid: ''
+    console.log 'conn: ', @conn
     @user = new Psg.User
+      conn: @conn
+
+    @globalChat = new Psg.Chat
+      game: ''
+      user: @user
+
     @user.on 'authenticated', @onAuthenticated
     @user.on 'signedOut', @onSignedOut
 
   onAuthenticated: =>
+    @globalChat.startRefreshing()
     @navigate 'dashboard', trigger: true
 
   onSignedOut: =>
+    sessionStorage.clear()
+    @globalChat.stopRefreshing()
     @navigate 'auth', trigger: true
 
   auth: ->
@@ -29,11 +42,12 @@ class Psg.Router extends Backbone.Router
     if not @user.isAuthenticated()
       @navigate 'auth', trigger: true
       return
+
     new Psg.ApplicationView
       model: new Psg.Application
         user: @user
+
     new Psg.ChatView
-      model: new Psg.Chat
-        sid: @user.get 'sid'
-        game: ""
+      model: @globalChat
+
     console.log 'dashboard'

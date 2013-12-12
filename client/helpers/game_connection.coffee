@@ -11,12 +11,13 @@ class Psg.GameConnection extends Psg.Connection
   __requestWithSid__: (action, params) ->
     params = params || {}
     params.sid = @sid
-    dfd = @request action, params
-    dfd.then (data) ->
+    req = @request action, params
+    req.then (data) =>
+      dfd = new $.Deferred
       if data.result is 'badSid'
         @trigger 'sessionLost'
         dfd.resolve data
-    dfd
+    req
 
   startTesting: (params) ->
     @request 'startTesting', params

@@ -1,6 +1,7 @@
-class Psg.Connection extends Backbone.Events
+class Psg.Connection
 
   constructor: (attrs) ->
+    _.extend @, Backbone.Events
     @url = attrs.url
     @sid = attrs.sid || ''
 

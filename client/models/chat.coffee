@@ -9,19 +9,25 @@ class Psg.Messages extends Backbone.Collection
 class Psg.Chat extends Backbone.Model
 
   initialize: ->
-    @conn = new Psg.GameConnection config.gameUrl
+    @conn = @get('user').conn
     @messages = new Psg.Messages
     @lastTime = @getCurrentTimestamp()
-    setInterval =>
+
+
+  startRefreshing: ->
+    @refreshInterval = setInterval =>
       @fetch()
     , config.chatRefreshInterval
+
+  stopRefreshing: ->
+    clearInterval @refreshInterval
 
   getCurrentTimestamp: ->
     d = new Date()
     (d.getTime() + d.getTimezoneOffset() * 60 * 1000) / 1000
 
   fetch: ->
-    @conn.getMessages(@get('sid'), @get('game'), @lastTime).then (data) =>
+    @conn.getMessages(game: @get('game'), since: @lastTime).then (data) =>
       if data.result is 'ok'
         newMessages = if @messages.models.length > 0 then _.rest data.messages else data.messages
         if newMessages.length > 0
@@ -31,4 +37,4 @@ class Psg.Chat extends Backbone.Model
           @trigger 'newMessages', newMessages
 
   sendMessage: (text) ->
-    @conn.sendMessage(@get('sid'), @get('game'), text)
+    @conn.sendMessage(game: @get('game'), text: text)
