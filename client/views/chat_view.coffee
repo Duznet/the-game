@@ -6,9 +6,11 @@ class Psg.MessageView extends Backbone.View
     @render()
 
   render: ->
+    zerofill = (number) ->
+      ('0' + number).slice(-2)
     t = new Date()
     date = new Date(@model.get('time') * 1000 - t.getTimezoneOffset() * 60 * 1000)
-    time = "#{date.getHours()}:#{date.getMinutes()}:#{date.getSeconds()}"
+    time = "#{zerofill(date.getHours())}:#{zerofill(date.getMinutes())}:#{zerofill(date.getSeconds())}"
     @$el.append @template(login: @model.get('login'), text: @model.get('text'), time: time)
 
 class Psg.ChatView extends Backbone.View
@@ -22,7 +24,6 @@ class Psg.ChatView extends Backbone.View
 
   initialize: ->
     @render()
-    console.log @$el
     @model.on 'newMessages', @onNewMessages
 
   onNewMessages: (messages) =>
