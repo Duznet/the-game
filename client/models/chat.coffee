@@ -11,7 +11,7 @@ class Psg.Chat extends Backbone.Model
   initialize: ->
     @conn = @get('user').conn
     @messages = new Psg.Messages
-    @lastTime = @getCurrentTimestamp()
+    @lastTime = @getCurrentTimestamp() - config.chatInitialTimeOffset
 
 
   startRefreshing: ->
@@ -34,7 +34,7 @@ class Psg.Chat extends Backbone.Model
           @messages.add newMessages
         if newMessages.length > 0
           @lastTime = newMessages[newMessages.length - 1].time
-          @trigger 'newMessages', newMessages
+          @trigger 'newMessages'
 
   sendMessage: (text) ->
     @conn.sendMessage(game: @get('game'), text: text)

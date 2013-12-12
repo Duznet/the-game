@@ -2,6 +2,7 @@ class Psg.User extends Backbone.Model
 
   initialize: ->
     @conn = @get 'conn'
+    @fetch()
     @conn.on 'sessionLost', @onSessionLost
 
   onSessionLost: =>
@@ -15,6 +16,7 @@ class Psg.User extends Backbone.Model
   fetch: ->
     @set 'login', sessionStorage.getItem 'login'
     @set 'sid', sessionStorage.getItem 'sid'
+    @conn.sid = @get 'sid'
 
   isAuthenticated: ->
     @fetch()

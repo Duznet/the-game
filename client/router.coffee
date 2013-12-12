@@ -10,7 +10,6 @@ class Psg.Router extends Backbone.Router
     @conn = new Psg.GameConnection
       url: config.gameUrl
       sid: ''
-    console.log 'conn: ', @conn
     @user = new Psg.User
       conn: @conn
 
@@ -22,16 +21,15 @@ class Psg.Router extends Backbone.Router
     @user.on 'signedOut', @onSignedOut
 
   onAuthenticated: =>
-    @globalChat.startRefreshing()
     @navigate 'dashboard', trigger: true
 
   onSignedOut: =>
     sessionStorage.clear()
-    @globalChat.stopRefreshing()
     @navigate 'auth', trigger: true
 
   auth: ->
     console.log 'auth'
+    @globalChat.stopRefreshing()
     wv = new Psg.WelcomeView model: @user
     $('#nav-signin').click()
 
@@ -43,6 +41,7 @@ class Psg.Router extends Backbone.Router
       @navigate 'auth', trigger: true
       return
 
+    @globalChat.startRefreshing()
     new Psg.ApplicationView
       model: new Psg.Application
         user: @user

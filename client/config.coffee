@@ -12,4 +12,5 @@ window.config =
   interpolate: true
   fpsCalcInterval: 250
   chatRefreshInterval: 1000
+  chatInitialTimeOffset: 24 * 60 * 60
 
