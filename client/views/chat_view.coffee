@@ -45,3 +45,5 @@ class Psg.ChatView extends Backbone.View
     $sidebar = $('#sidebar')
     $sidebar.empty()
     $sidebar.append @$el
+    @lastMessageIndex = 0
+    @onNewMessages()

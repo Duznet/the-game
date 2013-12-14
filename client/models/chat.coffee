@@ -32,7 +32,6 @@ class Psg.Chat extends Backbone.Model
         newMessages = if @messages.models.length > 0 then _.rest data.messages else data.messages
         if newMessages.length > 0
           @messages.add newMessages
-        if newMessages.length > 0
           @lastTime = newMessages[newMessages.length - 1].time
           @trigger 'newMessages'
 
