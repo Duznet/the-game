@@ -95,11 +95,11 @@ class window.Drawer
     onKeyDown = (event) =>
       if /^[wц]$|up|space/.test event.key
         dy--
-      if /^[aф]$/.test event.key
+      if /^[aф]$|left/.test event.key
         dx--
-      if /^[sы]$/.test event.key
+      if /^[sы]$|down/.test event.key
         dy++
-      if /^[dв]$/.test event.key
+      if /^[dв]$|right/.test event.key
         dx++
       dx = if dx > 0 then 1 else if dx < 0 then -1 else 0
       dy = if dy > 0 then 1 else if dy < 0 then -1 else 0
@@ -107,11 +107,11 @@ class window.Drawer
     onKeyUp = (event) =>
       if /^[wц]$|up|space/.test event.key
         dy = 0
-      if /^[aф]$/.test event.key
+      if /^[aф]$|left/.test event.key
         dx = 0
-      if /^[sы]$/.test event.key
+      if /^[sы]$|down/.test event.key
         dy = 0
-      if /^[dв]$/.test event.key
+      if /^[dв]$|right/.test event.key
         dx = 0
 
     onFrame = (event) =>
