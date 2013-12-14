@@ -25,9 +25,9 @@ class Psg.ChatView extends Backbone.View
   initialize: ->
     @render()
     @lastMessageIndex = 0
-    @model.on 'newMessages', @onNewMessages
+    @listenTo @model, 'newMessages', @onNewMessages
 
-  onNewMessages: =>
+  onNewMessages: ->
     $parent = @$el.find('.chat-log')
     messages = @model.messages.rest @lastMessageIndex
     @lastMessageIndex = @model.messages.length

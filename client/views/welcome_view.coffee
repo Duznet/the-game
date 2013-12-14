@@ -16,9 +16,9 @@ class Psg.WelcomeView extends Backbone.View
 
   initialize: ->
     @render()
-    @model.on 'submitFailed', @onSumbitFailed
+    @listenTo @model, 'submitFailed', @onSumbitFailed
 
-  onSumbitFailed: (result) =>
+  onSumbitFailed: (result) ->
     console.log 'submit failed'
     switch result
       when 'badLogin'

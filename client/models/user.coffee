@@ -3,9 +3,9 @@ class Psg.User extends Backbone.Model
   initialize: ->
     @conn = @get 'conn'
     @fetch()
-    @conn.on 'sessionLost', @onSessionLost
+    @listenTo @conn, 'sessionLost', @onSessionLost
 
-  onSessionLost: =>
+  onSessionLost: ->
     @trigger 'signedOut'
 
   save: ->

@@ -75,7 +75,7 @@ class window.Drawer
     dy = 0
     setInterval ->
       lastFps = Math.min Math.round(fps * 1000 / config.fpsCalcInterval), teorFps
-      console.log 'fps: ', lastFps
+      # console.log 'fps: ', lastFps
       fps = 0
     , config.fpsCalcInterval
     setInterval =>

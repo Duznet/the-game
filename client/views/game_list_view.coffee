@@ -23,9 +23,9 @@ class Psg.GameListView extends Backbone.View
 
   initialize: ->
     @render()
-    @model.on 'refreshed', @onRefreshed
+    @listenTo @model, 'refreshed', @onRefreshed
 
-  onRefreshed: =>
+  onRefreshed: ->
     $tbody = @$el.find('tbody')
     $tbody.empty()
     for g in @model.games.models

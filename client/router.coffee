@@ -20,13 +20,13 @@ class Psg.Router extends Backbone.Router
     @gameList = new Psg.GameList
       user: @user
 
-    @user.on 'authenticated', @onAuthenticated
-    @user.on 'signedOut', @onSignedOut
+    @listenTo @user, 'authenticated', @onAuthenticated
+    @listenTo @user, 'signedOut', @onSignedOut
 
-  onAuthenticated: =>
+  onAuthenticated: ->
     @navigate 'dashboard', trigger: true
 
-  onSignedOut: =>
+  onSignedOut: ->
     sessionStorage.clear()
     @navigate 'auth', trigger: true
 
@@ -34,13 +34,14 @@ class Psg.Router extends Backbone.Router
     console.log 'auth'
     @globalChat.stopRefreshing()
     @gameList.stopRefreshing()
-    wv = new Psg.WelcomeView model: @user
+    @wv = new Psg.WelcomeView model: @user
     $('#nav-signin').click()
 
   signout: ->
     @user.signout()
 
   dashboard: ->
+    if @wv then @wv.remove()
     if not @user.isAuthenticated()
       @navigate 'auth', trigger: true
       return
