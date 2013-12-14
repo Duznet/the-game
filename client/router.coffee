@@ -7,6 +7,11 @@ class Psg.Router extends Backbone.Router
     'signout': 'signout'
 
   initialize: ->
+
+    @views =
+      main: []
+      sidebar: []
+
     @conn = new Psg.GameConnection
       url: config.gameUrl
       sid: ''
@@ -30,8 +35,21 @@ class Psg.Router extends Backbone.Router
     sessionStorage.clear()
     @navigate 'auth', trigger: true
 
+  addView: (group, view) ->
+    @views[group].push view
+
+  removeViews: (group) ->
+    if group is 'all'
+      for g of @views
+        @cleanViews g
+    else
+      for v in @views[group]
+        v.remove()
+      @views[group] = []
+
   auth: ->
     console.log 'auth'
+    @removeViews 'all'
     @globalChat.stopRefreshing()
     @gameList.stopRefreshing()
     @wv = new Psg.WelcomeView model: @user
@@ -41,6 +59,7 @@ class Psg.Router extends Backbone.Router
     @user.signout()
 
   dashboard: ->
+    @removeViews 'all'
     if @wv then @wv.remove()
     if not @user.isAuthenticated()
       @navigate 'auth', trigger: true
