@@ -15,11 +15,22 @@ describe 'Websocket API using server', ->
         "#$..........."
       ]
     },
+    {
+      name: 'Long line'
+      maxPlayers: 4
+      map: [
+        '...................................................................',
+        '...................................................................',
+        '...................................................................',
+        '...................................................................',
+        '.................................$.................................',
+      ]
+    }
   ]
 
   findMap = (mapName) ->
-    maps = maps.filter (m) -> m.name is mapName
-    maps[0]
+    filteredMaps = maps.filter (m) -> m.name is mapName
+    filteredMaps[0]
 
   precision = Math.round Math.abs Math.log(config.defaultGameConsts.accuracy) / Math.LN10
 
@@ -342,3 +353,72 @@ describe 'Websocket API using server', ->
           console.log "count is 30; player: ", data.players[0]
           expect(touched).to.be.ok
           done()
+
+  describe 'on Long line map', ->
+
+    @timeout 5000
+
+    initialPosition =
+      x: 33.5
+      y: 4.5
+
+
+    before ->
+      map = findMap 'Long line'
+      console.log 'map is ', map
+
+    it 'should change only vy on diagonal jumping to the right', (done) ->
+
+      expectedPosition =
+        x: initialPosition.x + 2 * config.defaultGameConsts.accel + 2 * 20 * config.defaultGameConsts.accel
+        y: initialPosition.y
+
+      count = 0
+
+      gc.onmessage = (data) ->
+        count++
+        console.log 'player: ', data.players[0]
+        player = data.players[0]
+        if count is 1
+          gc.move(hostUser.sid, data.tick, 1, 0)
+        else if count is 2
+          gc.move(hostUser.sid, data.tick, 1, -1)
+        else if count is 3
+          gc.move(hostUser.sid, data.tick, 0, -1)
+        else if count is 30
+          playerPosition =
+            x: data.players[0].x
+            y: data.players[0].y
+          console.log 'count is 30; player position: ', playerPosition
+          expect(playerPosition).to.almost.eql expectedPosition, precision
+          done()
+        else
+          gc.move(hostUser.sid, data.tick, 0, 0)
+
+    it 'should change only vy on diagonal jumping to the left', (done) ->
+
+      expectedPosition =
+        x: initialPosition.x - 2 * config.defaultGameConsts.accel - 2 * 20 * config.defaultGameConsts.accel
+        y: initialPosition.y
+
+      count = 0
+
+      gc.onmessage = (data) ->
+        count++
+        console.log 'player: ', data.players[0]
+        player = data.players[0]
+        if count is 1
+          gc.move(hostUser.sid, data.tick, -1, 0)
+        else if count is 2
+          gc.move(hostUser.sid, data.tick, -1, -1)
+        else if count is 3
+          gc.move(hostUser.sid, data.tick, 0, -1)
+        else if count is 30
+          playerPosition =
+            x: data.players[0].x
+            y: data.players[0].y
+          console.log 'count is 30; player position: ', playerPosition
+          expect(playerPosition).to.almost.eql expectedPosition, precision
+          done()
+        else
+          gc.move(hostUser.sid, data.tick, 0, 0)
