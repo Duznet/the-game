@@ -4,6 +4,7 @@ class Psg.Router extends Backbone.Router
     '': 'dashboard'
     'auth': 'auth'
     'dashboard': 'dashboard'
+    'join': 'join'
     'signout': 'signout'
 
   initialize: ->
@@ -52,15 +53,20 @@ class Psg.Router extends Backbone.Router
     @removeViews 'all'
     @globalChat.stopRefreshing()
     @gameList.stopRefreshing()
-    @wv = new Psg.WelcomeView model: @user
+    @addView 'main', new Psg.WelcomeView model: @user
     $('#nav-signin').click()
 
   signout: ->
     @user.signout()
 
+  join: ->
+    @removeViews 'main'
+    if not @user.isAuthenticated()
+      @navigate 'auth', trigger: true
+      return
+
   dashboard: ->
     @removeViews 'all'
-    if @wv then @wv.remove()
     if not @user.isAuthenticated()
       @navigate 'auth', trigger: true
       return
@@ -71,10 +77,10 @@ class Psg.Router extends Backbone.Router
       model: new Psg.Application
         user: @user
 
-    new Psg.ChatView
+    @addView 'sidebar', new Psg.ChatView
       model: @globalChat
 
-    new Psg.GameListView
+    @addView 'main', new Psg.GameListView
       model: @gameList
 
     console.log 'dashboard'
