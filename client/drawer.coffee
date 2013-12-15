@@ -128,8 +128,3 @@ class window.Drawer
     tool.attach 'keyup', onKeyUp
     view.attach 'frame', onFrame
     console.log "game started"
-
-
-
-
-

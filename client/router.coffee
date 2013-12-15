@@ -41,7 +41,7 @@ class Psg.Router extends Backbone.Router
   removeViews: (group) ->
     if group is 'all'
       for g of @views
-        @cleanViews g
+        @removeViews g
     else
       for v in @views[group]
         v.remove()
