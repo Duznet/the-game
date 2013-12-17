@@ -11,6 +11,7 @@ window.config =
     gravity: 0.02
   interpolate: true
   fpsCalcInterval: 250
+  storage: sessionStorage
   chatRefreshInterval: 1000
   chatInitialTimeOffset: 24 * 60 * 60
 

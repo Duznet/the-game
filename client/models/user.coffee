@@ -2,6 +2,7 @@ class Psg.User extends Backbone.Model
 
   initialize: ->
     @conn = @get 'conn'
+    @storage = config.storage
     @fetch()
     @listenTo @conn, 'sessionLost', @onSessionLost
 
@@ -9,13 +10,13 @@ class Psg.User extends Backbone.Model
     @trigger 'signedOut'
 
   save: ->
-    sessionStorage.setItem 'login', @get 'login'
-    sessionStorage.setItem 'sid', @get 'sid'
+    @storage.setItem 'login', @get 'login'
+    @storage.setItem 'sid', @get 'sid'
     @conn.sid = @get 'sid'
 
   fetch: ->
-    @set 'login', sessionStorage.getItem 'login'
-    @set 'sid', sessionStorage.getItem 'sid'
+    @set 'login', @storage.getItem 'login'
+    @set 'sid', @storage.getItem 'sid'
     @conn.sid = @get 'sid'
 
   isAuthenticated: ->

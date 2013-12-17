@@ -35,7 +35,7 @@ class Psg.Router extends Backbone.Router
     @navigate 'dashboard', trigger: true
 
   onSignedOut: ->
-    sessionStorage.clear()
+    @user.storage.clear()
     @navigate 'auth', trigger: true
 
   clearPage: ->
