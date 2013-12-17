@@ -10,12 +10,16 @@ class Psg.Router extends Backbone.Router
   initialize: ->
 
     @views = []
+    @refreshingComponents = []
 
     @conn = new Psg.GameConnection
       url: config.gameUrl
       sid: ''
     @user = new Psg.User
       conn: @conn
+
+    @app = new Psg.Application
+      user: @user
 
     @globalChat = new Psg.Chat
       game: ''
@@ -34,6 +38,22 @@ class Psg.Router extends Backbone.Router
     sessionStorage.clear()
     @navigate 'auth', trigger: true
 
+  clearPage: ->
+    @removeViews()
+    @stopComponentRefreshings()
+
+  refreshPage: ->
+    @clearPage()
+
+    if not @user.isAuthenticated()
+      @onSignedOut()
+
+    if not @appView
+      @appView = new Psg.ApplicationView model: @app
+    else
+      @appView.render()
+    @addView @appView
+
   addView: (view) ->
     @views.push view
 
@@ -42,39 +62,31 @@ class Psg.Router extends Backbone.Router
       v.remove()
     @views = []
 
+  addRefreshingComponent: (component) ->
+    @refreshingComponents.push component
+    component.startRefreshing()
+
+  stopComponentRefreshings: ->
+    for c in @refreshingComponents
+      c.stopRefreshing()
+    @refreshingComponents = []
+
   auth: ->
     console.log 'auth'
-    @removeViews()
-    @globalChat.stopRefreshing()
-    @gameList.stopRefreshing()
-    @addView 'main', new Psg.WelcomeView model: @user
+    @clearPage()
+    @addView new Psg.WelcomeView model: @user
     $('#nav-signin').click()
 
   signout: ->
     @user.signout()
 
   join: ->
-    @removeViews 'main'
-    if not @user.isAuthenticated()
-      @navigate 'auth', trigger: true
-      return
+    @refreshPage()
+    @addRefreshingComponent @globalChat
+    @addRefreshingComponent @gameList
+    @addView new Psg.ChatView model: @globalChat
+    @addView new Psg.GameListView model: @gameList
 
   dashboard: ->
-    @removeViews 'all'
-    if not @user.isAuthenticated()
-      @navigate 'auth', trigger: true
-      return
-
-    @globalChat.startRefreshing()
-    @gameList.startRefreshing()
-    new Psg.ApplicationView
-      model: new Psg.Application
-        user: @user
-
-    @addView 'sidebar', new Psg.ChatView
-      model: @globalChat
-
-    @addView 'main', new Psg.GameListView
-      model: @gameList
-
     console.log 'dashboard'
+    @join()
