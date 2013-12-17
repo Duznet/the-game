@@ -9,9 +9,7 @@ class Psg.Router extends Backbone.Router
 
   initialize: ->
 
-    @views =
-      main: []
-      sidebar: []
+    @views = []
 
     @conn = new Psg.GameConnection
       url: config.gameUrl
@@ -36,21 +34,17 @@ class Psg.Router extends Backbone.Router
     sessionStorage.clear()
     @navigate 'auth', trigger: true
 
-  addView: (group, view) ->
-    @views[group].push view
+  addView: (view) ->
+    @views.push view
 
-  removeViews: (group) ->
-    if group is 'all'
-      for g of @views
-        @removeViews g
-    else
-      for v in @views[group]
-        v.remove()
-      @views[group] = []
+  removeViews: ->
+    for v in @views
+      v.remove()
+    @views = []
 
   auth: ->
     console.log 'auth'
-    @removeViews 'all'
+    @removeViews()
     @globalChat.stopRefreshing()
     @gameList.stopRefreshing()
     @addView 'main', new Psg.WelcomeView model: @user
