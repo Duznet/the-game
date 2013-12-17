@@ -3,3 +3,7 @@
     max-height: 500px;
     overflow: auto;
 }
+
+textarea {
+    font-family: monospace;
+}

@@ -5,6 +5,7 @@ class Psg.Router extends Backbone.Router
     'auth': 'auth'
     'dashboard': 'dashboard'
     'join': 'join'
+    'upload-map': 'uploadMap'
     'signout': 'signout'
 
   initialize: ->
@@ -86,6 +87,16 @@ class Psg.Router extends Backbone.Router
     @addRefreshingComponent @gameList
     @addView new Psg.ChatView model: @globalChat
     @addView new Psg.GameListView model: @gameList
+
+  uploadMap: ->
+    console.log 'uploadMap'
+    @refreshPage()
+    console.log 'add refreshingComponent'
+    @addRefreshingComponent @globalChat
+    @addView new Psg.ChatView model: @globalChat
+    @addView new Psg.MapUploaderView
+      model: new Psg.MapUploader
+        user: @user
 
   dashboard: ->
     console.log 'dashboard'
