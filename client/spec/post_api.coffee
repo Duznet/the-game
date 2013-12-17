@@ -519,6 +519,15 @@ describe 'POST API using server', ->
           expect(data.result).to.equal "badMap"
           done()
 
+      it 'should respond with "mapExists" if user is trying to upload map with the used name', (done) ->
+        mapName = gen.getStr()
+        conn.uploadMap(user.sid, mapName, 16, ["...", "...", "..."])
+        .then ->
+          conn.uploadMap(user.sid, mapName, 10, ["...", "..."])
+        .then (data) ->
+          expect(data.result).to.equal "mapExists"
+          done()
+
       it 'should respond with "badMap" if it has one teleport without exit', (done) ->
         conn.uploadMap(user.sid, gen.getStr(), 16, ["1..", ".$."]).then (data) ->
           expect(data.result).to.equal "badMap"
