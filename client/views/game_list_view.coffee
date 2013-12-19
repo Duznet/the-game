@@ -12,6 +12,7 @@ class Psg.GameListItemView extends Backbone.View
       playersNum: @model.get('players').length
       maxPlayers: @model.get 'maxPlayers'
       status: @model.get 'status'
+      id: @model.get 'id'
 
 
 class Psg.GameListView extends Backbone.View
