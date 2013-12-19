@@ -32,6 +32,3 @@ class Psg.MapUploader extends Backbone.Model
         @trigger 'uploaded'
       else
         @trigger 'submitFailed', data.result
-
-
-

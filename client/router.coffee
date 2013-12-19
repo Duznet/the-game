@@ -41,13 +41,13 @@ class Psg.Router extends Backbone.Router
 
   clearPage: ->
     @removeViews()
-    @stopComponentRefreshings()
 
   refreshPage: ->
     @clearPage()
 
     if not @user.isAuthenticated()
       @onSignedOut()
+      return
 
     if not @appView
       @appView = new Psg.ApplicationView model: @app
@@ -57,20 +57,18 @@ class Psg.Router extends Backbone.Router
 
   addView: (view) ->
     @views.push view
+    console.log 'pushing v: ', view
+    if view.model and typeof view.model.startRefreshing isnt 'undefined'
+      console.log 'and start refreshing it'
+      view.model.startRefreshing()
 
   removeViews: ->
     for v in @views
+      console.log 'removing v: ', v
       v.remove()
+      if v.model and typeof v.model.stopRefreshing isnt 'undefined'
+        v.model.stopRefreshing()
     @views = []
-
-  addRefreshingComponent: (component) ->
-    @refreshingComponents.push component
-    component.startRefreshing()
-
-  stopComponentRefreshings: ->
-    for c in @refreshingComponents
-      c.stopRefreshing()
-    @refreshingComponents = []
 
   auth: ->
     console.log 'auth'
@@ -83,16 +81,12 @@ class Psg.Router extends Backbone.Router
 
   join: ->
     @refreshPage()
-    @addRefreshingComponent @globalChat
-    @addRefreshingComponent @gameList
     @addView new Psg.ChatView model: @globalChat
     @addView new Psg.GameListView model: @gameList
 
   uploadMap: ->
     console.log 'uploadMap'
     @refreshPage()
-    console.log 'add refreshingComponent'
-    @addRefreshingComponent @globalChat
     @addView new Psg.ChatView model: @globalChat
     @addView new Psg.MapUploaderView
       model: new Psg.MapUploader
