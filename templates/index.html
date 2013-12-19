@@ -182,6 +182,37 @@
         </form>
     </script>
 
+    <script id="game-creator-template" type="text/template">
+        <form id="game-creator-form" action="#" class="form-horizontal well">
+            <div id="game-create-status-container" class="has-error">
+                <div id="game-create-status" class="control-label"></div>
+            </div>
+            <div class="form-group" id="name-group">
+                <label for="input-name" class="col-lg-2 control-label">Name</label>
+                <div class="col-lg-8">
+                    <input type="text" class="form-control" id="input-name" placeholder="Map name">
+                </div>
+            </div>
+            <div class="form-group" id="max-players-group">
+                <label for="input-max-players" class="col-lg-2 control-label">Max players</label>
+                <div class="col-lg-3">
+                    <input type="text" class="form-control" id="input-max-players" placeholder="Max players">
+                </div>
+            </div>
+            <div class="form-group" id="map-data-group">
+                <label for="select-map" class="col-lg-2 control-label">Map</label>
+                <div class="col-lg-4">
+                    <select name="select-map" id="select-map" class="form-control"><%= maps %></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-lg-8 col-lg-offset-2">
+                    <button id="submit-btn" type="submit" class="btn btn-default">Submit</button>
+                </div>
+            </div>
+        </form>
+    </script>
+
     <script src="/static/src/config.js"></script>
     <script src="/static/src/namespace.js"></script>
     <script src="/static/src/helpers/connection.js"></script>
@@ -190,12 +221,14 @@
     <script src="/static/src/models/chat.js"></script>
     <script src="/static/src/models/game_list.js"></script>
     <script src="/static/src/models/map_uploader.js"></script>
+    <script src="/static/src/models/game_creator.js"></script>
     <script src="/static/src/models/application.js"></script>
     <script src="/static/src/views/application_view.js"></script>
     <script src="/static/src/views/welcome_view.js"></script>
     <script src="/static/src/views/chat_view.js"></script>
     <script src="/static/src/views/game_list_view.js"></script>
     <script src="/static/src/views/map_uploader_view.js"></script>
+    <script src="/static/src/views/game_creator_view.js"></script>
     <script src="/static/src/router.js"></script>
 </head>
 

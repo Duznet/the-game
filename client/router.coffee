@@ -5,6 +5,7 @@ class Psg.Router extends Backbone.Router
     'auth': 'auth'
     'dashboard': 'dashboard'
     'join': 'join'
+    'create': 'create'
     'upload-map': 'uploadMap'
     'signout': 'signout'
 
@@ -29,8 +30,12 @@ class Psg.Router extends Backbone.Router
     @gameList = new Psg.GameList
       user: @user
 
+    @gameCreator = new Psg.GameCreator
+      user: @user
+
     @listenTo @user, 'authenticated', @onAuthenticated
     @listenTo @user, 'signedOut', @onSignedOut
+    @listenTo @gameCreator, 'created', @onGameCreated
 
   onAuthenticated: ->
     @navigate 'dashboard', trigger: true
@@ -38,6 +43,10 @@ class Psg.Router extends Backbone.Router
   onSignedOut: ->
     @user.storage.clear()
     @navigate 'auth', trigger: true
+
+  onGameCreated: (id) ->
+    console.log 'game created'
+    @navigate "game/#{id}", trigger: true
 
   clearPage: ->
     @removeViews()
@@ -83,6 +92,12 @@ class Psg.Router extends Backbone.Router
     @refreshPage()
     @addView new Psg.ChatView model: @globalChat
     @addView new Psg.GameListView model: @gameList
+
+  create: ->
+    @refreshPage()
+    @addView new Psg.ChatView model: @globalChat
+    @addView new Psg.GameCreatorView
+      model: @gameCreator
 
   uploadMap: ->
     console.log 'uploadMap'
