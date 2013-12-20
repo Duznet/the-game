@@ -23,6 +23,35 @@ class Psg.User extends Backbone.Model
     @fetch()
     @get('login') and @get('sid')
 
+  getGames: ->
+    @conn.getGames().then (data) =>
+      dfd = new $.Deferred
+      if data.result is 'ok'
+        @games = data.games
+        dfd.resolve()
+      dfd
+
+  isInGame: (id) ->
+    @fetch()
+    game = _.find(@games, (g) => _.find g.players, (p) => p is @get('login'))
+    console.log game
+    if game
+      if id
+        console.log 'game.id: ', game.id.toString()
+        console.log 'id: ', id.toString()
+        game.id.toString() is id.toString()
+    else
+      console.log 'user is not in any game'
+      false
+
+
+  leaveGame: ->
+    @conn.leaveGame()
+
+  joinGame: (gameId) ->
+    @conn.joinGame
+      game: gameId
+
   signup: (login, password) ->
     @conn.signup(login: login, password: password).then (data) =>
       if data.result is 'ok'
@@ -48,3 +77,4 @@ class Psg.User extends Backbone.Model
         @trigger 'signedOut'
       else
         @trigger 'submitFailed', data.result
+

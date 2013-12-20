@@ -8,6 +8,7 @@ class Psg.Router extends Backbone.Router
     'create': 'create'
     'upload-map': 'uploadMap'
     'signout': 'signout'
+    'game/:id': 'game'
 
   initialize: ->
 
@@ -114,3 +115,33 @@ class Psg.Router extends Backbone.Router
   dashboard: ->
     console.log 'dashboard'
     @join()
+
+  game: (id) ->
+    console.log "game #{id}"
+
+    addGameView = =>
+      console.log 'adding game view'
+      @addView new Psg.ChatView
+        model: new Psg.Chat
+          user: @user
+          game: id
+      @addView new Psg.GameView
+        model: new Psg.Game
+          user: @user
+          id: id
+
+    @refreshPage()
+    @user.getGames().then =>
+      console.log 'after getting games'
+      isInGame = @user.isInGame(id)
+      console.log 'user isInGame result: ', isInGame
+      if isInGame
+        console.log 'user is in the game'
+        addGameView()
+      else
+        console.log 'user is not in that game'
+        @user.leaveGame().then (data) =>
+          console.log 'leave game response: ', data
+          if data.result is 'ok' or data.result is 'notInGame'
+            @user.joinGame(id).then (data) =>
+              if data.result is 'ok' then addGameView()
