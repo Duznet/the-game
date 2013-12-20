@@ -12,6 +12,7 @@ class Psg.GameCreatorView extends Backbone.View
     @listenTo @model, 'submitFailed', @onSubmitFailed
     @listenTo @model, 'invalid', @onInvalid
     @listenTo @model, 'mapListUpdated', @onMapListUpdated
+    @listenTo @model, 'created', @onCreated
 
   onSubmitFailed: (result) ->
     switch result
@@ -36,25 +37,27 @@ class Psg.GameCreatorView extends Backbone.View
     for m in mapList
       $selectMap.append m
 
+  onCreated: ->
+    @writeStatus 'success', 'Game successfully created'
+
   getMapList: ->
     @model.maps.map (m) -> "<option value=\"#{m.id}\">#{m.name} (#{m.maxPlayers})</option>"
 
   render: ->
     @model.getMaps().then
     $content = $('#content')
-    # mapList = @getMapList()
     @$el.html @template(maps: '')
     @$el.appendTo $content
 
   writeStatus: (status, text) ->
-    $container = $('#map-upload-status-container')
+    $container = $('#game-create-status')
     if status is 'success'
-      $container.removeClass 'has-error'
-      $container.addClass 'has-success'
+      $container.removeClass 'alert-danger'
+      $container.addClass 'alert-success'
     else
-      $container.removeClass 'has-success'
-      $container.addClass 'has-error'
-    $('#game-create-status').html text
+      $container.removeClass 'alert-success'
+      $container.addClass 'alert-danger'
+    $container.html text
 
   submit: (e) ->
     e.preventDefault()

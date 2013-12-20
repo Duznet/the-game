@@ -96,8 +96,12 @@ class Psg.Router extends Backbone.Router
   create: ->
     @refreshPage()
     @addView new Psg.ChatView model: @globalChat
+    @gameCreator = new Psg.GameCreator
+      user: @user
     @addView new Psg.GameCreatorView
       model: @gameCreator
+
+    @listenTo @gameCreator, 'created', @onGameCreated
 
   uploadMap: ->
     console.log 'uploadMap'

@@ -40,14 +40,14 @@ class Psg.MapUploaderView extends Backbone.View
     @$el.appendTo $content
 
   writeStatus: (status, text) ->
-    $container = $('#map-upload-status-container')
+    $container = $('#map-upload-status')
     if status is 'success'
-      $container.removeClass 'has-error'
-      $container.addClass 'has-success'
+      $container.removeClass 'alert-danger'
+      $container.addClass 'alert-success'
     else
-      $container.removeClass 'has-success'
-      $container.addClass 'has-error'
-    $('#map-upload-status').html text
+      $container.removeClass 'alert-success'
+      $container.addClass 'alert-danger'
+    $container.html text
 
   submit: (e) ->
     e.preventDefault()
