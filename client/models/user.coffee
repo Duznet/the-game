@@ -28,7 +28,10 @@ class Psg.User extends Backbone.Model
       dfd = new $.Deferred
       if data.result is 'ok'
         @games = data.games
-        dfd.resolve()
+        @conn.getMaps().then (data) =>
+          if data.result is 'ok'
+            @maps = data.maps
+            dfd.resolve()
       dfd
 
   isInGame: (id) ->
@@ -37,9 +40,9 @@ class Psg.User extends Backbone.Model
     console.log game
     if game
       if id
-        console.log 'game.id: ', game.id.toString()
-        console.log 'id: ', id.toString()
-        game.id.toString() is id.toString()
+        console.log 'game.id: ', game.id
+        console.log 'id: ', id
+        parseInt(game.id) is parseInt(id)
     else
       console.log 'user is not in any game'
       false

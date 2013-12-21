@@ -1,61 +1,37 @@
-class window.Drawer
+class Psg.GameView extends Backbone.View
 
-  constructor: (@canvas) ->
-    @dfd = new $.Deferred
-    @conn = new Psg.GameConnection config.gameUrl
-    @gen = new Psg.Generator 'demo'
+  template: _.template $('#game-template').html()
 
-    @map =
-      name: @gen.getStr()
-      maxPlayers: 4
-      map: ["#..........................#",
-            "#......1...$...2...........#",
-            "#.....###########..........#",
-            "#..........................#",
-            "#...2..............1.......#",
-            "######################.....#",
-            "#..........................#",
-            "############################",
-            ]
+  initialize: ->
+    @render()
+    @listenTo @model, 'gameReady', @startGame
 
-    @user = @gen.getUser()
-    console.log "generated user: ", @user
-    @conn.startTesting('async')
-    .then =>
-      @user.signup()
-    .then (data) =>
-      @user.signin()
-    .then =>
-      @user.uploadMap(@map.name, @map.maxPlayers, @map.map)
-    .then =>
-      @user.getMaps()
-    .then (data) =>
-      maps = data.maps.filter (m) => m.name is @map.name
-      @map = maps[0]
-      console.log "map is ", @map
-      @user.createGame(@gen.getStr(), @map.maxPlayers, @map.id)
-    .then (data) =>
-      console.log "game created"
-      if data.result isnt "ok"
-        throw new Error "Could not start the game"
-      @dfd.resolve()
+  render: ->
+    @$el.appendTo('#content')
+    @$el.html @template()
 
   drawMap: ->
+    mapData = @model.map.map
     console.log "drawing map"
-    @scale = @canvas.width / @map.map[0].length
+    $canvas = $('#game-canvas')
+    console.log 'canvas: ', $canvas
+    @scale = $canvas.width() / mapData[0].length
     paper.install window
-    paper.setup @canvas.id
-    console.log "map is ", @map
+    paper.setup 'game-canvas'
     console.log "scale is ", @scale
-    for row, i in @map.map
-      for col, j in @map.map[i]
+    console.log 'mapData: ', mapData
+    for row, i in mapData
+      for col, j in row
+        console.log 'col: ', col
         rect = new Shape.Rectangle new Point(j * @scale, i * @scale), new Size(@scale, @scale)
         if col is '#'
           rect.strokeColor = 'black'
+          console.log 'rect: ', rect
         else if '1' <= col.toString() <= '9'
           rect.fillColor = 'yellow'
         else if col is '$'
           rect.fillColor = 'blue'
+    console.log 'map drawn'
 
   startGame: ->
     @drawMap()
@@ -65,6 +41,7 @@ class window.Drawer
     @playerPosition = new Point(0, 0)
     @v = new Point(0, 0)
     @gc = new Psg.GameplayConnection config.gameplayUrl
+    sid = @model.get('user').get('sid')
     @tick = 0
     teorFps = Math.round 1000 / config.defaultGameConsts.tickSize
     fps = 0
@@ -77,11 +54,11 @@ class window.Drawer
       fps = 0
     , config.fpsCalcInterval
     setInterval =>
-      if dx isnt 0 or dy isnt 0 then @gc.move @user.sid, @tick, dx, dy
+      if dx isnt 0 or dy isnt 0 then @gc.move sid, @tick, dx, dy
     , config.defaultGameConsts.tickSize / 2
     @playerVelocity = new Point(0, 0)
     @gc.onopen = =>
-      @gc.move @user.sid, @tick, 0, 0
+      @gc.move sid, @tick, 0, 0
     @gc.onmessage = (data) =>
       if data.tick < @tick then return
       fps++
@@ -126,3 +103,4 @@ class window.Drawer
     tool.attach 'keyup', onKeyUp
     view.attach 'frame', onFrame
     console.log "game started"
+

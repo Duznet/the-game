@@ -125,10 +125,12 @@ class Psg.Router extends Backbone.Router
         model: new Psg.Chat
           user: @user
           game: id
-      @addView new Psg.GameView
-        model: new Psg.Game
+      gameModel = new Psg.Game
           user: @user
           id: id
+      @addView new Psg.GameView
+        model: gameModel
+      gameModel.ready()
 
     @refreshPage()
     @user.getGames().then =>
