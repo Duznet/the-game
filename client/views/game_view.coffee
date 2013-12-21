@@ -35,11 +35,12 @@ class Psg.GameView extends Backbone.View
 
   startGame: ->
     @drawMap()
-    player = new Shape.Rectangle new Point(15, 15), new Size(@scale, @scale)
-    player.strokeColor = 'black'
-    player.fillColor = 'red'
-    @playerPosition = new Point(0, 0)
-    @v = new Point(0, 0)
+    @pViews = []
+    # player = new Shape.Rectangle new Point(15, 15), new Size(@scale, @scale)
+    # player.strokeColor = 'black'
+    # player.fillColor = 'red'
+    # @playerPosition = new Point(0, 0)
+    # @v = new Point(0, 0)
     @gc = new Psg.GameplayConnection config.gameplayUrl
     sid = @model.get('user').get('sid')
     @tick = 0
@@ -56,7 +57,7 @@ class Psg.GameView extends Backbone.View
     setInterval =>
       if dx isnt 0 or dy isnt 0 then @gc.move sid, @tick, dx, dy
     , config.defaultGameConsts.tickSize / 2
-    @playerVelocity = new Point(0, 0)
+    # @playerVelocity = new Point(0, 0)
     @gc.onopen = =>
       @gc.move sid, @tick, 0, 0
     @gc.onmessage = (data) =>
@@ -64,8 +65,17 @@ class Psg.GameView extends Backbone.View
       fps++
       @tick = data.tick
       # @v = x: data.players[0].x * @scale, y: data.players[0].y * @scale
-      @playerPosition = new Point(@scale * data.players[0].x, @scale * data.players[0].y)
-      @playerVelocity = new Point(@scale * data.players[0].vx, @scale * data.players[0].vy)
+      players = data.players
+      for p, i in players
+        if i is @pViews.length
+          @pViews.push new Shape.Rectangle new Point(0, 0), new Size(@scale, @scale)
+          @pViews[i].strokeColor = 'black'
+          @pViews[i].fillColor = 'red'
+        @pViews[i].position.x = @scale * p.x
+        @pViews[i].position.y = @scale * p.y
+
+      # @playerPosition = new Point(@scale * data.players[0].x, @scale * data.players[0].y)
+      # @playerVelocity = new Point(@scale * data.players[0].vx, @scale * data.players[0].vy)
 
     onKeyDown = (event) =>
       if /^[wц]$|up|space/.test event.key
@@ -90,14 +100,17 @@ class Psg.GameView extends Backbone.View
         dx = 0
 
     onFrame = (event) =>
-      if @playerPosition.x isnt player.position.x or @playerPosition.y isnt player.position.y
-        player.position = @playerPosition
-      else
-        t = 1000 / config.defaultGameConsts.tickSize * event.delta
-        if config.interpolate
-          player.position.x += t * @playerVelocity.x * (lastFps / teorFps)
-          player.position.y += t * @playerVelocity.y * (lastFps / teorFps)
-          @playerPosition = player.position
+      for p in @pViews
+        p.position = p.position
+
+      # if @playerPosition.x isnt player.position.x or @playerPosition.y isnt player.position.y
+      #   player.position = @playerPosition
+      # else
+      #   t = 1000 / config.defaultGameConsts.tickSize * event.delta
+      #   if config.interpolate
+      #     player.position.x += t * @playerVelocity.x * (lastFps / teorFps)
+      #     player.position.y += t * @playerVelocity.y * (lastFps / teorFps)
+      #     @playerPosition = player.position
 
     tool.attach 'keydown', onKeyDown
     tool.attach 'keyup', onKeyUp
