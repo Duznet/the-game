@@ -475,6 +475,22 @@ describe 'POST API using server', ->
             expect(data.result).to.equal "badGame"
             done()
 
+        it 'should respond without messages sent to in-game chat when tyring to receive messages from the global one', (done) ->
+          lastTime = 0
+          conn.sendMessage(gameGuest.sid, '', 'Global hi')
+          .then ->
+            conn.getMessages(gameGuest.sid, '', 0)
+          .then (data) ->
+            lastTime = data.messages[data.messages.length - 1].time
+            conn.sendMessage(gameGuest.sid, game.id, 'In-game hi')
+          .then (data) ->
+            conn.getMessages(gameGuest.sid, '', lastTime)
+          .then (data) ->
+            console.log 'messages in global chat: ', data.messages
+            expect(data.messages.length).to.equal 1
+            done()
+
+
 
   describe 'on Maps', ->
 
