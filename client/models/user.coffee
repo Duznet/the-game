@@ -23,57 +23,41 @@ class Psg.User extends Backbone.Model
     @fetch()
     @get('login') and @get('sid')
 
-  findGame: ->
-    games = []
-    maps = []
+  findCurGame: (games) ->
+    _.find(games, (g) => _.find g.players, (p) => p is @get('login'))
+
+  enterGame: ->
+    console.log 'entering the game'
     @conn.getGames()
     .then (data) =>
-      if data.result is 'ok'
-        games = data.games
-        @conn.getMaps()
+      @game = @findCurGame(data.games)
+      if not @game
+        console.log 'user suddenly is not playing any game'
+        return
+      @conn.getMaps()
     .then (data) =>
-      if data.result is 'ok'
-        maps = data.maps
-        game = _.find(games, (g) => _.find g.players, (p) => p is @get('login'))
-        game.map = _.find(maps, (m) => parseInt(m.id) is parseInt(game.map))
-        console.log 'game: ', game
-        if game
-          @game = game
-          @trigger 'enteredToGame', @game.id
-        else
-          @game = null
+      @game.map = _.find data.maps, (m) => parseInt(m.id) is @game.map
+      console.log 'entered the game'
+      @trigger 'enteredGame', @game.id
 
-  getGames: ->
+  joinGame: (gameId) ->
     @conn.getGames().then (data) =>
-      dfd = new $.Deferred
-      if data.result is 'ok'
-        @games = data.games
-        @conn.getMaps().then (data) =>
-          if data.result is 'ok'
-            @maps = data.maps
-            dfd.resolve()
-      dfd
-
-  isInGame: (id) ->
-    @fetch()
-    game = _.find(@games, (g) => _.find g.players, (p) => p is @get('login'))
-    console.log game
-    if game
-      if id
-        console.log 'game.id: ', game.id
-        console.log 'id: ', id
-        parseInt(game.id) is parseInt(id)
-    else
-      console.log 'user is not in any game'
-      false
-
+      console.log 'checking if user is playing this game'
+      game = @findCurGame(data.games)
+      if game and gameId is game.id
+        console.log 'user is playing this game'
+        @enterGame()
+      else
+        console.log 'user is not playing this game'
+        @conn.leaveGame()
+        .then =>
+          @conn.joinGame(game: gameId)
+        .then (data) =>
+          console.log 'joining game'
+          if data.result is 'ok' then @enterGame()
 
   leaveGame: ->
     @conn.leaveGame()
-
-  joinGame: (gameId) ->
-    @conn.joinGame
-      game: gameId
 
   signup: (login, password) ->
     @conn.signup(login: login, password: password).then (data) =>

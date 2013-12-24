@@ -10,7 +10,7 @@ class Psg.GameView extends Backbone.View
     @$el.html @template()
 
   drawMap: ->
-    mapData = @model.map.map
+    mapData = @model.game.map.map
     console.log "drawing map"
     $canvas = $('#game-canvas')
     console.log 'canvas: ', $canvas

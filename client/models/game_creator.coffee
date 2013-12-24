@@ -28,6 +28,7 @@ class Psg.GameCreator extends Backbone.Model
       map: @get('map')
     ).then (data) =>
       if data.result is 'ok'
-        @user.findGame()
+        console.log 'game created'
+        @get('user').enterGame()
       else
         @trigger 'submitFailed', data.result

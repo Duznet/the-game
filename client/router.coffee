@@ -36,7 +36,7 @@ class Psg.Router extends Backbone.Router
 
     @listenTo @user, 'authenticated', @onAuthenticated
     @listenTo @user, 'signedOut', @onSignedOut
-    @listenTo @user, 'enteredToGame', @onEnteredToGame
+    @listenTo @user, 'enteredGame', @onEnteredGame
 
   onAuthenticated: ->
     @navigate 'dashboard', trigger: true
@@ -45,11 +45,9 @@ class Psg.Router extends Backbone.Router
     @user.storage.clear()
     @navigate 'auth', trigger: true
 
-  onEnteredToGame: (id) ->
-    console.log 'entered to game'
+  onEnteredGame: (id) ->
     @navigate "game/#{id}"
     @refreshPage()
-    console.log 'adding game view'
     @addView new Psg.ChatView
       model: new Psg.Chat
         user: @user
@@ -130,19 +128,4 @@ class Psg.Router extends Backbone.Router
 
   game: (id) ->
     console.log "game #{id}"
-
-    @refreshPage()
-    @user.getGames().then =>
-      console.log 'after getting games'
-      isInGame = @user.isInGame(id)
-      console.log 'user isInGame result: ', isInGame
-      if isInGame
-        console.log 'user is in the game'
-        addGameView()
-      else
-        console.log 'user is not in that game'
-        @user.leaveGame().then (data) =>
-          console.log 'leave game response: ', data
-          if data.result is 'ok' or data.result is 'notInGame'
-            @user.joinGame(id).then (data) =>
-              if data.result is 'ok' then addGameView()
+    @user.joinGame parseInt id
