@@ -2,6 +2,8 @@ window.config =
   gameUrl: "http://localhost:5000"
   gameplayUrl: "ws://localhost:5000/websocket"
   websocketMode: "sync"
+  debug:
+    pushingViewsInfo: false
   defaultGameConsts:
     tickSize: 30
     accuracy: 0.000001

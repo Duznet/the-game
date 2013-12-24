@@ -79,14 +79,14 @@ class Psg.Router extends Backbone.Router
 
   addView: (view) ->
     @views.push view
-    console.log 'pushing v: ', view
+    if config.debug.pushingViewsInfo then console.log 'pushing v: ', view
     if view.model and typeof view.model.startRefreshing isnt 'undefined'
-      console.log 'and start refreshing it'
+      if config.debug.pushingViewsInfo then console.log 'and start refreshing it'
       view.model.startRefreshing()
 
   removeViews: ->
     for v in @views
-      console.log 'removing v: ', v
+      if config.debug.pushingViewsInfo then console.log 'removing v: ', v
       v.remove()
       if v.model and typeof v.model.stopRefreshing isnt 'undefined'
         v.model.stopRefreshing()
