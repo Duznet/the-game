@@ -13,7 +13,6 @@ class Psg.GameView extends Backbone.View
     mapData = @model.game.map.map
     console.log "drawing map"
     $canvas = $('#game-canvas')
-    console.log 'canvas: ', $canvas
     @scale = $canvas.width() / mapData[0].length
     paper.install window
     paper.setup 'game-canvas'
@@ -21,7 +20,6 @@ class Psg.GameView extends Backbone.View
     console.log 'mapData: ', mapData
     for row, i in mapData
       for col, j in row
-        console.log 'col: ', col
         rect = new Shape.Rectangle new Point(j * @scale, i * @scale), new Size(@scale, @scale)
         if col is '#'
           rect.strokeColor = 'black'
@@ -70,6 +68,7 @@ class Psg.GameView extends Backbone.View
           @pViews.push new Shape.Rectangle new Point(0, 0), new Size(@scale, @scale)
           @pViews[i].strokeColor = 'black'
           @pViews[i].fillColor = 'red'
+          @pViews[i].onFrame = (event) -> @position = @position
         @pViews[i].position.x = @scale * p.x
         @pViews[i].position.y = @scale * p.y
 
@@ -98,10 +97,6 @@ class Psg.GameView extends Backbone.View
       if /^[dв]$|right/.test event.key
         dx = 0
 
-    onFrame = (event) =>
-      for p in @pViews
-        p.position = p.position
-
       # if @playerPosition.x isnt player.position.x or @playerPosition.y isnt player.position.y
       #   player.position = @playerPosition
       # else
@@ -113,6 +108,5 @@ class Psg.GameView extends Backbone.View
 
     tool.attach 'keydown', onKeyDown
     tool.attach 'keyup', onKeyUp
-    view.attach 'frame', onFrame
     console.log "game started"
 
