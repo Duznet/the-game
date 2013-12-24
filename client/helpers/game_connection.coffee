@@ -17,6 +17,10 @@ class Psg.GameConnection extends Psg.Connection
       if data.result is 'badSid'
         @trigger 'sessionLost'
         dfd.resolve data
+      if data.result is 'badRequest'
+        console.log 'action: ', action
+        console.log 'params: ', params
+        throw new Error 'got badRequest result'
     req
 
   startTesting: (params) ->
