@@ -28,12 +28,6 @@ class Psg.GameCreator extends Backbone.Model
       map: @get('map')
     ).then (data) =>
       if data.result is 'ok'
-        @conn.getGames().then (data) =>
-          login = @get('user').get('login')
-          games = data.games.filter (g) ->
-            players = g.players.filter (p) -> p is login
-            players.length > 0
-          id = games[0].id
-          @trigger 'created', id
+        @user.findGame()
       else
         @trigger 'submitFailed', data.result

@@ -36,7 +36,7 @@ class Psg.Router extends Backbone.Router
 
     @listenTo @user, 'authenticated', @onAuthenticated
     @listenTo @user, 'signedOut', @onSignedOut
-    @listenTo @gameCreator, 'created', @onGameCreated
+    @listenTo @user, 'enteredToGame', @onEnteredToGame
 
   onAuthenticated: ->
     @navigate 'dashboard', trigger: true
@@ -45,9 +45,10 @@ class Psg.Router extends Backbone.Router
     @user.storage.clear()
     @navigate 'auth', trigger: true
 
-  onGameCreated: (id) ->
-    console.log 'game created'
-    @navigate "game/#{id}", trigger: true
+  onEnteredToGame: ->
+    console.log 'entered to game'
+    id = @user.game.id
+    @navigate "game/#{id}"
 
   clearPage: ->
     @removeViews()

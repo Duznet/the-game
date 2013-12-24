@@ -23,6 +23,26 @@ class Psg.User extends Backbone.Model
     @fetch()
     @get('login') and @get('sid')
 
+  findGame: ->
+    games = []
+    maps = []
+    @conn.getGames()
+    .then (data) =>
+      if data.result is 'ok'
+        games = data.games
+        @conn.getMaps()
+    .then (data) =>
+      if data.result is 'ok'
+        maps = data.maps
+        game = _.find(games, (g) => _.find g.players, (p) => p is @get('login'))
+        game.map = _.find(maps, (m) => parseInt(m.id) is parseInt(game.map))
+        console.log 'game: ', game
+        if game
+          @game = game
+          @trigger 'enteredToGame', @game.id
+        else
+          @game = null
+
   getGames: ->
     @conn.getGames().then (data) =>
       dfd = new $.Deferred
