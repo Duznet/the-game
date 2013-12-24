@@ -45,10 +45,21 @@ class Psg.Router extends Backbone.Router
     @user.storage.clear()
     @navigate 'auth', trigger: true
 
-  onEnteredToGame: ->
+  onEnteredToGame: (id) ->
     console.log 'entered to game'
-    id = @user.game.id
     @navigate "game/#{id}"
+    @refreshPage()
+    console.log 'adding game view'
+    @addView new Psg.ChatView
+      model: new Psg.Chat
+        user: @user
+        game: id
+    gameView = new Psg.GameView
+      model: new Psg.Game
+        user: @user
+        id: id
+    @addView gameView
+    gameView.startGame()
 
   clearPage: ->
     @removeViews()
@@ -119,19 +130,6 @@ class Psg.Router extends Backbone.Router
 
   game: (id) ->
     console.log "game #{id}"
-
-    addGameView = =>
-      console.log 'adding game view'
-      @addView new Psg.ChatView
-        model: new Psg.Chat
-          user: @user
-          game: id
-      gameModel = new Psg.Game
-          user: @user
-          id: id
-      @addView new Psg.GameView
-        model: gameModel
-      gameModel.ready()
 
     @refreshPage()
     @user.getGames().then =>

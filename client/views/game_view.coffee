@@ -4,7 +4,6 @@ class Psg.GameView extends Backbone.View
 
   initialize: ->
     @render()
-    @listenTo @model, 'gameReady', @startGame
 
   render: ->
     @$el.appendTo('#content')

@@ -8,7 +8,3 @@ class Psg.Game extends Backbone.Model
     @map = _.find @get('user').maps, (m) => parseInt(m.id) is parseInt(@game.id)
     console.log 'map: ', @map
 
-
-  ready: ->
-    @trigger 'gameReady'
-
