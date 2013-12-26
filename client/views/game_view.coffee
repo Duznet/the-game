@@ -69,8 +69,8 @@ class Psg.GameView extends Backbone.View
           @pViews[i].strokeColor = 'black'
           @pViews[i].fillColor = 'red'
           @pViews[i].onFrame = (event) -> @position = @position
-        @pViews[i].position.x = @scale * p.x
-        @pViews[i].position.y = @scale * p.y
+        @pViews[i].position.x = @scale * p[0]
+        @pViews[i].position.y = @scale * p[1]
 
       # @playerPosition = new Point(@scale * data.players[0].x, @scale * data.players[0].y)
       # @playerVelocity = new Point(@scale * data.players[0].vx, @scale * data.players[0].vy)
