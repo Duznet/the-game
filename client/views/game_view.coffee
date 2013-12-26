@@ -38,8 +38,8 @@ class Psg.GameView extends Backbone.View
     # player.fillColor = 'red'
     # @playerPosition = new Point(0, 0)
     # @v = new Point(0, 0)
-    @gc = new Psg.GameplayConnection config.gameplayUrl
     sid = @model.get('user').get('sid')
+    @gc = new Psg.GameplayConnection sid: sid
     @tick = 0
     teorFps = Math.round 1000 / config.defaultGameConsts.tickSize
     fps = 0
@@ -52,11 +52,11 @@ class Psg.GameView extends Backbone.View
       fps = 0
     , config.fpsCalcInterval
     setInterval =>
-      if dx isnt 0 or dy isnt 0 then @gc.move sid, @tick, dx, dy
+      if dx isnt 0 or dy isnt 0 then @gc.move dx: dx, dy: dy
     , config.defaultGameConsts.tickSize / 2
     # @playerVelocity = new Point(0, 0)
     @gc.onopen = =>
-      @gc.move sid, @tick, 0, 0
+      @gc.move dx: 0, dy: 0
     @gc.onmessage = (data) =>
       if data.tick < @tick then return
       fps++
