@@ -8,18 +8,37 @@ import sys
 
 import copy
 
+class Projectile:
+    def __init__(self, owner, point, v, weapon):
+        self.owner = owner
+        self.point = point
+        self.v = v
+        self.time = 0
+        self.weapon = weapon
+
+    def to_array(self):
+        return [self.point.x - 1, self.point.y - 1, self.v.x, self.v.y, self.weapon, self.time]
+
 class Player:
-    DEFAULT_HP = 100
+    MAX_HP = 100
     MAX_VELOCITY = 0.2
 
-    def __init__(self, point):
+    def __init__(self, name, point):
+        self.name = name
         self.point = point
         self.velocity = Point(0, 0)
-        self.hp = self.DEFAULT_HP
+        self.hp = self.MAX_HP
         self.score = 0
         self.moved = False
         self.got_action = False
         self.delta = Point(0, 0)
+        self.ammo = {'K': 0, 'R': 0, 'P': 0, 'M': 0, 'A': 0}
+        self.weapon = 'K'
+        self.angle = -1
+
+    def normalize_hp(self):
+        self.hp = min(self.hp, self.MAX_HP)
+        self.hp = max(self.hp, 0)
 
     def normalize_v(self):
         x = self.velocity.x
@@ -47,8 +66,12 @@ class Game:
         self.first_spawn = Point(1, 1)
         self.players_ = {}
         self.players_order = []
+        self.player_logins = []
         self.tick = 0
         self.first_portal = {}
+        self.items = []
+        self.item_id = {}
+        self.projectiles = []
 
         self.map = normalize_map(map, WALL)
 
@@ -66,13 +89,18 @@ class Game:
 
                     last_spawn = Point(x, y)
 
-                if re.match(PORTAL, cell):
+                elif is_teleport(cell):
                     if last_portal.get(cell):
                         self.NEXT_PORTAL[last_portal[cell]] = Point(x, y)
                     else:
                         self.first_portal[cell] = Point(x, y)
 
                     last_portal[cell] = Point(x, y)
+
+                elif is_weapon(cell) or is_health(cell):
+                    self.item_id[Point(x, y)] = len(self.items)
+                    self.items.append(0)
+
 
         self.NEXT_SPAWN[last_spawn] = self.first_spawn
 
@@ -88,16 +116,60 @@ class Game:
                 return False
 
         self.tick += 1
+        for item in self.items:
+            item -= 1
+            item = max(0, item)
+
+        self.move_projectiles()
+
         self.moveall()
 
         return True
+
+    def move_projectiles(self):
+        for i in range(len(self.projectiles)):
+            self.move_projectile(i)
+
+        self.projectiles = list(filter(None, self.projectiles))
+
+        for p in self.projectiles:
+            p.time += 1
+
+    def move_projectile(self, id):
+        projectile = self.projectiles[id]
+        bullet_path = Segment(projectile.point, projectile.point + projectile.v)
+
+        curcell = cell_coords(projectile.point)
+        dir = Point(sign(projectile.v.x), sign(projectile.v.y))
+        cells = [curcell + Point(x, y) for x in [0, dir.x] for y in [0, dir.y] if x != 0 or y != 0]
+
+        collisions = []
+        for cell in cells:
+            cell = cell_coords(cell)
+            cellval = self.map[cell.y][cell.x]
+
+            if cellval == WALL:
+                self.projectiles[id] = None
+                return
+
+
+        for player in self.players_.values():
+            if player == projectile.owner:
+                continue
+            if bullet_path.intersects_with_player(player.point):
+                player.hp -= DAMAGE[projectile.weapon]
+                player.normalize_hp()
+
+                self.projectiles[id] = None
+
+        projectile.point += projectile.v
 
     def update_players(self):
         for player in self.players_.values():
             player.got_action = False
 
 
-    def get_teleport_collisions(self, player, v):
+    def get_item_collisions(self, player, v):
         curcell = cell_coords(player)
 
         dir = Point(sign(v.x), sign(v.y))
@@ -107,37 +179,53 @@ class Game:
         collisions = []
         for cell in cells:
             cell = cell_coords(cell)
-            if is_teleport(self.map[cell.y][cell.x]):
-                collisions.append(collision_with_point(player, v, cell + Point(0.5, 0.5)))
+            cellval = self.map[cell.y][cell.x]
+            if cellval != WALL and cellval != SPACE:
+                collision = collision_with_point(player, v, cell + Point(0.5, 0.5))
 
-        collisions = list(filter(None, collisions))
+                if not collision:
+                    continue
 
-        if collisions:
-            first = min(collisions, key=lambda col: col.time)
+                if is_teleport(cellval):
+                    collisions.append(TeleportEvent(collision.time, self.NEXT_PORTAL[cell] + Point(SIDE, SIDE)))
+                elif is_weapon(cellval):
+                    collisions.append(WeaponPick(collision.time, self.items, self.item_id[cell], cellval))
+                elif is_health(cellval):
+                    collisions.append(HealthPick(collision.time, self.items, self.item_id[cell]))
 
-            return TeleportEvent(first.time, self.NEXT_PORTAL[cell_coords(first.segment.p1)] + Point(0.5, 0.5))
-        else:
-            return None
 
+        return collisions
+
+
+    def get_pick_events(self, player, v):
+        pass
 
     def get_events(self, player, v):
-        events = []
-        events.append(get_wall_collisions(self.map, player, v))
-        events.append(self.get_teleport_collisions(player, v))
-        print(events[-1])
+        events = get_wall_collisions(self.map, player, v)
+        events += self.get_item_collisions(player, v)
 
-        return sorted(filter(None, events), key=lambda event: event.time)
+        return events
 
     def players(self):
-        result = [{
-            'x': float(self.players_[id].point.x - 1),
-            'y': float(self.players_[id].point.y - 1),
-            'vx': float(self.players_[id].velocity.x),
-            'vy': float(self.players_[id].velocity.y),
-            'hp': self.players_[id].hp
-            } for id in self.players_order]
+        result = [[
+                    float(self.players_[id].point.x - 1),
+                    float(self.players_[id].point.y - 1),
+                    float(self.players_[id].velocity.x),
+                    float(self.players_[id].velocity.y),
+                    self.players_[id].weapon,
+                    self.players_[id].angle,
+                    self.players_[id].name,
+                    self.players_[id].hp,
+                    self.players_[id].score,
+                    self.players_[id].score
+                    ] for id in self.players_order]
         print(result)
         return result
+
+    def active_items(self):
+        items = [i for i in range(len(self.items)) if self.items[i] == 0]
+        print(items)
+        return items
 
     def player_ids(self):
         return self.players_order
@@ -145,8 +233,8 @@ class Game:
     def players_count(self):
         return len(self.players_order)
 
-    def add_player(self, id):
-        self.players_[id] = Player(self.first_spawn + self.PLAYER_POS)
+    def add_player(self, id, login):
+        self.players_[id] = Player(login, self.first_spawn + self.PLAYER_POS)
         self.players_order.append(id)
         print("add player: ", self.players_[id].got_action)
         return self.players_[id]
@@ -175,6 +263,21 @@ class Game:
         player.delta.y = dy
 
         return player
+
+    def fire(self, id, dx, dy):
+        player = self.players_[id]
+
+        dir = Point(dx, dy)
+        if (abs(dir) == 0 or player.ammo[player.weapon] == 0):
+            return player
+
+        dir /= abs(dir)
+
+        player.ammo[player.weapon] -= 1
+
+        self.projectiles.append(Projectile(player, player.point, dir * PROJV[player.weapon], player.weapon))
+        return player
+
 
     def fall_down_if_need(self, id):
         player = self.players_[id]
@@ -215,7 +318,7 @@ class Game:
 
         x = player.velocity.x
         y = player.velocity.y
-        x = 0 if brake_v.x > x else x - brake_v.x
+        x = 0 if abs(brake_v.x) > abs(x) else x - brake_v.x
         player.velocity = Point(x, y)
 
         print("result v: ", player.velocity)
@@ -243,16 +346,27 @@ class Game:
 
         t = 0
         events = self.get_events(player.point, player.velocity)
+
         while events and t < 1:
+            refresh = False
+            tevent = 0
             for event in events:
-                event.handle(player)
-                if event.require_event_refresh():
+                tevent = max(tevent, event.time)
+                if t + tevent > 1:
                     break
 
-            t += event.time
+                print(event)
+                event.handle(player)
 
-            if t < 1:
-                events = self.get_events(player.point, player.velocity * (1 - t))
+                if event.require_event_refresh():
+                    events = self.get_events(player.point, player.velocity * (1 - t - tevent - EPS))
+                    refresh = True
+                    break
+
+            t += tevent
+            if not refresh:
+                events = []
+
 
         if t < 1:
             player.point = player.velocity * (1 - t) + player.point
