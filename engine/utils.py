@@ -7,6 +7,9 @@ import re
 def cell_coords(point):
     return Point(floor(point.x), floor(point.y))
 
+def dist(first, second):
+    return abs(second - first)
+
 def sign(x):
     return 0 if x == 0 else x / abs(x)
 

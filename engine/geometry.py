@@ -11,15 +11,19 @@ class Segment:
 
 
     def intersects_with_player(self, player):
+        ipoint = [0, 0]
 
         for i in range(2):
             coord = list(sorted([self.p1.args[i], self.p2.args[i]]))
             pcoord = list(sorted([player.args[i] - SIDE, player.args[i] + SIDE]))
 
             if pcoord[1] < coord[0] or pcoord[0] > coord[1]:
-                return False
+                return None
 
-        return True
+            ipoint[i] = pcoord[0] if coord[0] <= pcoord[0] and pcoord[0] <= coord[1] else pcoord[1]
+
+
+        return Point(ipoint)
 
 
 class Point:

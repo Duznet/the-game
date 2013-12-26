@@ -23,18 +23,22 @@ class Player:
     MAX_HP = 100
     MAX_VELOCITY = 0.2
 
-    def __init__(self, name, point):
+    def __init__(self, name, first_spawn, next_spawn):
+        self.next_spawn = next_spawn
         self.name = name
-        self.point = point
         self.velocity = Point(0, 0)
         self.hp = self.MAX_HP
-        self.score = 0
+        self.kills = 0
+        self.deaths = 0
         self.moved = False
         self.got_action = False
         self.delta = Point(0, 0)
-        self.ammo = {'K': 0, 'R': 0, 'P': 0, 'M': 0, 'A': 0}
-        self.weapon = 'K'
+        self.ammo = {KNIFE: 0, ROCKET: 0, PISTOL: 0, MGUN: 0, RAILS: 0}
+        self.weapon = KNIFE
         self.angle = -1
+
+        self.last_spawn = first_spawn
+        self.point = first_spawn + Point(SIDE, SIDE)
 
     def normalize_hp(self):
         self.hp = min(self.hp, self.MAX_HP)
@@ -53,6 +57,21 @@ class Player:
 
         self.velocity = Point(x, y)
         return self
+
+    def spawn(self):
+        self.last_spawn = self.next_spawn[self.last_spawn]
+        self.point = self.last_spawn + Point(SIDE, SIDE)
+
+    def die(self):
+        self.deaths += 1
+        self.spawn()
+
+    def is_dead(self):
+        return self.hp == 0
+
+    def damage(self, value):
+        self.hp -= value
+        self.normalize_hp()
 
 class Game:
     DEFAULT_VELOCITY = 0.02
@@ -103,6 +122,7 @@ class Game:
 
 
         self.NEXT_SPAWN[last_spawn] = self.first_spawn
+        print(self.NEXT_SPAWN)
 
         for key in last_portal.keys():
             lp = last_portal.get(key)
@@ -127,16 +147,15 @@ class Game:
         return True
 
     def move_projectiles(self):
-        for i in range(len(self.projectiles)):
-            self.move_projectile(i)
+        self.projectiles = list(filter(lambda x: x.v != Point(0, 0) and not (x.weapon == KNIFE and x.time > 0), self.projectiles))
 
-        self.projectiles = list(filter(None, self.projectiles))
+        for proj in self.projectiles:
+            self.move_projectile(proj)
 
         for p in self.projectiles:
             p.time += 1
 
-    def move_projectile(self, id):
-        projectile = self.projectiles[id]
+    def move_projectile(self, projectile):
         bullet_path = Segment(projectile.point, projectile.point + projectile.v)
 
         curcell = cell_coords(projectile.point)
@@ -148,19 +167,31 @@ class Game:
             cell = cell_coords(cell)
             cellval = self.map[cell.y][cell.x]
 
-            if cellval == WALL:
-                self.projectiles[id] = None
+            intersection = bullet_path.intersects_with_player(cell + Point(SIDE, SIDE))
+            if cellval == WALL and intersection:
+                if projectile.weapon == ROCKET:
+                    self.burst(intersection)
+
+                projectile.v = Point(0, 0)
                 return
 
 
         for player in self.players_.values():
             if player == projectile.owner:
                 continue
-            if bullet_path.intersects_with_player(player.point):
-                player.hp -= DAMAGE[projectile.weapon]
-                player.normalize_hp()
 
-                self.projectiles[id] = None
+            intersection = bullet_path.intersects_with_player(cell + Point(SIDE, SIDE))
+            if intersection:
+                player.damage(DAMAGE[projectile.weapon])
+
+                if projectile.weapon == ROCKET:
+                    self.burst(intersection)
+
+                if player.is_dead():
+                    player.die()
+                    projectile.owner.kills += 1
+
+                projectile.v = Point(0, 0)
 
         projectile.point += projectile.v
 
@@ -216,8 +247,8 @@ class Game:
                     self.players_[id].angle,
                     self.players_[id].name,
                     self.players_[id].hp,
-                    self.players_[id].score,
-                    self.players_[id].score
+                    self.players_[id].kills,
+                    self.players_[id].deaths
                     ] for id in self.players_order]
         print(result)
         return result
@@ -234,7 +265,11 @@ class Game:
         return len(self.players_order)
 
     def add_player(self, id, login):
-        self.players_[id] = Player(login, self.first_spawn + self.PLAYER_POS)
+        self.players_[id] = Player(
+            login,
+            self.NEXT_SPAWN[self.players_[self.players_order[-1]].last_spawn] if self.players_ else self.first_spawn,
+            self.NEXT_SPAWN)
+
         self.players_order.append(id)
         print("add player: ", self.players_[id].got_action)
         return self.players_[id]
@@ -273,7 +308,7 @@ class Game:
 
         dir /= abs(dir)
 
-        player.ammo[player.weapon] -= 1
+        # player.ammo[player.weapon] -= 1
 
         self.projectiles.append(Projectile(player, player.point, dir * PROJV[player.weapon], player.weapon))
         return player
@@ -294,6 +329,13 @@ class Game:
         player.velocity = Point(player.velocity.x, y)
 
         return player
+
+    def burst(self, point):
+        for player in self.players_.values():
+            if dist(player.point, point) <= BURSTR:
+                player.v = player.point - point
+                player.v *= BURSTV / BURSTR
+                player.damage(BURSTD)
 
     def brake_if_not_moved(self, id):
         player = self.players_[id]
