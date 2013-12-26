@@ -87,8 +87,8 @@ class window.Drawer
       fps++
       @tick = data.tick
       # @v = x: data.players[0].x * @scale, y: data.players[0].y * @scale
-      @playerPosition = new Point(@scale * data.players[0].x, @scale * data.players[0].y)
-      @playerVelocity = new Point(@scale * data.players[0].vx, @scale * data.players[0].vy)
+      @playerPosition = new Point(@scale * data.players[0][0], @scale * data.players[0][1])
+      @playerVelocity = new Point(@scale * data.players[0][2], @scale * data.players[0][3])
 
     onKeyDown = (event) =>
       if /^[wц]$|up|space/.test event.key
