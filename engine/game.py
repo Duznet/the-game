@@ -207,18 +207,18 @@ class Game:
         return events
 
     def players(self):
-        result = [{
-                    "x": float(self.players_[id].point.x - 1),
-                    "y": float(self.players_[id].point.y - 1),
-                    "vx": float(self.players_[id].velocity.x),
-                    "vy": float(self.players_[id].velocity.y),
-                    "lol": self.players_[id].weapon,
-                    "lol": self.players_[id].angle,
-                    "login": self.players_[id].name,
-                    "lol": self.players_[id].hp,
-                    "lol": self.players_[id].score,
-                    "lol": self.players_[id].score
-                    } for id in self.players_order]
+        result = [[
+                    float(self.players_[id].point.x - 1),
+                    float(self.players_[id].point.y - 1),
+                    float(self.players_[id].velocity.x),
+                    float(self.players_[id].velocity.y),
+                    self.players_[id].weapon,
+                    self.players_[id].angle,
+                    self.players_[id].name,
+                    self.players_[id].hp,
+                    self.players_[id].score,
+                    self.players_[id].score
+                    ] for id in self.players_order]
         print(result)
         return result
 
