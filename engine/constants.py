@@ -9,9 +9,19 @@ HEALTH = 'h'
 
 SIDE = 0.5
 
-AMMO = {'R': 30, 'P': 30, 'M': 30, 'A': 30}
-PROJV = {'K': 0, 'R': 0.5, 'P': 0.5, 'M': 0.5, 'A': 0.5}
-DAMAGE = {'K': 20, 'R': 15, 'P': 5, 'M': 3, 'A': 40}
+KNIFE = 'K'
+ROCKET = 'R'
+RAILS = 'A'
+PISTOL = 'P'
+MGUN = 'M'
+
+BURSTR = 1.0
+BURSTV = 0.4
+BURSTD = 10
+
+AMMO = {ROCKET: 30, PISTOL: 30, MGUN: 30, RAILS: 30}
+PROJV = {KNIFE: 1, ROCKET: 0.5, PISTOL: 0.5, MGUN: 0.5, RAILS: 0.5}
+DAMAGE = {KNIFE: 20, ROCKET: 15, PISTOL: 5, MGUN: 3, RAILS: 40}
 HP = 25
 
 WEAPON_RESP = 3000
