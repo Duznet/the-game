@@ -11,6 +11,10 @@ class GameplayController(BasicController):
     def empty(self):
         self.game.update_v(self.user.id, 0, 0).got_action = True
 
+    def fire(self):
+        dx, dy = self.json['dx'], self.json['dy']
+        self.game.fire(self.user.id, dx, dy).got_action = True
+
     def move(self):
         tick = int(self.json['tick'])
         print("game tick: " + str(self.game.tick) + ", tick got: " + str(tick))
@@ -24,4 +28,8 @@ class GameplayController(BasicController):
 
 
     def tick(self):
-        return jsonify(players=self.game.players(), tick=self.game.tick)
+        return jsonify(
+            players=self.game.players(),
+            items=self.game.items,
+            projectiles=[proj.to_array() for proj in self.game.projectiles],
+            tick=self.game.tick)

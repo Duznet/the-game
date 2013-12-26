@@ -26,7 +26,7 @@ class GameController(BasicController):
             game = self.games.new(map = map, name =  str(self.json['name']), max_players = int(str(self.json['maxPlayers'])))
             self.user.game = game
             self.user.save()
-            self.current_games.add_game(game.id, map.map).add_player(self.user.id)
+            self.current_games.add_game(game.id, map.map).add_player(self.user.id, self.user.login)
         except CommitException:
             raise GameExists()
         except ValueError:

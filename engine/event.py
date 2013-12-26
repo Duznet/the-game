@@ -48,4 +48,45 @@ class TeleportEvent(Event):
     def handle(self, player):
         player.point = self.next_point
 
+class PickEvent(Event):
+    def __init__(self, time, items, id_):
+        super(PickEvent, self).__init__(time)
+        self.items = items
+        self.id = id_
+
+
+    @staticmethod
+    def require_event_refresh():
+        return False
+
+class WeaponPick(PickEvent):
+    def __init__(self, time, items, id_, weapon):
+        super(WeaponPick, self).__init__(time, items, id_)
+        self.weapon = weapon
+
+
+    def __repr__(self):
+        return "WeaponPick" + str([self.time, self.weapon])
+
+    def handle(self, player):
+        if (self.items[self.id] == 0):
+            self.items[self.id] = engine.constants.WEAPON_RESP
+            player.ammo[self.weapon] += engine.constants.AMMO[self.weapon]
+            player.weapon = self.weapon
+
+
+class HealthPick(PickEvent):
+    def __init__(self, time, items, id_):
+        super(HealthPick, self).__init__(time, items, id_)
+
+    def __repr__(self):
+        return "HealthPick" + str([self.time])
+
+    def handle(self, player):
+        if (self.items[self.id] == 0):
+            self.items[self.id] = engine.constants.HEALTH_RESP
+            player.hp += engine.constants.HP
+            player.normalize_hp()
+
+
 

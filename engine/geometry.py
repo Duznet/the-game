@@ -1,4 +1,5 @@
 from math import *
+from engine.constants import *
 
 class Segment:
     def __init__(self, p1, p2):
@@ -7,6 +8,18 @@ class Segment:
 
     def __repr__(self):
         return str([self.p1, self.p2])
+
+
+    def intersects_with_player(self, player):
+
+        for i in range(2):
+            coord = list(sorted([self.p1.args[i], self.p2.args[i]]))
+            pcoord = list(sorted([player.args[i] - SIDE, player.args[i] + SIDE]))
+
+            if pcoord[1] < coord[0] or pcoord[0] > coord[1]:
+                return False
+
+        return True
 
 
 class Point:

@@ -78,6 +78,12 @@ def is_vertical(segment):
 def is_teleport(sym):
     return re.match(PORTAL, sym)
 
+def is_weapon(sym):
+    return re.match(WEAPON, sym)
+
+def is_health(sym):
+    return sym == HEALTH
+
 def underpoint(player):
     return Point(floor(player.x), floor(player.y + SIDE))
 
@@ -136,9 +142,9 @@ def get_wall_collisions(map_, player, v):
         collisions = [col for col in collisions if col.time == first.time]
 
     if collisions:
-        return WallCollisionEvent(collisions)
+        return [WallCollisionEvent(collisions)]
     else:
-        return None
+        return []
 
 
 def collision_with_point(player, v, point):

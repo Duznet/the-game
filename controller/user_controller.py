@@ -52,7 +52,7 @@ class UserController(BasicController):
         user = self._user_by_sid()
         try:
             user.join_game(id=int(self.json['game']))
-            self.current_games.game(int(self.json['game'])).add_player(user.id)
+            self.current_games.game(int(self.json['game'])).add_player(user.id, user.login)
         except ValueError:
             raise BadGame()
         return jsonify(result="ok")
