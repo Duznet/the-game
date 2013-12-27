@@ -57,7 +57,8 @@ class Psg.User extends Backbone.Model
           if data.result is 'ok' then @enterGame()
 
   leaveGame: ->
-    @conn.leaveGame()
+    @conn.leaveGame().then (data) =>
+      @trigger 'leftGame'
 
   signup: (login, password) ->
     @conn.signup(login: login, password: password).then (data) =>

@@ -9,6 +9,7 @@ class Psg.Router extends Backbone.Router
     'upload-map': 'uploadMap'
     'signout': 'signout'
     'game/:id': 'game'
+    'leave': 'leave'
 
   initialize: ->
 
@@ -37,6 +38,7 @@ class Psg.Router extends Backbone.Router
     @listenTo @user, 'authenticated', @onAuthenticated
     @listenTo @user, 'signedOut', @onSignedOut
     @listenTo @user, 'enteredGame', @onEnteredGame
+    @listenTo @user, 'leftGame', @onLeftGame
 
   onAuthenticated: ->
     @navigate 'dashboard', trigger: true
@@ -58,6 +60,9 @@ class Psg.Router extends Backbone.Router
         id: id
     @addView gameView
     gameView.startGame()
+
+  onLeftGame: ->
+    @navigate 'dashboard', trigger: true
 
   clearPage: ->
     @removeViews()
@@ -129,3 +134,7 @@ class Psg.Router extends Backbone.Router
   game: (id) ->
     console.log "game #{id}"
     @user.joinGame parseInt id
+
+  leave: ->
+    console.log 'leaving game'
+    @user.leaveGame()
