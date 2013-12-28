@@ -11,6 +11,8 @@ window.config =
     maxVelocity: 0.2
     friction: 0.02
     gravity: 0.02
+  game:
+    scale: 30
   interpolate: true
   fpsCalcInterval: 250
   storage: sessionStorage

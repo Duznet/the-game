@@ -14,11 +14,10 @@ class Psg.GameView extends Backbone.View
   drawMap: ->
     console.log "drawing map"
     mapData = @model.game.map.map
-    $canvas = $('#game-canvas')
-    @scale = $canvas.width() / mapData[0].length
+    @scale = config.game.scale
     console.log "scale is ", @scale
     console.log 'mapData: ', mapData
-    mapDrawer = new Psg.MapDrawer scale: @scale
+    mapDrawer = new Psg.MapDrawer
     mapDrawer.draw(mapData)
 
   onmessage: (data) =>
@@ -28,9 +27,12 @@ class Psg.GameView extends Backbone.View
         @pViews.push new Shape.Rectangle new Point(0, 0), new Size(@scale, @scale)
         @pViews[i].strokeColor = 'black'
         @pViews[i].fillColor = 'red'
-        @pViews[i].onFrame = (event) -> @position = @position
+        @pViews[i].onFrame = (event) ->
+          @position = @position
       @pViews[i].position.x = @scale * p[0]
       @pViews[i].position.y = @scale * p[1]
+      if p[6] is @model.get('user').get('login')
+        view.scrollBy [@pViews[i].position.x - view.center.x, @pViews[i].position.y - view.center.y]
 
   startGame: ->
     @drawMap()

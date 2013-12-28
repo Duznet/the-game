@@ -1,7 +1,8 @@
 class Psg.MapDrawer
 
   constructor: (attrs) ->
-    @scale = attrs.scale || config.scale
+    attrs = attrs || {}
+    @scale = attrs.scale || config.game.scale
 
   drawWall: (position) ->
     rect = new Shape.Rectangle position, new Size(@scale, @scale)
