@@ -21,10 +21,10 @@ class Psg.MapDrawer
   draw: (mapData) ->
     # paper must have been initialized
     length = mapData[0].length
-    for j in [-1...mapData[0].length]
+    for j in [0...mapData[0].length]
       @drawWall new Point(j * @scale, -1 * @scale)
       @drawWall new Point(j * @scale, mapData.length * @scale)
-    for i in [-1...mapData.length]
+    for i in [-1..mapData.length]
       @drawWall new Point(-1 * @scale, i * @scale)
       @drawWall new Point(mapData[0].length * @scale, i * @scale)
 
