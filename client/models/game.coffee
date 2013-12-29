@@ -21,3 +21,6 @@ class Psg.Game extends Backbone.Model
 
     @gc.onclose = =>
       clearInterval @sendActionInterval
+
+  closeConnection: ->
+    @gc.close()

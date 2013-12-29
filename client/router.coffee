@@ -67,6 +67,7 @@ class Psg.Router extends Backbone.Router
   clearPage: ->
     @removeViews()
 
+
   refreshPage: ->
     @clearPage()
 
@@ -93,6 +94,8 @@ class Psg.Router extends Backbone.Router
       v.remove()
       if v.model and typeof v.model.stopRefreshing isnt 'undefined'
         v.model.stopRefreshing()
+      if v.model and typeof v.model.closeConnection isnt 'undefined'
+        v.model.closeConnection()
     @views = []
 
   auth: ->

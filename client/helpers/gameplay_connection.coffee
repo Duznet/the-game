@@ -7,6 +7,7 @@ class Psg.GameplayConnection extends Psg.Connection
 
     @ws = new WebSocket @url
     @ws.onopen = (event) =>
+      console.log 'connection opened'
       @onopen event
     @ws.onmessage = (event) =>
       data = JSON.parse event.data
@@ -17,6 +18,7 @@ class Psg.GameplayConnection extends Psg.Connection
     @ws.onerror = (event) =>
       @onerror event
     @ws.onclose = (event) =>
+      console.log 'connection closed'
       @onclose event
 
   send: (data) ->
@@ -40,6 +42,8 @@ class Psg.GameplayConnection extends Psg.Connection
   onerror: (data) ->
     #default placeholder
 
+  close: ->
+    @ws.close()
 
   move: (params) ->
     @__request__ 'move', params
