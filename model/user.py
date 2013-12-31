@@ -41,7 +41,8 @@ class User(odm.StdModel):
             if self.game is None or str(self.game.id) != str(game_id):
                 raise BadGame()
 
-            return message.new(text=text, timestamp=timegm(datetime.now().utctimetuple()), user=self, game=self.game)
+            return message.new(text=text, timestamp=datetime.utcnow().timestamp(), user=self, game=self.game)
+
         except (ValueError, ObjectNotFound):
             raise BadGame()
 
