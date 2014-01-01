@@ -11,6 +11,7 @@ class Psg.ApplicationView extends Backbone.View
   render: ->
     @$el.html @template
       login: @model.user.get 'login'
+      pageTitle: @model.get 'pageTitle'
     $body = $('body')
     $body.empty()
     $body.append @$el

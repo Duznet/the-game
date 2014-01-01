@@ -49,7 +49,7 @@ class Psg.Router extends Backbone.Router
 
   onEnteredGame: (id) ->
     @navigate "game/#{id}"
-    @refreshPage()
+    @refreshPage(pageTitle: "Playing '#{@user.game.name}'")
     @addView new Psg.ChatView
       model: new Psg.Chat
         user: @user
@@ -68,13 +68,13 @@ class Psg.Router extends Backbone.Router
     @removeViews()
 
 
-  refreshPage: ->
+  refreshPage: (attrs) ->
     @clearPage()
 
     if not @user.isAuthenticated()
       @onSignedOut()
       return
-
+    @app.set 'pageTitle', attrs.pageTitle
     if not @appView
       @appView = new Psg.ApplicationView model: @app
     else
@@ -108,12 +108,12 @@ class Psg.Router extends Backbone.Router
     @user.signout()
 
   join: ->
-    @refreshPage()
+    @refreshPage(pageTitle: 'Join game')
     @addView new Psg.ChatView model: @globalChat
     @addView new Psg.GameListView model: @gameList
 
   create: ->
-    @refreshPage()
+    @refreshPage(pageTitle: 'Create game')
     @addView new Psg.ChatView model: @globalChat
     @gameCreator = new Psg.GameCreator
       user: @user
@@ -124,7 +124,7 @@ class Psg.Router extends Backbone.Router
 
   uploadMap: ->
     console.log 'uploadMap'
-    @refreshPage()
+    @refreshPage(pageTitle: 'Upload map')
     @addView new Psg.ChatView model: @globalChat
     @addView new Psg.MapUploaderView
       model: new Psg.MapUploader
