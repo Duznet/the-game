@@ -6,6 +6,7 @@ class Psg.GameView extends Backbone.View
     @render()
     paper.install window
     paper.setup 'game-canvas'
+    @projectiles = []
 
   render: ->
     @$el.appendTo('#content')
@@ -32,7 +33,18 @@ class Psg.GameView extends Backbone.View
       @pViews[i].position.x = @scale * p[0]
       @pViews[i].position.y = @scale * p[1]
       if p[6] is @model.get('user').get('login')
+        @model.player.position.x = p[0]
+        @model.player.position.y = p[1]
         view.scrollBy [@pViews[i].position.x - view.center.x, @pViews[i].position.y - view.center.y]
+
+    for p in @projectiles
+      p.remove()
+    @projectiles = []
+    for p in data.projectiles
+      newProjectile = new Path.Circle new Point(@scale * p[0], @scale * p[1]), @scale * 0.1
+      newProjectile.strokeColor = 'black'
+      newProjectile.fillColor = 'black'
+      @projectiles.push newProjectile
 
   startGame: ->
     @drawMap()
@@ -71,7 +83,21 @@ class Psg.GameView extends Backbone.View
       if /^[dв]$|right/.test event.key
         @model.player.movement.dx = 0
 
+    onMouseDown = (event) =>
+      @model.player.fire =
+        dx: event.point.x / @scale - @model.player.position.x
+        dy: event.point.y / @scale - @model.player.position.y
+    onMouseDrag = (event) =>
+      @model.player.fire =
+        dx: event.point.x / @scale - @model.player.position.x
+        dy: event.point.y / @scale - @model.player.position.y
+    onMouseUp = (event) =>
+      @model.player.fire = dx: 0, dy: 0
+
     tool.attach 'keydown', onKeyDown
     tool.attach 'keyup', onKeyUp
+    tool.attach 'mousedown', onMouseDown
+    tool.attach 'mousedrag', onMouseDrag
+    tool.attach 'mouseup', onMouseUp
     console.log "game started"
 
