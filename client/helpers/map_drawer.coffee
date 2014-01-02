@@ -19,6 +19,15 @@ class Psg.MapDrawer
     rect.onFrame = ->
       @rotate(2)
 
+  drawWeapon: (type, position) ->
+    rect = new Shape.Rectangle position, new Size(@scale, @scale)
+    rect.strokeColor = 'black'
+    textItem = new PointText [position.x + @scale / 2, position.y + @scale / 2]
+    textItem.content = type
+    textItem.justification = 'center'
+    textItem.fillColor = 'black'
+    textItem.fontSize = @scale / 2
+
   draw: (mapData) ->
     # paper must have been initialized
     length = mapData[0].length
@@ -35,5 +44,7 @@ class Psg.MapDrawer
           continue
         if col is '#'
           @drawWall new Point(j * @scale, i * @scale)
+        if 'A' <= col <= 'Z'
+          @drawWeapon col, new Point(j * @scale, i * @scale)
         else if '1' <= col.toString() <= '9'
           @drawTeleport new Point(j * @scale, i * @scale)
