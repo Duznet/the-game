@@ -8,6 +8,7 @@ class Psg.ObjectView
     @shape.position = new Point
       x: @scale * (newPosition.x - @shapeOffset.x)
       y: @scale * (newPosition.y - @shapeOffset.y)
+    @position = @shape.position
 
   onFrame: ->
     @visible = true

@@ -22,6 +22,9 @@ class Psg.Game extends Backbone.Model
     t.kdr = kills: data[9], deaths: data[10]
     if not @players[t.login]
       @players[login] = t
+    if login is @get('user').get('login')
+      for prop of t
+        @player[prop] = t[prop]
 
   updateProjectileData: (data) ->
     t = {}

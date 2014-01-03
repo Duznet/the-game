@@ -7,6 +7,7 @@ class Psg.GameView extends Backbone.View
     paper.install window
     paper.setup 'game-canvas'
     @projectiles = []
+    @pressedKeys = left: 0, up: 0, right: 0, down: 0
 
   render: ->
     @$el.appendTo('#content')
@@ -22,34 +23,39 @@ class Psg.GameView extends Backbone.View
     mapDrawer.draw(mapData)
     @items = mapDrawer.items
 
+  codeIsDirected: (code, direction) ->
+    switch direction
+      when 'left' then code is 37 or code is 65
+      when 'up' then code is 38 or code is 87 or code is 32
+      when 'right' then code is 39 or code is 68
+      when 'down' then code is 40 or code is 83
+
+  updateMovement: ->
+    @model.player.movement.dx = @pressedKeys.right - @pressedKeys.left
+    @model.player.movement.dy = @pressedKeys.down - @pressedKeys.up
+
+  updateKeys: (code, eventType) ->
+    for p of @pressedKeys
+      if @codeIsDirected code, p
+        @pressedKeys[p] = eventType is 'keydown'
+    @updateMovement()
+
+  onKeyDown: (event) =>
+    @updateKeys event.keyCode, 'keydown'
+
+  onKeyUp: (event) =>
+    @updateKeys event.keyCode, 'keyup'
+
   startGame: ->
     @drawMap()
     @pViews = []
     @model.startGame(onmessage: @onmessage)
-
-    onKeyDown = (event) =>
-      if /^[wц]$|up|space/.test event.key
-        @model.player.movement.dy--
-      if /^[aф]$|left/.test event.key
-        @model.player.movement.dx--
-      if /^[sы]$|down/.test event.key
-        @model.player.movement.dy++
-      if /^[dв]$|right/.test event.key
-        @model.player.movement.dx++
-      dx = @model.player.movement.dx
-      dy = @model.player.movement.dy
-      dx = if dx > 0 then 1 else if dx < 0 then -1 else 0
-      dy = if dy > 0 then 1 else if dy < 0 then -1 else 0
-
-    onKeyUp = (event) =>
-      if /^[wц]$|up|space/.test event.key
-        @model.player.movement.dy = 0
-      if /^[aф]$|left/.test event.key
-        @model.player.movement.dx = 0
-      if /^[sы]$|down/.test event.key
-        @model.player.movement.dy = 0
-      if /^[dв]$|right/.test event.key
-        @model.player.movement.dx = 0
+    $canvas = $('#game-canvas')
+    $canvas.attr 'tabindex', '0'
+    $canvas.focus()
+    $canvas.keydown @onKeyDown
+    $canvas.keyup @onKeyUp
+    @login = @model.get('user').get('login')
 
     onMouseDown = (event) =>
       @model.player.fire =
@@ -69,14 +75,12 @@ class Psg.GameView extends Backbone.View
           @pViews[login] = new Psg.PlayerView
         pView = @pViews[login]
         pView.moveTo p.position
-        if login is @model.get('user').get('login')
-          @playerView = pView
+        if login is @login
+          @playerPosition = pView.position
 
-      if not @playerView then return
-      view.scrollBy [@playerView.position.x - view.center.x, @playerView.position.y - view.center.y]
+      if not @playerPosition then return
+      view.scrollBy [@pViews[@login].position.x - view.center.x, @pViews[@login].position.y - view.center.y]
 
-    tool.attach 'keydown', onKeyDown
-    tool.attach 'keyup', onKeyUp
     tool.attach 'mousedown', onMouseDown
     tool.attach 'mousedrag', onMouseDrag
     tool.attach 'mouseup', onMouseUp
