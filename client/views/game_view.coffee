@@ -22,42 +22,9 @@ class Psg.GameView extends Backbone.View
     mapDrawer.draw(mapData)
     @items = mapDrawer.items
 
-  onmessage: (data) =>
-    players = data.players
-    for p, i in players
-      if i is @pViews.length
-        @pViews.push new Shape.Rectangle new Point(0, 0), new Size(@scale, @scale)
-        @pViews[i].strokeColor = 'black'
-        @pViews[i].fillColor = 'red'
-        @pViews[i].onFrame = (event) ->
-          @position = @position
-      @pViews[i].position.x = @scale * p[0]
-      @pViews[i].position.y = @scale * p[1]
-      if p[6] is @model.get('user').get('login')
-        @model.player.position.x = p[0]
-        @model.player.position.y = p[1]
-        @playerView = @pViews[i]
-
-    for p in @projectiles
-      p.remove()
-    @projectiles = []
-    for p in data.projectiles
-      newProjectile = new Path.Circle new Point(@scale * p[0], @scale * p[1]), @scale * 0.1
-      newProjectile.strokeColor = 'black'
-      newProjectile.fillColor = 'black'
-      @projectiles.push newProjectile
-
   startGame: ->
     @drawMap()
     @pViews = []
-    # teorFps = Math.round 1000 / config.defaultGameConsts.tickSize
-    # fps = 0
-    # lastFps = 0
-    # setInterval ->
-    #   lastFps = Math.min Math.round(fps * 1000 / config.fpsCalcInterval), teorFps
-    #   console.log 'fps: ', lastFps
-    #   fps = 0
-    # , config.fpsCalcInterval
     @model.startGame(onmessage: @onmessage)
 
     onKeyDown = (event) =>
@@ -96,6 +63,16 @@ class Psg.GameView extends Backbone.View
       @model.player.fire = dx: 0, dy: 0
 
     onFrame = (event) =>
+      players = @model.players
+      for login, p of @model.players
+        if not @pViews[login]
+          @pViews[login] = new Psg.PlayerView
+        pView = @pViews[login]
+        pView.moveTo p.position
+        if login is @model.get('user').get('login')
+          @playerView = pView
+
+      if not @playerView then return
       view.scrollBy [@playerView.position.x - view.center.x, @playerView.position.y - view.center.y]
 
     tool.attach 'keydown', onKeyDown
