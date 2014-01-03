@@ -20,6 +20,7 @@ class Psg.GameView extends Backbone.View
     console.log 'mapData: ', mapData
     mapDrawer = new Psg.MapDrawer
     mapDrawer.draw(mapData)
+    @items = mapDrawer.items
 
   onmessage: (data) =>
     players = data.players
@@ -35,7 +36,7 @@ class Psg.GameView extends Backbone.View
       if p[6] is @model.get('user').get('login')
         @model.player.position.x = p[0]
         @model.player.position.y = p[1]
-        view.scrollBy [@pViews[i].position.x - view.center.x, @pViews[i].position.y - view.center.y]
+        @playerView = @pViews[i]
 
     for p in @projectiles
       p.remove()
@@ -94,10 +95,14 @@ class Psg.GameView extends Backbone.View
     onMouseUp = (event) =>
       @model.player.fire = dx: 0, dy: 0
 
+    onFrame = (event) =>
+      view.scrollBy [@playerView.position.x - view.center.x, @playerView.position.y - view.center.y]
+
     tool.attach 'keydown', onKeyDown
     tool.attach 'keyup', onKeyUp
     tool.attach 'mousedown', onMouseDown
     tool.attach 'mousedrag', onMouseDrag
     tool.attach 'mouseup', onMouseUp
+    view.attach 'frame', onFrame
     console.log "game started"
 
