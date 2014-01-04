@@ -7,6 +7,9 @@ import re
 def cell_coords(point):
     return Point(floor(point.x), floor(point.y))
 
+def is_inside_rect(point, lbound, ubound):
+    return point >= lbound and point <= ubound
+
 def dist(first, second):
     return abs(second - first)
 
