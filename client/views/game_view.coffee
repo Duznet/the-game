@@ -82,6 +82,7 @@ class Psg.GameView extends Backbone.View
           pView.flip()
         if login is @login
           @playerPosition = pView.getPosition()
+          pView.label.content = "#{login} (#{p.health})"
 
       if @model.projectilesInvalidated
         @model.projectilesInvalidated = false
