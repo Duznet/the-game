@@ -24,7 +24,7 @@ class Psg.MapDrawer
     model = {}
     model.respawn = 0
     model.type = type
-    model.position = x: position.x + 0.25, y: position.y + 0.25
+    model.position = x: position.x + 0.5, y: position.y + 0.5
     @items.push new Psg.WeaponOnMapView model
 
   draw: (mapData) ->

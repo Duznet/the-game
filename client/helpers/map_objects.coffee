@@ -94,7 +94,7 @@ class Psg.WeaponOnMapView extends Psg.ObjectView
     @text.content = @type
     @text.fontSize = @scale / 2
 
-    @shape = new Group @rect, @text
+    @shape = @rect
     @importPosition model
     @shape.onFrame = =>
       @shape.visible = @respawn <= 0
