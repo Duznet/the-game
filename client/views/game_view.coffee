@@ -74,12 +74,16 @@ class Psg.GameView extends Backbone.View
         if not @pViews[login]
           @pViews[login] = new Psg.PlayerView
         pView = @pViews[login]
-        pView.moveTo p.position
+        pView.moveTo new Point
+          x: p.position.x * @scale
+          y: p.position.y * @scale
+        if @model.players[login].velocity.x * pView.sign < 0
+          pView.flip()
         if login is @login
-          @playerPosition = pView.position
+          @playerPosition = pView.getPosition()
 
       if not @playerPosition then return
-      view.scrollBy [@pViews[@login].position.x - view.center.x, @pViews[@login].position.y - view.center.y]
+      view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
 
     tool.attach 'mousedown', onMouseDown
     tool.attach 'mousedrag', onMouseDrag
