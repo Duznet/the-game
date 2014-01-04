@@ -73,7 +73,7 @@ class Psg.GameView extends Backbone.View
       players = @model.players
       for login, p of @model.players
         if not @pViews[login]
-          @pViews[login] = new Psg.PlayerView
+          @pViews[login] = new Psg.PlayerView p
         pView = @pViews[login]
         pView.moveTo
           x: p.position.x * @scale
@@ -89,7 +89,7 @@ class Psg.GameView extends Backbone.View
           p.shape.remove()
         @projectiles = []
         for p in @model.projectiles
-          v = new Psg.ProjectileView x: @scale * p.position.x, y: @scale * p.position.y
+          v = new Psg.ProjectileView p
           @projectiles.push v
 
       if not @playerPosition then return

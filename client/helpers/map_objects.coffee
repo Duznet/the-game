@@ -18,11 +18,18 @@ class Psg.ObjectView
     @sign *= -1
     @shape.scale(-1, 1)
 
+  importPosition: (model) ->
+    @moveTo x: model.position.x * @scale, y: model.position.y * @scale
+
+
 class Psg.PlayerView extends Psg.ObjectView
 
-  constructor: (attrs) ->
-    attrs = attrs || {}
-    @body = new Shape.Rectangle new Point(0, 0), new Size(@scale, @scale)
+  moveTo: (newPosition) ->
+    super newPosition
+    @label.position = x: @body.position.x, y: @body.position.y - @scale
+
+  constructor: (model) ->
+    @body = new Shape.Rectangle size: new Size(@scale, @scale)
     @body.strokeColor = 'black'
     @body.fillColor = 'red'
 
@@ -47,16 +54,22 @@ class Psg.PlayerView extends Psg.ObjectView
     @head = new Group @ribbon, @eye
     @head.rotate(5)
 
+    @label = new PointText new Point(0, 0)
+    @label.fillColor = 'black'
+    @label.justification = 'center'
+    @label.content = model.login
+
     @shape = new Group(@body, @head)
     @shapeOffset = new Point
       x: @shape.position.x - @body.position.x
       y: @shape.position.y - @body.position.y
+    if model then @importPosition model
 
 
 class Psg.ProjectileView extends Psg.ObjectView
 
-  constructor: (position) ->
+  constructor: (model) ->
     @shape = new Path.Circle new Point(0, 0), 0.1 * @scale
     @shape.strokeColor = 'black'
     @shape.fillColor = 'black'
-    if position then @moveTo position
+    if model then @importPosition model

@@ -10,19 +10,18 @@ class Psg.Game extends Backbone.Model
     @projectiles = []
 
   updatePlayerData: (data) ->
-    login = data[6]
     t = {}
     t.position = x: data[0], y: data[1]
     t.velocity = x: data[2], y: data[3]
     t.weapon = data[4]
     t.weaponAngle = data[5]
+    t.login = data[6]
     t.health = data[7]
     t.respawn = data[8]
     t.status = if t.respawn is 0 then 'alive' else 'dead'
     t.kdr = kills: data[9], deaths: data[10]
-    if not @players[t.login]
-      @players[login] = t
-    if login is @get('user').get('login')
+    @players[t.login] = t
+    if t.login is @get('user').get('login')
       for prop of t
         @player[prop] = t[prop]
 
