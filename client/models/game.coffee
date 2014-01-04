@@ -55,6 +55,7 @@ class Psg.Game extends Backbone.Model
       for login, p of @players
         if p.status is 'offline'
           delete @players[login]
+      @projectilesInvalidated = true
       for p in data.projectiles
         @updateProjectileData p
       @items = data.items

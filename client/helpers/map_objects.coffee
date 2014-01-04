@@ -9,9 +9,6 @@ class Psg.ObjectView
       x: newPosition.x - @shapeOffset.x
       y: newPosition.y - @shapeOffset.y
 
-  onFrame: ->
-    @visible = true
-
   getPosition: ->
     new Point
       x: @shape.position.x + @shapeOffset.x
@@ -51,10 +48,15 @@ class Psg.PlayerView extends Psg.ObjectView
     @head.rotate(5)
 
     @shape = new Group(@body, @head)
-    @shape.visible = false
     @shapeOffset = new Point
       x: @shape.position.x - @body.position.x
       y: @shape.position.y - @body.position.y
 
-    @shape.onFrame = @onFrame
 
+class Psg.ProjectileView extends Psg.ObjectView
+
+  constructor: (position) ->
+    @shape = new Path.Circle new Point(0, 0), 0.1 * @scale
+    @shape.strokeColor = 'black'
+    @shape.fillColor = 'black'
+    if position then @moveTo position

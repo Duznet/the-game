@@ -49,6 +49,7 @@ class Psg.GameView extends Backbone.View
   startGame: ->
     @drawMap()
     @pViews = []
+    @projectiles = []
     @model.startGame(onmessage: @onmessage)
     $canvas = $('#game-canvas')
     $canvas.attr 'tabindex', '0'
@@ -74,13 +75,22 @@ class Psg.GameView extends Backbone.View
         if not @pViews[login]
           @pViews[login] = new Psg.PlayerView
         pView = @pViews[login]
-        pView.moveTo new Point
+        pView.moveTo
           x: p.position.x * @scale
           y: p.position.y * @scale
         if @model.players[login].velocity.x * pView.sign < 0
           pView.flip()
         if login is @login
           @playerPosition = pView.getPosition()
+
+      if @model.projectilesInvalidated
+        @model.projectilesInvalidated = false
+        for p in @projectiles
+          p.shape.remove()
+        @projectiles = []
+        for p in @model.projectiles
+          v = new Psg.ProjectileView x: @scale * p.position.x, y: @scale * p.position.y
+          @projectiles.push v
 
       if not @playerPosition then return
       view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
