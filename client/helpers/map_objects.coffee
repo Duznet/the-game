@@ -59,7 +59,21 @@ class Psg.PlayerView extends Psg.ObjectView
     @label.justification = 'center'
     @label.content = model.login
 
-    @shape = new Group(@body, @head)
+    @barrel = new Shape.Rectangle(
+      new Point(@body.position.x + 0.1 * @body.size.width, @body.position.y - 0.05 * @body.size.height),
+      new Size(@body.size.width, 0.1 * @body.size.height)
+    )
+    @barrel.strokeColor = 'black'
+    @barrel.fillColor = 'black'
+    @handle = new Shape.Rectangle size: new Size(0.3 * @body.size.width, 0.05 * @body.size.height)
+    @handle.position =
+      x: @barrel.position.x - 0.3 * @barrel.size.width
+      y: @barrel.position.y + @barrel.size.height
+    @handle.strokeColor = 'black'
+    @handle.fillColor = 'black'
+    @handle.rotate(100)
+
+    @shape = new Group(@body, @head, @barrel, @handle)
     @shapeOffset = new Point
       x: @shape.position.x - @body.position.x
       y: @shape.position.y - @body.position.y
