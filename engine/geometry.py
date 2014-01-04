@@ -25,6 +25,53 @@ class Segment:
 
         return Point(ipoint)
 
+    def cells_path(self, lbound, ubound):
+        """Bresenham's line algorithm"""
+        res = []
+
+        (x0, y0) = self.p1.args
+        (x1, y1) = self.p2.args
+
+        dx = abs(x1 - x0)
+        dy = abs(y1 - y0)
+        x, y = x0, y0
+        sx = -1 if x0 > x1 else 1
+        sy = -1 if y0 > y1 else 1
+        if dx > dy:
+            err = dx / 2.0
+            while x != x1:
+                pt = Point(x, y)
+                if pt >= lbound and pt <= ubound:
+                    res.append(pt)
+                else:
+                    return res
+                err -= dy
+                if err < 0:
+                    y += sy
+                    err += dx
+                x += sx
+        else:
+            err = dy / 2.0
+            while y != y1:
+                pt = Point(x, y)
+                if pt >= lbound and pt <= ubound:
+                    res.append(pt)
+                else:
+                    return res
+                err -= dx
+                if err < 0:
+                    x += sx
+                    err += dy
+                y += sy
+
+        pt = Point(x, y)
+        if pt >= lbound and pt <= ubound:
+            res.append(pt)
+        else:
+            return res
+
+        return res
+
 
 class Point:
     def __init__(self, x, y=None):
@@ -72,6 +119,12 @@ class Point:
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
+    def __ge__(self, other):
+        return self.x >= other.x and self.y >= other.y
+
+    def __le__(self, other):
+        return self.x <= other.x and self.y <= other.y
+
     def __truediv__(self, num):
         self.x /= num
         self.y /= num
@@ -82,4 +135,3 @@ class Point:
 
     def midpoint(self, other):
         return (self + other) / 2
-

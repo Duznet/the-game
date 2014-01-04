@@ -21,7 +21,7 @@ class Projectile:
 
 class Player:
     MAX_HP = 100
-    MAX_VELOCITY = 0.2
+    MAX_VELOCITY = 0.4
 
     def __init__(self, name, first_spawn, next_spawn):
         self.next_spawn = next_spawn
@@ -33,7 +33,8 @@ class Player:
         self.moved = False
         self.got_action = False
         self.delta = Point(0, 0)
-        self.ammo = {KNIFE: 0, ROCKET: 0, PISTOL: 0, MGUN: 0, RAILS: 0}
+        self.ammo = {KNIFE: 0, ROCKET: 0, PISTOL: 0, MGUN: 0, RAIL: 0}
+        self.shot_time = {KNIFE: -1000000, ROCKET: -1000000, PISTOL: -1000000, MGUN: -1000000, RAIL: -1000000}
         self.weapon = KNIFE
         self.angle = -1
 
@@ -72,6 +73,16 @@ class Player:
     def damage(self, value):
         self.hp -= value
         self.normalize_hp()
+
+    def can_fire(self, tick):
+        return self.shot_time[self.weapon] + RECHARGE_TIME[self.weapon] <= tick
+
+    def fire(self, tick):
+        if self.can_fire(tick):
+            self.shot_time[self.weapon] = tick
+            return True
+
+        return False
 
 class Game:
     DEFAULT_VELOCITY = 0.02
@@ -136,9 +147,11 @@ class Game:
                 return False
 
         self.tick += 1
-        for item in self.items:
-            item -= 1
-            item = max(0, item)
+        for i in range(len(self.items)):
+            self.items[i] -= 1
+            self.items[i] = max(0, self.items[i])
+
+        print("Items", self.items)
 
         self.move_projectiles()
 
@@ -147,10 +160,14 @@ class Game:
         return True
 
     def move_projectiles(self):
-        self.projectiles = list(filter(lambda x: x.v != Point(0, 0) and not (x.weapon == KNIFE and x.time > 0), self.projectiles))
+        self.projectiles = list(filter(lambda x: x.v != Point(0, 0), self.projectiles))
 
-        for proj in self.projectiles:
-            self.move_projectile(proj)
+        for p in self.projectiles:
+            if (p.weapon == KNIFE or p.weapon == RAIL) and p.time >= 1:
+                p.v = Point(0, 0)
+
+        for p in self.projectiles:
+            self.move_projectile(p)
 
         for p in self.projectiles:
             p.time += 1
@@ -158,9 +175,11 @@ class Game:
     def move_projectile(self, projectile):
         bullet_path = Segment(projectile.point, projectile.point + projectile.v)
 
+        if projectile.weapon == RAIL:
+            bullet_path.p2 = projectile.point + projectile.v * 100
+
         curcell = cell_coords(projectile.point)
-        dir = Point(sign(projectile.v.x), sign(projectile.v.y))
-        cells = [curcell + Point(x, y) for x in [0, dir.x] for y in [0, dir.y] if x != 0 or y != 0]
+        cells = bullet_path.cells_path(Point(0, 0), Point(len(self.map[0]), len(self.map)))
 
         collisions = []
         for cell in cells:
@@ -172,15 +191,20 @@ class Game:
                 if projectile.weapon == ROCKET:
                     self.burst(intersection)
 
-                projectile.v = Point(0, 0)
-                return
+                bullet_path.p2 = intersection
+                if projectile.weapon == RAIL:
+                    projectile.v = bullet_path.p2 - bullet_path.p1
+                else:
+                    projectile.v = Point(0, 0)
+
+                break
 
 
         for player in self.players_.values():
             if player == projectile.owner:
                 continue
 
-            intersection = bullet_path.intersects_with_player(cell + Point(SIDE, SIDE))
+            intersection = bullet_path.intersects_with_player(player.point)
             if intersection:
                 player.damage(DAMAGE[projectile.weapon])
 
@@ -191,9 +215,10 @@ class Game:
                     player.die()
                     projectile.owner.kills += 1
 
-                projectile.v = Point(0, 0)
+                if projectile.weapon != RAIL:
+                    projectile.v = Point(0, 0)
 
-        projectile.point += projectile.v
+        projectile.point = bullet_path.p2
 
     def update_players(self):
         for player in self.players_.values():
@@ -308,6 +333,9 @@ class Game:
 
         dir /= abs(dir)
 
+        if not player.fire(self.tick):
+            return player
+
         # player.ammo[player.weapon] -= 1
 
         self.projectiles.append(Projectile(player, player.point, dir * PROJV[player.weapon], player.weapon))
@@ -334,7 +362,7 @@ class Game:
         for player in self.players_.values():
             if dist(player.point, point) <= BURSTR:
                 player.v = player.point - point
-                player.v *= BURSTV / BURSTR
+                # player.v *= BURSTV / BURSTR
                 player.damage(BURSTD)
 
     def brake_if_not_moved(self, id):
