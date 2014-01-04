@@ -3,6 +3,7 @@ class Psg.MapDrawer
   constructor: (attrs) ->
     attrs = attrs || {}
     @scale = attrs.scale || config.game.scale
+    @items = []
 
   drawWall: (position) ->
     rect = new Shape.Rectangle position, new Size(@scale, @scale)
@@ -20,13 +21,11 @@ class Psg.MapDrawer
       @rotate(2)
 
   drawWeapon: (type, position) ->
-    rect = new Shape.Rectangle position, new Size(@scale, @scale)
-    rect.strokeColor = 'black'
-    textItem = new PointText [position.x + @scale / 2, position.y + @scale / 2]
-    textItem.content = type
-    textItem.justification = 'center'
-    textItem.fillColor = 'black'
-    textItem.fontSize = @scale / 2
+    model = {}
+    model.respawn = 0
+    model.type = type
+    model.position = x: position.x + 0.25, y: position.y + 0.25
+    @items.push new Psg.WeaponOnMapView model
 
   draw: (mapData) ->
     # paper must have been initialized
@@ -45,6 +44,6 @@ class Psg.MapDrawer
         if col is '#'
           @drawWall new Point(j * @scale, i * @scale)
         if 'A' <= col <= 'Z'
-          @drawWeapon col, new Point(j * @scale, i * @scale)
+          @drawWeapon col, new Point(j, i)
         else if '1' <= col.toString() <= '9'
           @drawTeleport new Point(j * @scale, i * @scale)

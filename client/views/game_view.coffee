@@ -92,6 +92,9 @@ class Psg.GameView extends Backbone.View
           v = new Psg.ProjectileView p
           @projectiles.push v
 
+      for respawn, index in @model.items
+        @items[index].respawn = respawn
+
       if not @playerPosition then return
       view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
 
