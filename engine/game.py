@@ -62,6 +62,8 @@ class Player:
     def spawn(self):
         self.last_spawn = self.next_spawn[self.last_spawn]
         self.point = self.last_spawn + Point(SIDE, SIDE)
+        self.hp = self.MAX_HP
+        self.weapon = KNIFE
 
     def die(self):
         self.deaths += 1
