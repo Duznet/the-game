@@ -6,13 +6,13 @@ class Psg.ObjectView
 
   moveTo: (newPosition) ->
     @shape.position = new Point
-      x: newPosition.x - @shapeOffset.x
-      y: newPosition.y - @shapeOffset.y
+      x: newPosition.x + @sign * @shapeOffset.x
+      y: newPosition.y + @sign * @shapeOffset.y
 
   getPosition: ->
     new Point
-      x: @shape.position.x + @shapeOffset.x
-      y: @shape.position.y + @shapeOffset.y
+      x: @shape.position.x - @sign * @shapeOffset.x
+      y: @shape.position.y - @sign * @shapeOffset.y
 
   flip: ->
     @sign *= -1
@@ -27,6 +27,10 @@ class Psg.PlayerView extends Psg.ObjectView
   moveTo: (newPosition) ->
     super newPosition
     @label.position = x: @body.position.x, y: @body.position.y - @scale
+
+  flip: ->
+    @sign *= -1
+    @shape.scale(-1, 1, @body.position)
 
   constructor: (model) ->
     @body = new Shape.Rectangle size: new Size(@scale, @scale)
@@ -45,35 +49,24 @@ class Psg.PlayerView extends Psg.ObjectView
       3,
       0.8 * @ribbon.size.height
     )
-    @eye.scale(0.6, 1)
+    @eye.scale(0.5, 1)
     @eye.rotate(90)
-    @eye.position = new Point @ribbon.position.x + 0.4 * @ribbon.size.width, @ribbon.position.y
+    @eye.position = new Point @ribbon.position.x + 0.35 * @ribbon.size.width, @ribbon.position.y
     @eye.strokeColor = 'black'
     @eye.fillColor = 'yellow'
 
     @head = new Group @ribbon, @eye
     @head.rotate(5)
 
-    @label = new PointText new Point(0, 0)
+    @label = new PointText
     @label.fillColor = 'black'
     @label.justification = 'center'
     @label.content = model.login
 
-    @barrel = new Shape.Rectangle(
-      new Point(@body.position.x + 0.1 * @body.size.width, @body.position.y - 0.05 * @body.size.height),
-      new Size(@body.size.width, 0.1 * @body.size.height)
-    )
-    @barrel.strokeColor = 'black'
-    @barrel.fillColor = 'black'
-    @handle = new Shape.Rectangle size: new Size(0.3 * @body.size.width, 0.05 * @body.size.height)
-    @handle.position =
-      x: @barrel.position.x - 0.3 * @barrel.size.width
-      y: @barrel.position.y + @barrel.size.height
-    @handle.strokeColor = 'black'
-    @handle.fillColor = 'black'
-    @handle.rotate(100)
+    @gun = new Psg.MachineGunView
+      position: @body.position
 
-    @shape = new Group(@body, @head, @barrel, @handle)
+    @shape = new Group(@body, @head, @gun.shape)
     @shapeOffset = new Point
       x: @shape.position.x - @body.position.x
       y: @shape.position.y - @body.position.y
@@ -112,3 +105,52 @@ class Psg.WeaponOnMapView extends Psg.ObjectView
     @importPosition model
     @shape.onFrame = =>
       @shape.visible = @respawn <= 0
+
+
+class Psg.WeaponView extends Psg.ObjectView
+
+  constructor: (model) ->
+
+
+class Psg.KnifeView extends Psg.WeaponView
+
+  constructor: (model) ->
+
+
+class Psg.PistolView extends Psg.WeaponView
+
+  constructor: (model) ->
+
+
+class Psg.MachineGunView extends Psg.WeaponView
+
+  constructor: (model) ->
+    @barrel = new Shape.Rectangle(
+      size: new Size(@scale, 0.16 * @scale)
+    )
+    @barrel.strokeColor = 'black'
+    @barrel.fillColor = 'black'
+    @grip = new Shape.Rectangle size: new Size(0.3 * @scale, 0.1 * @scale)
+    @grip.position =
+      x: @barrel.position.x - 0.3 * @barrel.size.width
+      y: @barrel.position.y + @barrel.size.height
+    @grip.strokeColor = 'black'
+    @grip.fillColor = 'black'
+    @grip.rotate(100)
+
+    @shape = new Group @barrel, @grip
+    @shapeOffset =
+      x: 0.55 * @scale
+      y: 0.15 * @scale
+    if model.position
+      @moveTo model.position
+
+
+class Psg.RocketLauncherView extends Psg.WeaponView
+
+  constructor: (model) ->
+
+
+class Psg.RailGunView extends Psg.WeaponView
+
+  constructor: (model) ->
