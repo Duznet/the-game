@@ -65,6 +65,7 @@ class Psg.PlayerView extends Psg.ObjectView
 
     @gun = new Psg.MachineGunView
       position: @body.position
+      onBody: true
 
     @shape = new Group(@body, @head, @gun.shape)
     @shapeOffset = new Point
@@ -125,6 +126,8 @@ class Psg.PistolView extends Psg.WeaponView
 class Psg.MachineGunView extends Psg.WeaponView
 
   constructor: (model) ->
+    if not model.onBody
+      @scale *= 0.8
     @barrel = new Shape.Rectangle(
       size: new Size(@scale, 0.16 * @scale)
     )
@@ -138,10 +141,22 @@ class Psg.MachineGunView extends Psg.WeaponView
     @grip.fillColor = 'black'
     @grip.rotate(100)
 
-    @shape = new Group @barrel, @grip
-    @shapeOffset =
-      x: 0.55 * @scale
-      y: 0.15 * @scale
+    @grip2 = new Shape.Rectangle size: new Size(0.3 * @scale, 0.1 * @scale)
+    @grip2.position =
+      x: @barrel.position.x + 0.1 * @barrel.size.width
+      y: @barrel.position.y + 0.8 * @barrel.size.height
+    @grip2.strokeColor = 'black'
+    @grip2.fillColor = 'black'
+    @grip2.rotate(45)
+
+    @shape = new Group @barrel, @grip, @grip2
+    if model.onBody
+      @shapeOffset =
+        x: 0.55 * @scale
+        y: 0.15 * @scale
+    else
+      @shape.onFrame = =>
+        @shape.visible = @respawn <= 0
     if model.position
       @moveTo model.position
 
