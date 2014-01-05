@@ -112,8 +112,8 @@ class Psg.ProjectileView extends Psg.ObjectView
           y: model.position.y * @scale
         ),
         new Point(
-          x: model.velocity.x * @scale
-          y: model.velocity.y * @scale
+          x: (model.position.x + model.velocity.x) * @scale
+          y: (model.position.y + model.velocity.y) * @scale
         )
       )
       @shape.strokeColor = 'blue'
