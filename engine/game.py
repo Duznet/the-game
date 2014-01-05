@@ -192,7 +192,12 @@ class Game:
 
             cellval = self.map[cell.y][cell.x]
 
-            intersection = bullet_path.intersects_with_player(cell + Point(SIDE, SIDE))
+            intersection = None
+            if projectile.weapon == RAIL:
+                intersection = bullet_path.intersects_with_player_accurate(player.point)
+            else:
+                intersection = bullet_path.intersects_with_player(player.point)
+
             if (cellval == WALL) and intersection:
                 if projectile.weapon == ROCKET:
                     self.burst(projectile, intersection)
