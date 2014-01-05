@@ -65,7 +65,7 @@ class Psg.GameView extends Backbone.View
         dx: event.point.x / @scale - @model.player.position.x
         dy: event.point.y / @scale - @model.player.position.y
     onMouseMove = (event) =>
-      if config.showSight
+      if config.game.showSight
         @sight.moveTo event.point
         @sight.saveOffset view.center
     onMouseDrag = (event) =>
@@ -77,10 +77,6 @@ class Psg.GameView extends Backbone.View
       @model.player.fire = dx: 0, dy: 0
 
     onFrame = (event) =>
-      if config.showSight
-        @sight.moveTo
-          x: view.center.x + @sight.offset.x
-          y: view.center.y + @sight.offset.y
       players = @model.players
       for login, p of @model.players
         if not @pViews[login]
@@ -110,6 +106,11 @@ class Psg.GameView extends Backbone.View
 
       if not @playerPosition then return
       view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
+      if config.game.showSight
+        @sight.moveTo
+          x: view.center.x + @sight.offset.x
+          y: view.center.y + @sight.offset.y
+
 
     tool.attach 'mousedown', onMouseDown
     tool.attach 'mousedrag', onMouseDrag
