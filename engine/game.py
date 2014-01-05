@@ -194,9 +194,9 @@ class Game:
 
             intersection = None
             if projectile.weapon == RAIL:
-                intersection = bullet_path.intersects_with_player_accurate(player.point)
+                intersection = bullet_path.intersects_with_player_accurate(cell + Point(SIDE, SIDE))
             else:
-                intersection = bullet_path.intersects_with_player(player.point)
+                intersection = bullet_path.intersects_with_player(cell + Point(SIDE, SIDE))
 
             if (cellval == WALL) and intersection:
                 if projectile.weapon == ROCKET:
