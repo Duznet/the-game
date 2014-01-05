@@ -51,6 +51,8 @@ class Psg.GameView extends Backbone.View
     @pViews = []
     @projectiles = []
     @model.startGame(onmessage: @onmessage)
+    if config.game.showSight
+      @sight = new Psg.SightView
     $canvas = $('#game-canvas')
     $canvas.attr 'tabindex', '0'
     $canvas.focus()
@@ -62,7 +64,12 @@ class Psg.GameView extends Backbone.View
       @model.player.fire =
         dx: event.point.x / @scale - @model.player.position.x
         dy: event.point.y / @scale - @model.player.position.y
+    onMouseMove = (event) =>
+      if config.showSight
+        @sight.moveTo event.point
+        @sight.saveOffset view.center
     onMouseDrag = (event) =>
+      onMouseMove(event)
       @model.player.fire =
         dx: event.point.x / @scale - @model.player.position.x
         dy: event.point.y / @scale - @model.player.position.y
@@ -70,6 +77,10 @@ class Psg.GameView extends Backbone.View
       @model.player.fire = dx: 0, dy: 0
 
     onFrame = (event) =>
+      if config.showSight
+        @sight.moveTo
+          x: view.center.x + @sight.offset.x
+          y: view.center.y + @sight.offset.y
       players = @model.players
       for login, p of @model.players
         if not @pViews[login]
@@ -90,6 +101,7 @@ class Psg.GameView extends Backbone.View
           p.shape.remove()
         @projectiles = []
         for p in @model.projectiles
+          if p.velocity.x is 0 and p.velocity.y is 0 then continue
           v = new Psg.ProjectileView p
           @projectiles.push v
 
@@ -101,7 +113,9 @@ class Psg.GameView extends Backbone.View
 
     tool.attach 'mousedown', onMouseDown
     tool.attach 'mousedrag', onMouseDrag
+    tool.attach 'mousemove', onMouseMove
     tool.attach 'mouseup', onMouseUp
+
     view.attach 'frame', onFrame
     console.log "game started"
 

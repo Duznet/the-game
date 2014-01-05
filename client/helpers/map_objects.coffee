@@ -22,6 +22,20 @@ class Psg.ObjectView
     @moveTo x: model.position.x * @scale, y: model.position.y * @scale
 
 
+class Psg.SightView extends Psg.ObjectView
+
+  saveOffset: (point) ->
+    @offset =
+      x: @shape.position.x - point.x
+      y: @shape.position.y - point.y
+
+  constructor: ->
+    @offset = x: 0, y: 0
+    @shape = new Shape.Circle new Point(0, 0), 0.3 * @scale
+    @shape.strokeColor = 'black'
+    @shape.strokeWidth = 5
+
+
 class Psg.PlayerView extends Psg.ObjectView
 
   moveTo: (newPosition) ->

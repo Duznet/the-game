@@ -7,6 +7,7 @@ window.config =
   game:
     scale: 30
     showChat: true
+    showSight: false
     defaultConsts:
       tickSize: 30
       accuracy: 0.000001
