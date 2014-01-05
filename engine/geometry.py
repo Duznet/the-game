@@ -9,21 +9,44 @@ class Segment:
     def __repr__(self):
         return str([self.p1, self.p2])
 
+    def vector(self):
+        return self.p2 - self.p1
+
+    def intersect_with_segment(self, seg):
+        v1 = (seg.p2.x - seg.p1.x) * (self.p1.y - seg.p1.y) - (seg.p2.y - seg.p1.y) * (self.p1.x - seg.p1.x)
+        v2 = (seg.p2.x - seg.p1.x) * (self.p2.y - seg.p1.y) - (seg.p2.y - seg.p1.y) * (self.p2.x - seg.p1.x)
+        v3 = (self.p2.x - self.p1.x) * (seg.p1.y - self.p1.y) - (self.p2.y - self.p1.y) * (seg.p1.x - self.p1.x)
+        v4 = (self.p2.x - self.p1.x) * (seg.p2.y - self.p1.y) - (self.p2.y - self.p1.y) * (seg.p2.x - self.p1.x)
+        return (v1 * v2 < 0) and (v3 * v4 < 0)
+
+    def intersects_with_player_accurate(self, player):
+        lbound = player - Point(SIDE, SIDE)
+        ubound = player + Point(SIDE, SIDE)
+
+        pts = [lbound, lbound + Point(0, SIDE), ubound, lbound + Point(SIDE, 0), lbound]
+
+        for i in range(len(pts) - 1):
+            if self.intersect_with_segment(Segment(pts[i], pts[i + 1])):
+                return player
+
+        return None
+
+
 
     def intersects_with_player(self, player):
-        ipoint = [0, 0]
-
-        for i in range(2):
-            coord = list(sorted([self.p1.args[i], self.p2.args[i]]))
-            pcoord = list(sorted([player.args[i] - SIDE, player.args[i] + SIDE]))
-
-            if pcoord[1] < coord[0] or pcoord[0] > coord[1]:
-                return None
-
-            ipoint[i] = pcoord[0] if coord[0] <= pcoord[0] and pcoord[0] <= coord[1] else pcoord[1]
+        lbound = player - Point(SIDE, SIDE)
+        ubound = player + Point(SIDE, SIDE)
 
 
-        return Point(ipoint)
+        # print(ipoints)
+
+        pts = [self.p1, self.p2]
+
+        for p in pts:
+            if lbound <= p <= ubound:
+                return player
+
+        return None
 
     def cells_path(self, lbound, ubound):
         """Bresenham's line algorithm"""
