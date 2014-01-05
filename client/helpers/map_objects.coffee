@@ -63,7 +63,7 @@ class Psg.PlayerView extends Psg.ObjectView
     @label.justification = 'center'
     @label.content = model.login
 
-    @gun = new Psg.MachineGunView
+    @gun = new Psg.PistolView
       position: @body.position
       onBody: true
 
@@ -121,6 +121,42 @@ class Psg.KnifeView extends Psg.WeaponView
 class Psg.PistolView extends Psg.WeaponView
 
   constructor: (model) ->
+    @barrel = new Shape.Rectangle
+      size:
+        x: 0.6 * @scale
+        y: 0.16 * @scale
+    @barrel.fillColor = 'black'
+
+    @n = new Shape.Rectangle
+      size:
+        x: 0.5 * @barrel.size.width
+        y: 1.5 * @barrel.size.height
+    @n.strokeColor = 'black'
+    @n.fillColor = 'grey'
+    @n.position =
+      x: @barrel.position.x + 0.2 * @barrel.size.width
+      y: @barrel.position.y - 0.1 * @barrel.size.height
+
+    @grip = new Shape.Rectangle
+      size:
+        x: 0.36 * @scale
+        y: 0.1 * @scale
+    @grip.position =
+      x: @barrel.position.x - 0.3 * @barrel.size.width
+      y: @barrel.position.y + 0.6 * @barrel.size.height
+    @grip.fillColor = 'black'
+    @grip.rotate(100)
+
+    @shape = new Group @barrel, @grip, @n
+    if model.onBody
+      @shapeOffset =
+        x: 0.55 * @scale
+        y: 0.15 * @scale
+    else
+      @shape.onFrame = =>
+        @shape.visible = @respawn <= 0
+    if model.position
+      @moveTo model.position
 
 
 class Psg.MachineGunView extends Psg.WeaponView
