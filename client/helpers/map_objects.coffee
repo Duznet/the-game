@@ -105,10 +105,24 @@ class Psg.ProjectileView extends Psg.ObjectView
     A: 'blue'
 
   constructor: (model) ->
-    @shape = new Path.Circle new Point(0, 0), @SIZES[model.weapon] * @scale
-    @shape.strokeColor = 'black'
-    @shape.fillColor = @COLORS[model.weapon]
-    if model then @importPosition model
+    if model.weapon is 'A'
+      @shape = new Path.Line(
+        new Point(
+          x: model.position.x * @scale
+          y: model.position.y * @scale
+        ),
+        new Point(
+          x: model.velocity.x * @scale
+          y: model.velocity.y * @scale
+        )
+      )
+      @shape.strokeColor = 'blue'
+      @shape.strokeWidth = 0.1 * @scale
+    else
+      @shape = new Path.Circle new Point(0, 0), @SIZES[model.weapon] * @scale
+      @shape.strokeColor = 'black'
+      @shape.fillColor = @COLORS[model.weapon]
+      if model then @importPosition model
 
 
 class Psg.WeaponOnMapView extends Psg.ObjectView
