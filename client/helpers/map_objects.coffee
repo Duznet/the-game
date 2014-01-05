@@ -76,10 +76,24 @@ class Psg.PlayerView extends Psg.ObjectView
 
 class Psg.ProjectileView extends Psg.ObjectView
 
+  SIZES:
+    K: 0.1
+    P: 0.1
+    M: 0.1
+    R: 0.2
+    A: 0.2
+
+  COLORS:
+    K: 'grey'
+    P: 'black'
+    M: 'black'
+    R: 'red'
+    A: 'blue'
+
   constructor: (model) ->
-    @shape = new Path.Circle new Point(0, 0), 0.1 * @scale
+    @shape = new Path.Circle new Point(0, 0), @SIZES[model.weapon] * @scale
     @shape.strokeColor = 'black'
-    @shape.fillColor = 'black'
+    @shape.fillColor = @COLORS[model.weapon]
     if model then @importPosition model
 
 
