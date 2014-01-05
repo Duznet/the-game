@@ -73,13 +73,14 @@ class Psg.Router extends Backbone.Router
 
     if not @user.isAuthenticated()
       @onSignedOut()
-      return
+      return false
     @app.set 'pageTitle', attrs.pageTitle
     if not @appView
       @appView = new Psg.ApplicationView model: @app
     else
       @appView.render()
     @addView @appView
+    return true
 
   addView: (view) ->
     @views.push view
@@ -108,12 +109,12 @@ class Psg.Router extends Backbone.Router
     @user.signout()
 
   join: ->
-    @refreshPage(pageTitle: 'Join game')
+    if not @refreshPage(pageTitle: 'Join game') then return
     @addView new Psg.ChatView model: @globalChat
     @addView new Psg.GameListView model: @gameList
 
   create: ->
-    @refreshPage(pageTitle: 'Create game')
+    if not @refreshPage(pageTitle: 'Create game') then return
     @addView new Psg.ChatView model: @globalChat
     @gameCreator = new Psg.GameCreator
       user: @user
@@ -124,7 +125,7 @@ class Psg.Router extends Backbone.Router
 
   uploadMap: ->
     console.log 'uploadMap'
-    @refreshPage(pageTitle: 'Upload map')
+    if not @refreshPage(pageTitle: 'Upload map') then return
     @addView new Psg.ChatView model: @globalChat
     @addView new Psg.MapUploaderView
       model: new Psg.MapUploader
