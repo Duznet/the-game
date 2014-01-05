@@ -66,7 +66,7 @@ class window.Drawer
     @v = new Point(0, 0)
     @gc = new Psg.GameplayConnection config.gameplayUrl
     @tick = 0
-    teorFps = Math.round 1000 / config.defaultGameConsts.tickSize
+    teorFps = Math.round 1000 / config.game.defaultConsts.tickSize
     fps = 0
     lastFps = 0
     dx = 0
@@ -78,7 +78,7 @@ class window.Drawer
     , config.fpsCalcInterval
     setInterval =>
       if dx isnt 0 or dy isnt 0 then @gc.move @user.sid, @tick, dx, dy
-    , config.defaultGameConsts.tickSize / 2
+    , config.game.defaultConsts.tickSize / 2
     @playerVelocity = new Point(0, 0)
     @gc.onopen = =>
       @gc.move @user.sid, @tick, 0, 0
@@ -116,7 +116,7 @@ class window.Drawer
       if @playerPosition.x isnt player.position.x or @playerPosition.y isnt player.position.y
         player.position = @playerPosition
       else
-        t = 1000 / config.defaultGameConsts.tickSize * event.delta
+        t = 1000 / config.game.defaultConsts.tickSize * event.delta
         if config.interpolate
           player.position.x += t * @playerVelocity.x * (lastFps / teorFps)
           player.position.y += t * @playerVelocity.y * (lastFps / teorFps)

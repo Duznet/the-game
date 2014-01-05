@@ -32,7 +32,7 @@ describe 'Websocket API using server', ->
     filteredMaps = maps.filter (m) -> m.name is mapName
     filteredMaps[0]
 
-  precision = Math.round Math.abs Math.log(config.defaultGameConsts.accuracy) / Math.LN10
+  precision = Math.round Math.abs Math.log(config.game.defaultConsts.accuracy) / Math.LN10
 
   before (done) ->
     startTesting ->
@@ -346,7 +346,7 @@ describe 'Websocket API using server', ->
         console.log "got: ", data.players[0]
         if count < 30
           gc.move(hostUser.sid, data.tick, 0, -1)
-        if count > 2 and Math.abs(player.y - 2.5) < config.defaultGameConsts.accuracy
+        if count > 2 and Math.abs(player.y - 2.5) < config.game.defaultConsts.accuracy
           touched = true
 
         if count is 30
@@ -370,7 +370,7 @@ describe 'Websocket API using server', ->
     it 'should change only vy on diagonal jumping to the right', (done) ->
 
       expectedPosition =
-        x: initialPosition.x + 2 * config.defaultGameConsts.accel + 2 * 20 * config.defaultGameConsts.accel
+        x: initialPosition.x + 2 * config.game.defaultConsts.accel + 2 * 20 * config.game.defaultConsts.accel
         y: initialPosition.y
 
       count = 0
@@ -398,7 +398,7 @@ describe 'Websocket API using server', ->
     it 'should change only vy on diagonal jumping to the left', (done) ->
 
       expectedPosition =
-        x: initialPosition.x - 2 * config.defaultGameConsts.accel - 2 * 20 * config.defaultGameConsts.accel
+        x: initialPosition.x - 2 * config.game.defaultConsts.accel - 2 * 20 * config.game.defaultConsts.accel
         y: initialPosition.y
 
       count = 0

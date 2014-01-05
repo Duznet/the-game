@@ -64,7 +64,7 @@ class Psg.Game extends Backbone.Model
         @gc.move @player.movement
       if @player.fire.dx isnt 0 or @player.fire.dy isnt 0
         @gc.fire @player.fire
-    , config.defaultGameConsts.tickSize / 2
+    , config.game.defaultConsts.tickSize / 2
 
     @gc.onclose = =>
       clearInterval @sendActionInterval

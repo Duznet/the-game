@@ -4,16 +4,16 @@ window.config =
   websocketMode: "sync"
   debug:
     pushingViewsInfo: false
-  defaultGameConsts:
-    tickSize: 30
-    accuracy: 0.000001
-    accel: 0.02
-    maxVelocity: 0.2
-    friction: 0.02
-    gravity: 0.02
   game:
     scale: 30
     showChat: true
+    defaultConsts:
+      tickSize: 30
+      accuracy: 0.000001
+      accel: 0.02
+      maxVelocity: 0.2
+      friction: 0.02
+      gravity: 0.02
   interpolate: true
   fpsCalcInterval: 250
   storage: sessionStorage
