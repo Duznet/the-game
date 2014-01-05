@@ -33,7 +33,7 @@ class Player:
         self.moved = False
         self.got_action = False
         self.delta = Point(0, 0)
-        self.ammo = {KNIFE: 0, ROCKET: 0, PISTOL: 0, MGUN: 0, RAIL: 0}
+        self.ammo = {KNIFE: 1, ROCKET: 0, PISTOL: 0, MGUN: 0, RAIL: 0}
         self.shot_time = {KNIFE: -1000000, ROCKET: -1000000, PISTOL: -1000000, MGUN: -1000000, RAIL: -1000000}
         self.weapon = KNIFE
         self.angle = -1
@@ -72,9 +72,13 @@ class Player:
     def is_dead(self):
         return self.hp == 0
 
-    def damage(self, value):
-        self.hp -= value
+    def damage(self, projectile):
+        self.hp -= DAMAGE[projectile.weapon]
         self.normalize_hp()
+
+        if self.is_dead():
+            self.die()
+            projectile.owner.kills += 1
 
     def can_fire(self, tick):
         return self.shot_time[self.weapon] + RECHARGE_TIME[self.weapon] <= tick
@@ -177,21 +181,21 @@ class Game:
     def move_projectile(self, projectile):
         bullet_path = Segment(projectile.point, projectile.point + projectile.v)
 
-        if projectile.weapon == RAIL:
-            bullet_path.p2 = projectile.point + projectile.v * 100
-
         curcell = cell_coords(projectile.point)
         cells = bullet_path.cells_path(Point(0, 0), Point(len(self.map[0]), len(self.map)))
 
-        collisions = []
         for cell in cells:
             cell = cell_coords(cell)
+
+            if not (cell <= Point(len(self.map[0]) - 1, len(self.map) - 1)):
+                break
+
             cellval = self.map[cell.y][cell.x]
 
             intersection = bullet_path.intersects_with_player(cell + Point(SIDE, SIDE))
-            if cellval == WALL and intersection:
+            if (cellval == WALL) and intersection:
                 if projectile.weapon == ROCKET:
-                    self.burst(intersection)
+                    self.burst(projectile, intersection)
 
                 bullet_path.p2 = intersection
                 if projectile.weapon == RAIL:
@@ -206,21 +210,24 @@ class Game:
             if player == projectile.owner:
                 continue
 
-            intersection = bullet_path.intersects_with_player(player.point)
+
+            intersection = None
+            if projectile.weapon == RAIL:
+                intersection = bullet_path.intersects_with_player_accurate(player.point)
+            else:
+                intersection = bullet_path.intersects_with_player(player.point)
             if intersection:
-                player.damage(DAMAGE[projectile.weapon])
-
                 if projectile.weapon == ROCKET:
-                    self.burst(intersection)
+                    self.burst(projectile, intersection)
+                else:
+                    player.damage(projectile)
 
-                if player.is_dead():
-                    player.die()
-                    projectile.owner.kills += 1
 
                 if projectile.weapon != RAIL:
                     projectile.v = Point(0, 0)
 
-        projectile.point = bullet_path.p2
+        if projectile.weapon != RAIL:
+            projectile.point = bullet_path.p2
 
     def update_players(self):
         for player in self.players_.values():
@@ -360,21 +367,19 @@ class Game:
 
         return player
 
-    def burst(self, point):
+    def burst(self, projectile, point):
         for player in self.players_.values():
             if dist(player.point, point) <= BURSTR:
-                player.v = player.point - point
+                player.velocity = player.point - point
+                # print("player velocity", player.v)
                 # player.v *= BURSTV / BURSTR
-                player.damage(BURSTD)
+                player.damage(projectile)
 
     def brake_if_not_moved(self, id):
         player = self.players_[id]
 
-        print("delta: ", player.delta)
         if abs(player.delta.x) > EPS:
             return player
-        print("BRAKE")
-        print(player.velocity)
 
         norm = abs(player.velocity)
 
