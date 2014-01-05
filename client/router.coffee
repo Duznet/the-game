@@ -50,10 +50,11 @@ class Psg.Router extends Backbone.Router
   onEnteredGame: (id) ->
     @navigate "game/#{id}"
     @refreshPage(pageTitle: "Playing '#{@user.game.name}'")
-    @addView new Psg.ChatView
-      model: new Psg.Chat
-        user: @user
-        game: id
+    if config.game.showChat
+      @addView new Psg.ChatView
+        model: new Psg.Chat
+          user: @user
+          game: id
     gameView = new Psg.GameView
       model: new Psg.Game
         user: @user

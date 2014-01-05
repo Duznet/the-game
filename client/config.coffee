@@ -13,6 +13,7 @@ window.config =
     gravity: 0.02
   game:
     scale: 30
+    showChat: true
   interpolate: true
   fpsCalcInterval: 250
   storage: sessionStorage
