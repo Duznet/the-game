@@ -28,6 +28,7 @@ class GameplayController(BasicController):
 
 
     def tick(self):
+        # print("projectiles", [proj.to_array() for proj in self.game.projectiles])
         return jsonify(
             players=self.game.players(),
             items=self.game.items,

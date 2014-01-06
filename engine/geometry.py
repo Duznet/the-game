@@ -6,6 +6,9 @@ from engine.constants import *
 def pfloor(point):
     return [floor(point.x), floor(point.y)]
 
+def pceil(point):
+    return [ceil(point.x), ceil(point.y)]
+
 
 class Segment:
     def __init__(self, p1, p2):
@@ -56,8 +59,9 @@ class Segment:
 
         return None
 
-    def cells_path(self, lbound, ubound):
-        """Bresenham's line algorithm"""
+    def closest_wall(self, map_):
+        lbound = Point(0, 0)
+        ubound = Point(len(map_[0]) - 1, len(map_) - 1)
         res = []
 
         (x0, y0) = self.p1.args
@@ -66,49 +70,77 @@ class Segment:
         dx = abs(x1 - x0)
         dy = abs(y1 - y0)
 
-        (x0, y0) = pfloor(self.p1)
-        (x1, y1) = pfloor(self.p2)
-
-        x, y = x0, y0
         sx = -1 if x0 > x1 else 1
         sy = -1 if y0 > y1 else 1
-        if dx > dy:
-            err = dx / 2.0
 
-            while x != x1:
-                pt = Point(x, y)
-                if pt >= lbound and pt <= ubound:
-                    res.append(pt)
-                else:
-                    return res
-                err -= dy
-                if err < 0:
-                    y += sy
-                    err += dx
+        # print("path: ", Point(x0, y0), Point(x1, y1))
+
+        x, y = x0, y0
+
+        while (x1 - x)*sx > 0 and dx != 0:
+            dx_ = x - floor(x) if sx == 1 else x - ceil(x)
+
+            dy_ = sx * sy * dx_ * dy / dx
+            # if sx == 1:
+            #     dy_ = -dy_
+
+            pt = Point(x - dx_, y - dy_)
+            if (pt.y - y0) * sy < 0 or (pt.x - x0) * sx < 0:
+                y += sy *  dy / dx
                 x += sx
-        else:
-            err = dy / 2.0
+                continue
+            cell = Point(pfloor(pt))
+            if sx == -1:
+                cell.x -= 1
 
-            while y != y1:
-                pt = Point(x, y)
-                if pt >= lbound and pt <= ubound:
+            # print(cell)
+            # print(pt)
+            if cell >= lbound and cell <= ubound:
+                # res[0].append(pt)
+                if map_[cell.y][cell.x] == WALL:
                     res.append(pt)
-                else:
-                    return res
-                err -= dx
-                if err < 0:
-                    x += sx
-                    err += dy
+                    break
+            else:
+                break
+
+            y += sy *  dy / dx
+            x += sx
+
+        # print("-------------------")
+        x, y = x0, y0
+        while (y1 - y)*sy > 0 and dy != 0:
+            dy_ = y - floor(y) if sy == 1 else y - ceil(y)
+            dx_ = sy * sx * dy_ * dx / dy
+            # if sy == 1:
+            #     dx_ = -dx_
+
+            pt = Point(x - dx_, y - dy_)
+            if (pt.y - y0) * sy < 0 or (pt.x - x0) * sx < 0:
+                x += sx *  dx / dy
                 y += sy
+                continue
+            # cell = Point(pceil(pt)) - Point(0, 1) if sy == -1 else Point(pfloor(pt))
+            cell = Point(pfloor(pt))
+            if sy == -1:
+                cell.y -= 1
+            #     cell = Point(pceil(pt)) - Point(1,1)
+            # print(cell)
+            # print(pt)
+            if cell >= lbound and cell <= ubound:
+                # res[0].append(pt)
+                if map_[cell.y][cell.x] == WALL:
+                    res.append(pt)
+                    break
+            else:
+                break
 
-        pt = Point(x, y)
-        if pt >= lbound and pt <= ubound:
-            res.append(pt)
+            x += sx *  dx / dy
+            y += sy
+
+        if len(res):
+            return min(res, key=lambda x: self.p1.distance(x))
         else:
-            return res
-
-        return res
-
+            return None
 
 class Point:
     def __init__(self, x, y=None):

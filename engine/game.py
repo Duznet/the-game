@@ -182,28 +182,26 @@ class Game:
         bullet_path = Segment(projectile.point, projectile.point + projectile.v)
 
         curcell = cell_coords(projectile.point)
-        cells = bullet_path.cells_path(Point(0, 0), Point(len(self.map[0]), len(self.map)))
+        wall = bullet_path.closest_wall(self.map)
 
-        for cell in cells:
-            cell = cell_coords(cell)
+        # for cell in cells:
+        #     cell = cell_coords(cell)
 
-            if not (cell <= Point(len(self.map[0]) - 1, len(self.map) - 1)):
-                break
-
-            cellval = self.map[cell.y][cell.x]
+        #     cellval = self.map[cell.y][cell.x]
 
 
-            if (cellval == WALL):
-                if projectile.weapon == ROCKET:
-                    self.burst(projectile, cell + Point(SIDE, SIDE))
+        #     if (cellval == WALL):
+        if wall:
+            if projectile.weapon == ROCKET:
+                self.burst(projectile, wall)
 
-                bullet_path.p2 = cell + Point(SIDE, SIDE)
-                if projectile.weapon == RAIL:
-                    projectile.v = bullet_path.p2 - bullet_path.p1
-                else:
-                    projectile.v = Point(0, 0)
+            bullet_path.p2 = wall
+            if projectile.weapon == RAIL:
+                projectile.v = bullet_path.p2 - bullet_path.p1
+            else:
+                projectile.v = Point(0, 0)
 
-                break
+            # break
 
 
         for player in self.players_.values():
