@@ -93,6 +93,8 @@ class Psg.PlayerView extends Psg.ObjectView
 
 class Psg.ProjectileView extends Psg.ObjectView
 
+  finished: true
+
   SIZES:
     K: 0.1
     P: 0.1
@@ -109,6 +111,7 @@ class Psg.ProjectileView extends Psg.ObjectView
 
   constructor: (model) ->
     if model.weapon is 'A'
+      @finished = false
       @shape = new Path.Line(
         new Point(
           x: model.position.x * @scale
@@ -121,6 +124,14 @@ class Psg.ProjectileView extends Psg.ObjectView
       )
       @shape.strokeColor = 'blue'
       @shape.strokeWidth = 0.1 * @scale
+      @shape.strokeCap = 'round'
+      @shape.onFrame = =>
+        if @shape.strokeWidth < 0.3 * @scale
+          @shape.strokeWidth *= 1.15
+        if @shape.strokeColor.alpha > 0.2
+          @shape.strokeColor.alpha -= 0.15
+        else
+          @finished = true
     else
       @shape = new Path.Circle new Point(0, 0), @SIZES[model.weapon] * @scale
       @shape.strokeColor = 'black'

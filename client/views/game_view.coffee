@@ -7,6 +7,7 @@ class Psg.GameView extends Backbone.View
     paper.install window
     paper.setup 'game-canvas'
     @projectiles = []
+    @animations = []
     @pressedKeys = left: 0, up: 0, right: 0, down: 0
 
   render: ->
@@ -100,10 +101,13 @@ class Psg.GameView extends Backbone.View
           y: view.center.y + @crosshair.offset.y
         @crosshair.shape.bringToFront()
 
+      for p in @animations
+        if p.finished
+          p.shape.onFrame = null
+          p.shape.remove()
       if @model.projectilesInvalidated
         @model.projectilesInvalidated = false
-        for p in @projectiles
-          p.shape.remove()
+        @animations = @projectiles.concat(@animations.filter (p) -> not p.finished)
         @projectiles = []
         for p in @model.projectiles
           if p.velocity.x is 0 and p.velocity.y is 0 then continue
