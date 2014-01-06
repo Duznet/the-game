@@ -51,8 +51,8 @@ class Psg.GameView extends Backbone.View
     @pViews = []
     @projectiles = []
     @model.startGame(onmessage: @onmessage)
-    if config.game.showSight
-      @sight = new Psg.SightView
+    if config.game.showCrosshair
+      @crosshair = new Psg.CrosshairView
     $canvas = $('#game-canvas')
     $canvas.attr 'tabindex', '0'
     $canvas.focus()
@@ -65,9 +65,9 @@ class Psg.GameView extends Backbone.View
         dx: event.point.x / @scale - @model.player.position.x
         dy: event.point.y / @scale - @model.player.position.y
     onMouseMove = (event) =>
-      if config.game.showSight
-        @sight.moveTo event.point
-        @sight.saveOffset view.center
+      if config.game.showCrosshair
+        @crosshair.moveTo event.point
+        @crosshair.saveOffset view.center
     onMouseDrag = (event) =>
       onMouseMove(event)
       @model.player.fire =
@@ -94,10 +94,10 @@ class Psg.GameView extends Backbone.View
 
       if not @playerPosition then return
       view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
-      if config.game.showSight
-        @sight.moveTo
-          x: view.center.x + @sight.offset.x
-          y: view.center.y + @sight.offset.y
+      if config.game.showCrosshair
+        @crosshair.moveTo
+          x: view.center.x + @crosshair.offset.x
+          y: view.center.y + @crosshair.offset.y
 
       if @model.projectilesInvalidated
         @model.projectilesInvalidated = false

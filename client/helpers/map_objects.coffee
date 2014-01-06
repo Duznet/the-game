@@ -22,7 +22,7 @@ class Psg.ObjectView
     @moveTo x: model.position.x * @scale, y: model.position.y * @scale
 
 
-class Psg.SightView extends Psg.ObjectView
+class Psg.CrosshairView extends Psg.ObjectView
 
   saveOffset: (point) ->
     @offset =
@@ -31,9 +31,11 @@ class Psg.SightView extends Psg.ObjectView
 
   constructor: ->
     @offset = x: 0, y: 0
-    @shape = new Shape.Circle new Point(0, 0), 0.3 * @scale
-    @shape.strokeColor = 'black'
-    @shape.strokeWidth = 5
+    @circle = new Shape.Circle new Point(0, 0), 0.3 * @scale
+    @shape = new Group @circle
+    @shape.style = 
+      strokeColor: 'black'
+      strokeWidth: 3
 
 
 class Psg.PlayerView extends Psg.ObjectView

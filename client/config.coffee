@@ -7,7 +7,7 @@ window.config =
   game:
     scale: 30
     showChat: true
-    showSight: true
+    showCrosshair: true
     showHealth: true
     defaultConsts:
       tickSize: 30
