@@ -3,7 +3,6 @@ from engine.event import *
 from engine.constants import *
 
 import re
-
 def cell_coords(point):
     return Point(floor(point.x), floor(point.y))
 

@@ -6,7 +6,7 @@ window.config =
     pushingViewsInfo: false
   game:
     scale: 30
-    showChat: true
+    showChat: false
     showCrosshair: true
     showHealth: true
     defaultConsts:
