@@ -92,6 +92,13 @@ class Psg.GameView extends Backbone.View
         if login is @login or config.showHealth
           pView.label.content = "#{login} (#{p.health})"
 
+      if not @playerPosition then return
+      view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
+      if config.game.showSight
+        @sight.moveTo
+          x: view.center.x + @sight.offset.x
+          y: view.center.y + @sight.offset.y
+
       if @model.projectilesInvalidated
         @model.projectilesInvalidated = false
         for p in @projectiles
@@ -104,13 +111,6 @@ class Psg.GameView extends Backbone.View
 
       for respawn, index in @model.items
         @items[index].respawn = respawn
-
-      if not @playerPosition then return
-      view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
-      if config.game.showSight
-        @sight.moveTo
-          x: view.center.x + @sight.offset.x
-          y: view.center.y + @sight.offset.y
 
 
     tool.attach 'mousedown', onMouseDown
