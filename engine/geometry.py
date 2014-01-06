@@ -140,7 +140,11 @@ class Segment:
         if len(res):
             return min(res, key=lambda x: self.p1.distance(x))
         else:
-            return None
+            pt = Point(pfloor(self.p2))
+            if map_[pt.y][pt.x] == WALL:
+                return self.p2
+            else:
+                return None
 
 class Point:
     def __init__(self, x, y=None):
