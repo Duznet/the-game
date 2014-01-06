@@ -1,6 +1,12 @@
 from math import *
 from engine.constants import *
 
+# import sympy.geometry as geom
+
+def pfloor(point):
+    return [floor(point.x), floor(point.y)]
+
+
 class Segment:
     def __init__(self, p1, p2):
         self.p1 = p1
@@ -17,7 +23,7 @@ class Segment:
         v2 = (seg.p2.x - seg.p1.x) * (self.p2.y - seg.p1.y) - (seg.p2.y - seg.p1.y) * (self.p2.x - seg.p1.x)
         v3 = (self.p2.x - self.p1.x) * (seg.p1.y - self.p1.y) - (self.p2.y - self.p1.y) * (seg.p1.x - self.p1.x)
         v4 = (self.p2.x - self.p1.x) * (seg.p2.y - self.p1.y) - (self.p2.y - self.p1.y) * (seg.p2.x - self.p1.x)
-        return (v1 * v2 < 0) and (v3 * v4 < 0)
+        return (v1 * v2 <= 0) and (v3 * v4 <= 0)
 
     def intersects_with_player_accurate(self, player):
         lbound = player - Point(SIDE, SIDE)
@@ -26,6 +32,8 @@ class Segment:
         pts = [lbound, lbound + Point(0, SIDE), ubound, lbound + Point(SIDE, 0), lbound]
 
         for i in range(len(pts) - 1):
+            # this = geom.Segment(self.p1.args, self.p2.args)
+            # if this.intersection(geom.Segment(pts[i].args, pts[i + 1].args)):
             if self.intersect_with_segment(Segment(pts[i], pts[i + 1])):
                 return player
 
@@ -38,7 +46,7 @@ class Segment:
         ubound = player + Point(SIDE, SIDE)
 
 
-        # print(ipoints)
+
 
         pts = [self.p1, self.p2]
 
@@ -57,11 +65,16 @@ class Segment:
 
         dx = abs(x1 - x0)
         dy = abs(y1 - y0)
+
+        (x0, y0) = pfloor(self.p1)
+        (x1, y1) = pfloor(self.p2)
+
         x, y = x0, y0
         sx = -1 if x0 > x1 else 1
         sy = -1 if y0 > y1 else 1
         if dx > dy:
             err = dx / 2.0
+
             while x != x1:
                 pt = Point(x, y)
                 if pt >= lbound and pt <= ubound:
@@ -75,6 +88,7 @@ class Segment:
                 x += sx
         else:
             err = dy / 2.0
+
             while y != y1:
                 pt = Point(x, y)
                 if pt >= lbound and pt <= ubound:

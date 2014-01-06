@@ -192,17 +192,12 @@ class Game:
 
             cellval = self.map[cell.y][cell.x]
 
-            intersection = None
-            if projectile.weapon == RAIL:
-                intersection = bullet_path.intersects_with_player_accurate(cell + Point(SIDE, SIDE))
-            else:
-                intersection = bullet_path.intersects_with_player(cell + Point(SIDE, SIDE))
 
-            if (cellval == WALL) and intersection:
+            if (cellval == WALL):
                 if projectile.weapon == ROCKET:
-                    self.burst(projectile, intersection)
+                    self.burst(projectile, cell + Point(SIDE, SIDE))
 
-                bullet_path.p2 = intersection
+                bullet_path.p2 = cell + Point(SIDE, SIDE)
                 if projectile.weapon == RAIL:
                     projectile.v = bullet_path.p2 - bullet_path.p1
                 else:
@@ -233,6 +228,10 @@ class Game:
 
         if projectile.weapon != RAIL:
             projectile.point = bullet_path.p2
+        else:
+            print("rail bullet path", bullet_path)
+            print("rail proj", projectile.to_array())
+
 
     def update_players(self):
         for player in self.players_.values():
