@@ -98,6 +98,7 @@ class Psg.GameView extends Backbone.View
         @crosshair.moveTo
           x: view.center.x + @crosshair.offset.x
           y: view.center.y + @crosshair.offset.y
+        @crosshair.shape.bringToFront()
 
       if @model.projectilesInvalidated
         @model.projectilesInvalidated = false
