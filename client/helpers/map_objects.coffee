@@ -110,6 +110,9 @@ class Psg.ProjectileView extends Psg.ObjectView
     A: 'blue'
 
   constructor: (model) ->
+    if model.velocity.x is 0 and model.velocity.y is 0 and model.weapon isnt 'R'
+      @shape = null
+      return
     if model.weapon is 'A'
       @finished = false
       @shape = new Path.Line(
@@ -130,6 +133,37 @@ class Psg.ProjectileView extends Psg.ObjectView
           @shape.strokeWidth *= 1.15
         if @shape.strokeColor.alpha > 0.2
           @shape.strokeColor.alpha -= 0.15
+        else
+          @finished = true
+    else if model.weapon is 'R' and model.velocity.x is 0 and model.velocity.y is 0
+      console.log 'this if!'
+      @finished = false
+      @back = new Path.Star
+        center: [model.position.x * @scale, model.position.y * @scale]
+        points: 18
+        radius1: 12
+        radius2: 24
+        fillColor: 'red'
+      @front = new Path.Star
+        center: [model.position.x * @scale, model.position.y * @scale]
+        points: 12
+        radius1: 4
+        radius2: 8
+        fillColor: 'yellow'
+      @front.rotate(15)
+      @back.smooth()
+      @front.smooth()
+      @shape = new Group(@back, @front)
+      @count = 0
+      @shape.onFrame = =>
+        if @count < 5
+          @back.scale(1.4)
+          @front.scale(1.3)
+          @back.fillColor.alpha /= 1.2
+          @front.fillColor.alpha /= 1.1
+          @front.rotate(5)
+          @back.rotate(-1)
+          @count++
         else
           @finished = true
     else
