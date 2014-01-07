@@ -136,7 +136,6 @@ class Psg.ProjectileView extends Psg.ObjectView
         else
           @finished = true
     else if model.weapon is 'R' and model.velocity.x is 0 and model.velocity.y is 0
-      console.log 'this if!'
       @finished = false
       @back = new Path.Star
         center: [model.position.x * @scale, model.position.y * @scale]
