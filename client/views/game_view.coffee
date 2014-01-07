@@ -101,19 +101,19 @@ class Psg.GameView extends Backbone.View
           y: view.center.y + @crosshair.offset.y
         @crosshair.shape.bringToFront()
 
-      for p in @animations
-        if p.finished
-          p.shape.onFrame = null
-          p.shape.remove()
+
       if @model.projectilesInvalidated
         @model.projectilesInvalidated = false
-        @animations = @projectiles.concat(@animations.filter (p) -> not p.finished)
         @projectiles = []
         for p in @model.projectiles
           if p.velocity.x is 0 and p.velocity.y is 0 then continue
           v = new Psg.ProjectileView p
           @projectiles.push v
-
+      for p in @animations
+        if p.finished
+          p.shape.onFrame = null
+          p.shape.remove()
+      @animations = @projectiles.concat(@animations.filter (p) -> not p.finished)
       for respawn, index in @model.items
         @items[index].respawn = respawn
 
