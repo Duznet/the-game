@@ -5,10 +5,18 @@ class Psg.MapDrawer
     @scale = attrs.scale || config.game.scale
     @items = []
 
+  drawScene: (attrs) ->
+    scene = new Shape.Rectangle
+      point: new Point(-0.5 * @scale, -0.5 * @scale)
+      size: new Size((attrs.width + 1) * @scale, (attrs.height + 1) * @scale)
+    scene.strokeColor = 'black'
+    scene.strokeWidth = @scale
+
   drawWall: (position) ->
-    rect = new Shape.Rectangle position, new Size(@scale, @scale)
-    rect.strokeColor = 'black'
-    rect.fillColor = 'black'
+    shape = new Shape.Rectangle position, new Size(@scale, @scale)
+    shape.style =
+      strokeColor: 'black'
+      fillColor: 'black'
 
   drawTeleport: (position) ->
     teleportSize = @scale / 2
@@ -30,12 +38,7 @@ class Psg.MapDrawer
   draw: (mapData) ->
     # paper must have been initialized
     length = mapData[0].length
-    for j in [0...mapData[0].length]
-      @drawWall new Point(j * @scale, -1 * @scale)
-      @drawWall new Point(j * @scale, mapData.length * @scale)
-    for i in [-1..mapData.length]
-      @drawWall new Point(-1 * @scale, i * @scale)
-      @drawWall new Point(mapData[0].length * @scale, i * @scale)
+    @drawScene(width: length, height: mapData.length)
 
     for row, i in mapData
       for col, j in row
