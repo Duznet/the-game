@@ -86,7 +86,9 @@ class Psg.GameView extends Backbone.View
         pView.moveTo
           x: p.position.x * @scale
           y: p.position.y * @scale
-        if @model.players[login].velocity.x * pView.sign < 0
+        pView.wound.visible = p.wounded
+        pView.eye.fillColor = if p.wounded then 'red' else 'yellow'
+        if p.velocity.x * pView.sign < 0
           pView.flip()
         if login is @login
           @playerPosition = pView.getPosition()

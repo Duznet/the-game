@@ -84,7 +84,13 @@ class Psg.PlayerView extends Psg.ObjectView
       position: @body.position
       onBody: true
 
-    @shape = new Group(@body, @head, @gun.shape)
+    @wound = new Shape.Circle(@body.position, 0.8 * @scale)
+    @wound.style =
+      strokeColor: 'red'
+      strokeWidth: 2
+    @wound.visible = false
+
+    @shape = new Group(@body, @head, @gun.shape, @wound)
     @shapeOffset = new Point
       x: @shape.position.x - @body.position.x
       y: @shape.position.y - @body.position.y
