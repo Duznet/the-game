@@ -145,13 +145,13 @@ class Psg.ProjectileView extends Psg.ObjectView
       @finished = false
       @back = new Path.Star
         center: [model.position.x * @scale, model.position.y * @scale]
-        points: 18
+        points: 8 + Math.floor(Math.random() * 8)
         radius1: 12
         radius2: 24
         fillColor: 'red'
       @front = new Path.Star
         center: [model.position.x * @scale, model.position.y * @scale]
-        points: 12
+        points: 6 + Math.floor(Math.random() * 6)
         radius1: 4
         radius2: 8
         fillColor: 'yellow'
