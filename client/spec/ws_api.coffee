@@ -5,6 +5,13 @@ describe 'Websocket API using server', ->
   game = null
   map = null
 
+  expectedPlayer = null
+
+  checkPlayer = (got, expected = expectedPlayer) ->
+    expect(got.position).to.almost.eql expected.position, precision
+    expect(got.velocity).to.almost.eql expected.velocity, precision
+    expect(got.health).to.almost.eql expected.health, precision
+
   maps = [
     {
       name: "Default map"
@@ -85,17 +92,22 @@ describe 'Websocket API using server', ->
     it 'should get correct game state every tick', (done) ->
 
       expectedPlayer =
-        x: 1.5
-        y: 2.5
-        vx: 0
-        vy: 0
-        hp: 100
+        position:
+          x: 1.5
+          y: 2.5
+        velocity:
+          x: 0
+          y: 0
+        health: 100
 
       gc.onmessage = (data) ->
         console.log "data: ", data
         console.log "expected: ", expectedPlayer
         console.log "got: ", data.players[0]
-        expect(data.players[0]).to.almost.eql expectedPlayer, precision
+        checkPlayer(data.players[0])
+        # expect(data.players[0].position).to.almost.eql expectedPlayer.position, precision
+        # expect(data.players[0].velocity).to.almost.eql expectedPlayer.velocity, precision
+        # expect(data.players[0].health).to.almost.eql expectedPlayer.health, precision
         done()
 
     it 'should move player correctly for one move', (done) ->
@@ -103,11 +115,13 @@ describe 'Websocket API using server', ->
       @timeout 5000
 
       expectedPlayer =
-        x: 1.52
-        y: 2.5
-        vx: 0.02
-        vy: 0
-        hp: 100
+        position:
+          x: 1.52
+          y: 2.5
+        velocity:
+          x: 0.02
+          y: 0
+        health: 100
 
       count = 0
 
@@ -118,7 +132,11 @@ describe 'Websocket API using server', ->
         console.log "got: ", data.players[0]
         gc.move hostUser.sid, data.tick, 1, 0
         if count == 2
-          expect(data.players[0]).to.almost.eql expectedPlayer, precision
+          checkPlayer(data.players[0])
+          # expect(data.players[0].position).to.almost.eql expectedPlayer.position, precision
+          # expect(data.players[0].velocity).to.almost.eql expectedPlayer.velocity, precision
+          # expect(data.players[0].health).to.almost.eql expectedPlayer.health, precision
+
           done()
 
     it 'should not allow player to gain velocity more than maximum value', (done) ->
@@ -130,7 +148,7 @@ describe 'Websocket API using server', ->
         console.log "got: ", data.players[0]
         if count > 10
           player = data.players[0]
-          expect(player.vx).to.almost.equal 0.2, precision
+          expect(player.velocity.x).to.almost.equal 0.2, precision
 
         if count == 20
           done()
@@ -139,11 +157,13 @@ describe 'Websocket API using server', ->
     it 'should not allow player to move through the wall', (done) ->
 
       expectedPlayer =
-        x: 1.5
-        y: 2.5
-        vx: 0
-        vy: 0
-        hp: 100
+        position:
+          x: 1.5
+          y: 2.5
+        velocity:
+          x: 0
+          y: 0
+        health: 100
 
       count = 0
 
@@ -154,17 +174,21 @@ describe 'Websocket API using server', ->
         console.log "expected: ", expectedPlayer
         console.log "got: ", data.players[0]
         if count == 2
-          expect(data.players[0]).to.almost.eql expectedPlayer, precision
+          expect(data.players[0].position).to.almost.eql expectedPlayer.position, precision
+          expect(data.players[0].velocity).to.almost.eql expectedPlayer.velocity, precision
+          expect(data.players[0].health).to.almost.eql expectedPlayer.health, precision
           done()
 
     it 'should decrease players velocity if not getting moves', (done) ->
 
       expectedPlayer =
-        x: 1.5 + 0.02 + 0.04 + 0.02
-        y: 2.5
-        vx: 0.02
-        vy: 0
-        hp: 100
+        position:
+          x: 1.5 + 0.02 + 0.04 + 0.02
+          y: 2.5
+        velocity:
+          x: 0.02
+          y: 0
+        health: 100
 
       count = 0
 
@@ -180,17 +204,21 @@ describe 'Websocket API using server', ->
         if count == 4
           player = data.players[0]
           console.log "Assert. Expected: ", expectedPlayer, ", got:", player
-          expect(data.players[0]).to.almost.eql expectedPlayer, precision
+          expect(data.players[0].position).to.almost.eql expectedPlayer.position, precision
+          expect(data.players[0].velocity).to.almost.eql expectedPlayer.velocity, precision
+          expect(data.players[0].health).to.almost.eql expectedPlayer.health, precision
           done()
 
     it 'should stop player if not getting moves', (done) ->
 
       expectedPlayer =
-        x: 1.52
-        y: 2.5
-        vx: 0
-        vy: 0
-        hp: 100
+        position:
+          x: 1.52
+          y: 2.5
+        velocity:
+          x: 0
+          y: 0
+        health: 100
 
       count = 0
 
@@ -215,11 +243,13 @@ describe 'Websocket API using server', ->
     it 'should not allow player to move through the wall after several moves', (done) ->
 
       expectedPlayer =
-        x: 12.5
-        y: 2.5
-        vx: 0
-        vy: 0
-        hp: 100
+        position:
+          x: 12.5
+          y: 2.5
+        velocity:
+          x: 0
+          y: 0
+        health: 100
 
       count = 0
       @timeout 5000
@@ -239,11 +269,13 @@ describe 'Websocket API using server', ->
     it 'should make player jump correctly', (done) ->
 
       expectedPlayer =
-        x: 1.5
-        y: 2.5 - 0.2
-        vx: 0
-        vy: -0.2
-        hp: 100
+        position:
+          x: 1.5
+          y: 2.5 - 0.2
+        velocity:
+          x: 0
+          y: -0.2
+        health: 100
 
       count = 0
 
@@ -260,11 +292,13 @@ describe 'Websocket API using server', ->
     it 'should make player fall down while jumping', (done) ->
 
       expectedPlayer =
-        x: 1.5
-        y: 2.5 - 0.2 - 0.2 + 0.02
-        vx: 0
-        vy: -0.2 + 0.02
-        hp: 100
+        position:
+          x: 1.5
+          y: 2.5 - 0.2 - 0.2 + 0.02
+        velocity:
+          x: 0
+          y: -0.2 + 0.02
+        health: 100
 
       count = 0
 
@@ -284,11 +318,13 @@ describe 'Websocket API using server', ->
     it 'should make player fall down to the wall after jumping', (done) ->
 
       expectedPlayer =
-        x: 1.5
-        y: 2.5
-        vx: 0
-        vy: 0
-        hp: 100
+        position:
+          x: 1.5
+          y: 2.5
+        velocity:
+          x: 0
+          y: 0
+        health: 100
 
       count = 0
 
