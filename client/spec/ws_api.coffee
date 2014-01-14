@@ -133,10 +133,6 @@ describe 'Websocket API using server', ->
         gc.move hostUser.sid, data.tick, 1, 0
         if count == 2
           checkPlayer(data.players[0])
-          # expect(data.players[0].position).to.almost.eql expectedPlayer.position, precision
-          # expect(data.players[0].velocity).to.almost.eql expectedPlayer.velocity, precision
-          # expect(data.players[0].health).to.almost.eql expectedPlayer.health, precision
-
           done()
 
     it 'should not allow player to gain velocity more than maximum value', (done) ->
@@ -174,9 +170,7 @@ describe 'Websocket API using server', ->
         console.log "expected: ", expectedPlayer
         console.log "got: ", data.players[0]
         if count == 2
-          expect(data.players[0].position).to.almost.eql expectedPlayer.position, precision
-          expect(data.players[0].velocity).to.almost.eql expectedPlayer.velocity, precision
-          expect(data.players[0].health).to.almost.eql expectedPlayer.health, precision
+          checkPlayer(data.players[0])
           done()
 
     it 'should decrease players velocity if not getting moves', (done) ->
@@ -204,9 +198,7 @@ describe 'Websocket API using server', ->
         if count == 4
           player = data.players[0]
           console.log "Assert. Expected: ", expectedPlayer, ", got:", player
-          expect(data.players[0].position).to.almost.eql expectedPlayer.position, precision
-          expect(data.players[0].velocity).to.almost.eql expectedPlayer.velocity, precision
-          expect(data.players[0].health).to.almost.eql expectedPlayer.health, precision
+          checkPlayer(data.players[0])
           done()
 
     it 'should stop player if not getting moves', (done) ->
