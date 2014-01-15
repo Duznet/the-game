@@ -74,6 +74,9 @@ class Player:
     def is_dead(self):
         return self.hp == 0 or self.respawn > 0
 
+    def is_alive(self):
+        return not self.is_dead()
+
     def damage(self, projectile):
         self.hp -= DAMAGE[projectile.weapon]
         self.normalize_hp()
@@ -212,7 +215,7 @@ class Game:
             # break
 
 
-        for player in self.players_.values():
+        for player in self.allive_players():
             if player == projectile.owner:
                 continue
 
@@ -346,6 +349,10 @@ class Game:
 
         return player
 
+    def allive_players(self):
+        return filter(Player.is_alive, self.players_.values())
+        # return [player for player in self.players_.values() if player.is_]
+
     def fire(self, id, dx, dy):
         player = self.players_[id]
         if player.is_dead():
@@ -384,7 +391,7 @@ class Game:
         return player
 
     def burst(self, projectile, point):
-        for player in self.players_.values():
+        for player in self.allive_players():
             if dist(player.point, point) <= BURSTR:
                 player.velocity = player.point - point
                 # print("player velocity", player.v)
@@ -420,7 +427,8 @@ class Game:
 
     def moveall(self):
         for id in self.players_order:
-            self.move(id)
+            if not self.players_[id].is_dead():
+                self.move(id)
 
         return self
 
