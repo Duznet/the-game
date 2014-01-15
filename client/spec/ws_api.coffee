@@ -36,8 +36,7 @@ describe 'Websocket API using server', ->
   ]
 
   findMap = (mapName) ->
-    filteredMaps = maps.filter (m) -> m.name is mapName
-    filteredMaps[0]
+    _.find maps, (m) -> m.name is mapName
 
   precision = Math.round Math.abs Math.log(config.game.defaultConsts.accuracy) / Math.LN10
 
@@ -68,8 +67,7 @@ describe 'Websocket API using server', ->
     .then ->
       hostUser.getGames()
     .then (data) ->
-      games = data.games.filter (g) -> g.name is game.name
-      game = games[0]
+      game = _.find data.games, (g) -> g.name is game.name
       gc = new Psg.GameplayConnection config.gameplayUrl
 
       gc.onopen = ->
