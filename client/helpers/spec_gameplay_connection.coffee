@@ -2,16 +2,19 @@ class Psg.GameplayConnection extends Psg.Connection
 
   constructor: (@url) ->
     @ws = new WebSocket @url
-
+    @tick = 0
     @ws.onopen = =>
+      console.log '--opening connection--'
       @onopen()
 
     @ws.onclose = (event) =>
+      console.log '--closing connection--'
       @onclose event
 
 
     @ws.onmessage = (event) =>
       data = JSON.parse event.data
+      @tick = data.tick
       data.players = data.players.map (p) ->
         t = {}
         t.position = x: p[0], y: p[1]
@@ -36,7 +39,18 @@ class Psg.GameplayConnection extends Psg.Connection
     @ws.onerror = (error) =>
       @onerror error
 
-  onmessage: ->
+
+  onopen: (data) ->
+    #default placeholder
+
+  onclose: (data) ->
+    #default placeholder
+
+  onmessage: (data) ->
+    @lostData = data
+
+  onerror: (data) ->
+    #default placeholder
 
   send: (requestData) ->
     @ws.send requestData
@@ -44,9 +58,9 @@ class Psg.GameplayConnection extends Psg.Connection
   close: ->
     @ws.close()
 
-  move: (sid, tick, dx, dy) ->
+  move: (user, dx, dy) ->
     @request "move",
-      sid: sid,
-      tick: tick,
+      tick: @tick,
+      sid: user.sid,
       dx: dx,
       dy: dy
