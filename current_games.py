@@ -5,10 +5,17 @@ class CurrentGames:
 
     games = {}
 
-    def add_game(self, id, map):
+    def add_game(self, id, map, consts=None):
         if id in self.games:
             print("what")
-        self.games[id] = Game(map)
+        if consts:
+            self.games[id] = Game(map,
+                accel=float(consts['accel']),
+                maxv=float(consts['maxVelocity']),
+                friction=float(consts['friction']),
+                gravity=float(consts['gravity']))
+        else:
+            self.games[id] = Game(map)
         return self.games[id]
 
     def remove_game(self, id):

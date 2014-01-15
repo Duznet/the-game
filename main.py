@@ -105,6 +105,7 @@ class MainHandler(web.RequestHandler):
             self.write(response)
         except (KeyError, TypeError):
             self.write(BadRequest().msg())
+            print("badRequest")
             return
 
 class DemoHandler(web.RequestHandler):
@@ -162,14 +163,18 @@ class GameApp(web.Application):
 CLIENT_SCRIPTS_DIR = "client"
 
 if __name__ == '__main__':
+
+    tornado.options.define("port", default=5000, type=int, help="port")
+    tornado.options.parse_command_line()
+    port = tornado.options.options.port
+
     coffee_compiler = CoffeeCompiler(CLIENT_SCRIPTS_DIR)
     coffee_compiler.compile()
 
     application = GameApp()
 
-    tornado.options.parse_command_line()
 
-    application.listen(5000)
+    application.listen(port)
     loop = ioloop.IOLoop.instance()
     timer = ioloop.PeriodicCallback(application.tick, 30, io_loop = loop)
     autoreload.start(loop)

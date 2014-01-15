@@ -21,7 +21,6 @@ class Projectile:
 
 class Player:
     MAX_HP = 100
-    MAX_VELOCITY = 0.4
 
     def __init__(self, name, first_spawn, next_spawn):
         self.next_spawn = next_spawn
@@ -33,6 +32,7 @@ class Player:
         self.moved = False
         self.got_action = False
         self.delta = Point(0, 0)
+        self.respawn = 0
         self.ammo = {KNIFE: 1, ROCKET: 0, PISTOL: 0, MGUN: 0, RAIL: 0}
         self.shot_time = {KNIFE: -1000000, ROCKET: -1000000, PISTOL: -1000000, MGUN: -1000000, RAIL: -1000000}
         self.weapon = KNIFE
@@ -45,16 +45,16 @@ class Player:
         self.hp = min(self.hp, self.MAX_HP)
         self.hp = max(self.hp, 0)
 
-    def normalize_v(self):
+    def normalize_v(self, MAXV):
         x = self.velocity.x
-        if abs(x) > self.MAX_VELOCITY:
+        if abs(x) > MAXV:
             x /= abs(x)
-            x *= self.MAX_VELOCITY
+            x *= MAXV
 
         y = self.velocity.y
-        if abs(y) > self.MAX_VELOCITY:
+        if abs(y) > MAXV:
             y /= abs(y)
-            y *= self.MAX_VELOCITY
+            y *= MAXV
 
         self.velocity = Point(x, y)
         return self
@@ -67,10 +67,12 @@ class Player:
 
     def die(self):
         self.deaths += 1
+        self.respawn = 100
+        self.velocity = Point(0, 0)
         self.spawn()
 
     def is_dead(self):
-        return self.hp == 0
+        return self.hp == 0 or self.respawn > 0
 
     def damage(self, projectile):
         self.hp -= DAMAGE[projectile.weapon]
@@ -91,14 +93,12 @@ class Player:
         return False
 
 class Game:
-    DEFAULT_VELOCITY = 0.02
     PLAYER_POS = Point(0.5, 0.5)
-    GRAVITY = 0.02
 
     NEXT_PORTAL = {}
     NEXT_SPAWN = {}
 
-    def __init__(self, map):
+    def __init__(self, map, accel=0.02, gravity=0.02, friction=0.02, maxv=0.4):
         self.first_spawn = Point(1, 1)
         self.players_ = {}
         self.players_order = []
@@ -108,6 +108,12 @@ class Game:
         self.items = []
         self.item_id = {}
         self.projectiles = []
+
+
+        self.DEFAULT_VELOCITY = accel
+        self.GRAVITY = gravity
+        self.MAXV = maxv
+        self.FRICTION = friction
 
         self.map = normalize_map(map, WALL)
 
@@ -149,6 +155,8 @@ class Game:
 
     def next_tick(self, is_sync):
         for player in self.players_.values():
+            player.respawn -= 1
+            player.respawn = max(player.respawn, 0)
             if not player.got_action and is_sync:
                 return False
 
@@ -283,6 +291,7 @@ class Game:
                     self.players_[id].angle,
                     self.players_[id].name,
                     self.players_[id].hp,
+                    self.players_[id].respawn,
                     self.players_[id].kills,
                     self.players_[id].deaths
                     ] for id in self.players_order]
@@ -316,6 +325,8 @@ class Game:
 
     def update_v(self, id, dx, dy):
         player = self.players_[id]
+        if player.is_dead():
+            return player
 
 
         if (dx != 0):
@@ -337,6 +348,9 @@ class Game:
 
     def fire(self, id, dx, dy):
         player = self.players_[id]
+        if player.is_dead():
+            return player
+        # player.respawn = 0
 
         dir = Point(dx, dy)
         if (abs(dir) == 0 or player.ammo[player.weapon] == 0):
@@ -414,9 +428,9 @@ class Game:
         player = self.brake_if_not_moved(id)
         player.velocity += player.delta * self.DEFAULT_VELOCITY
         if player.delta.y < 0:
-            player.velocity.y = -Player.MAX_VELOCITY
+            player.velocity.y = -self.MAXV
 
-        player.normalize_v()
+        player.normalize_v(self.MAXV)
 
         player = self.fall_down_if_need(id)
 
