@@ -49,12 +49,16 @@ class Psg.GameConnection extends Psg.Connection
     @request "getMaps",
       sid: sid
 
-  createGame: (sid, name, maxPlayers, mapId) ->
-    @request "createGame",
+  createGame: (sid, name, maxPlayers, mapId, consts) ->
+    params =
       sid: sid
       name: name
       maxPlayers: maxPlayers
       map: mapId
+    if consts?
+      params.consts = consts
+    @request "createGame", params
+
 
   getGames: (sid) ->
     @request "getGames",

@@ -64,7 +64,7 @@ describe 'Websocket API using server', ->
       maxPlayers: map.maxPlayers
       map: map.id
     console.log 'game: ', game
-    hostUser.createGame(game.name, game.maxPlayers, game.map)
+    hostUser.createGame(game.name, game.maxPlayers, game.map, config.game.defaultConsts)
     .then ->
       hostUser.getGames()
     .then (data) ->
