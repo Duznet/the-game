@@ -9,7 +9,6 @@ class Psg.GameplayConnection extends Psg.Connection
     @ws.onclose = (event) =>
       @onclose event
 
-    onmessage: ->
 
     @ws.onmessage = (event) =>
       data = JSON.parse event.data
@@ -37,6 +36,7 @@ class Psg.GameplayConnection extends Psg.Connection
     @ws.onerror = (error) =>
       @onerror error
 
+  onmessage: ->
 
   send: (requestData) ->
     @ws.send requestData
