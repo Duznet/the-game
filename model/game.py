@@ -21,3 +21,9 @@ class Game(odm.StdModel):
         if game.map.max_players < game.max_players:
             raise BadMaxPlayers()
 
+    def clear(self):
+        for player in self.players.all():
+            player.game = None
+
+        self.delete()
+
