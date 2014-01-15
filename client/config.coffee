@@ -13,7 +13,7 @@ window.config =
       tickSize: 30
       accuracy: 0.000001
       accel: 0.02
-      maxVelocity: 0.2
+      maxVelocity: 0.4
       friction: 0.02
       gravity: 0.02
   interpolate: true
