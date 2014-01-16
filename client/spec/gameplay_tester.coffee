@@ -8,7 +8,6 @@ class Psg.GameplayTester
   addCommand: (command, {begin, end} = {}) ->
     begin ?= if @commands.length > 0 then _.last(@commands).end + 1 else 0
     end ?= begin
-    console.log 'begin: ', begin, ' end: ', end
     @commands.push
       exec: command
       begin: begin + @curTick
@@ -18,7 +17,6 @@ class Psg.GameplayTester
     @execDefinition = callback
     @execDefinition()
     @conn.onmessage = (data) =>
-      # console.log 'players[0]: ', data.players[0]
       @data = data
       for c in @commands
         if c.begin <= @curTick <= c.end
