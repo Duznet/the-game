@@ -1,11 +1,17 @@
 class Psg.GameplayConnection extends Psg.Connection
 
-  constructor: (@url) ->
+  constructor: (@sid, @openDone) ->
+    @url = config.gameplayUrl
+    @tick = 0
+
     @ws = new WebSocket @url
     @tick = 0
+
     @ws.onopen = =>
       console.log '--opening connection--'
       @onopen()
+      if @openDone?
+        @openDone.resolve()
 
     @ws.onclose = (event) =>
       console.log '--closing connection--'
@@ -58,9 +64,9 @@ class Psg.GameplayConnection extends Psg.Connection
   close: ->
     @ws.close()
 
-  move: (user, dx, dy) ->
+  move: (dx, dy) ->
     @request "move",
       tick: @tick,
-      sid: user.sid,
+      sid: @sid,
       dx: dx,
       dy: dy

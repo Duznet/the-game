@@ -8,7 +8,6 @@ describe 'Websocket API using server', ->
   map = null
   tester = new Psg.GameplayTester
   consts = config.game.defaultConsts
-
   maps = [
     {
       name: "Default map"
@@ -28,6 +27,17 @@ describe 'Websocket API using server', ->
         '...................................................................',
         '...................................................................',
         '.................................$.................................',
+      ]
+    },
+    {
+      name: 'map-with-platform'
+      maxPlayers: 4
+      map: [
+        '..................................',
+        '..................................',
+        '..................................',
+        '...###############################',
+        '$.................................',
       ]
     }
   ]
@@ -64,16 +74,20 @@ describe 'Websocket API using server', ->
       hostUser.getGames()
     .then (data) ->
       game = _.find data.games, (g) -> g.name is game.name
-      gc = new Psg.GameplayConnection config.gameplayUrl
+      gc = new Psg.GameplayConnection hostUser.sid
       tester.setup gc
       gc.onopen = ->
-        gc.move hostUser, 0, 0
+        gc.move 0, 0
         done()
 
   afterEach (done) ->
     gc.onclose = ->
       hostUser.leaveGame().then ->
-        done()
+        if tester.users.length > 0
+          tester.leaveGame(0, 1).then ->
+            done()
+        else
+          done()
 
     gc.close()
 
@@ -107,7 +121,7 @@ describe 'Websocket API using server', ->
             x: 0.02
             y: 0
         @addCommand ->
-          gc.move hostUser, 1, 0
+          gc.move 1, 0
         @addCommand ->
           @checkPlayer @data.players[0]
           done()
@@ -120,7 +134,7 @@ describe 'Websocket API using server', ->
             x: consts.maxVelocity
             y: 0
         @addCommand ->
-          gc.move hostUser, 1, 0
+          gc.move 1, 0
         , begin: 0, end: 29
         @addCommand ->
           @checkPlayer @data.players[0]
@@ -139,7 +153,7 @@ describe 'Websocket API using server', ->
             x: 0
             y: 0
         @addCommand ->
-          gc.move hostUser, -1, 0
+          gc.move -1, 0
         @addCommand ->
           @checkPlayer @data.players[0]
           done()
@@ -156,10 +170,10 @@ describe 'Websocket API using server', ->
             x: 0.02
             y: 0
         @addCommand ->
-          gc.move hostUser, 1, 0
+          gc.move 1, 0
         , end: 1
         @addCommand ->
-          gc.move hostUser, 0, 0
+          gc.move 0, 0
         @addCommand ->
           @checkPlayer @data.players[0]
           done()
@@ -175,11 +189,11 @@ describe 'Websocket API using server', ->
             x: 0
             y: 0
         @addCommand ->
-          gc.move hostUser, 1, 0
+          gc.move 1, 0
         @addCommand ->
-          gc.move hostUser, 0, 0
+          gc.move 0, 0
         @addCommand ->
-          gc.move hostUser, 0, 0
+          gc.move 0, 0
           @checkPlayer @data.players[0]
         , end: 10
         @addCommand ->
@@ -196,7 +210,7 @@ describe 'Websocket API using server', ->
             x: 0
             y: 0
         @addCommand ->
-          gc.move hostUser, 1, 0
+          gc.move 1, 0
         , end: 100
         @addCommand ->
           @checkPlayer @data.players[0]
@@ -215,7 +229,7 @@ describe 'Websocket API using server', ->
             x: 0
             y: -consts.maxVelocity
         @addCommand ->
-          gc.move hostUser, 0, -1
+          gc.move 0, -1
         @addCommand ->
           @checkPlayer @data.players[0]
           done()
@@ -231,7 +245,7 @@ describe 'Websocket API using server', ->
             x: 0
             y: -consts.maxVelocity + 2 * consts.gravity
         @addCommand ->
-          gc.move hostUser, 0, -1
+          gc.move 0, -1
         , end: 2
         @addCommand ->
           @checkPlayer @data.players[0]
@@ -250,9 +264,9 @@ describe 'Websocket API using server', ->
             y: 0
           health: 100
         @addCommand ->
-          gc.move hostUser, 0, -1
+          gc.move 0, -1
         @addCommand ->
-          gc.move hostUser, 0, 0
+          gc.move 0, 0
         , end: 30
         @addCommand ->
           @checkPlayer @data.players[0]
@@ -267,10 +281,10 @@ describe 'Websocket API using server', ->
             x: consts.maxVelocity - consts.friction
             y: 0
         @addCommand ->
-          gc.move hostUser, 1, 0
+          gc.move 1, 0
         , end: 20
         @addCommand ->
-          gc.move hostUser, 0, -1
+          gc.move 0, -1
         @addCommand ->
           @checkPlayer @data.players[0]
           done()
@@ -283,7 +297,7 @@ describe 'Websocket API using server', ->
 
       tester.defineTest ->
         @addCommand ->
-          gc.move hostUser, 0, -1
+          gc.move 0, -1
         , end: 30
         @addCommand ->
           player = @data.players[0]
@@ -292,6 +306,37 @@ describe 'Websocket API using server', ->
         , begin: 2, end: 30
         @addCommand ->
           expect(touched).to.be.ok
+          done()
+
+  describe 'on map with platform', ->
+    initPos =
+      x: 0
+      y: 4.5
+
+    before ->
+      map = findMap 'map-with-platform'
+
+    it 'should jump onto the platform after right-top jump', (done) ->
+      tester.addUser gen.getUser(), game.id
+      tester.addUser gen.getUser(), game.id
+
+      tester.defineTest ->
+        @expectedPlayer =
+          position: initPos
+
+        @addCommand ->
+          gc.move 0, -1
+          for user in @users
+            user.gc.move 0, 0
+        @addCommand ->
+          gc.move 1, 0
+          for user in @users
+            user.gc.move 0, 0
+        , end: 40
+        @addCommand ->
+          got = @data.players[0].position
+          expect(got.x).to.be.greaterThan initPos.x + 3
+          expect(got.y).to.almost.equal initPos.y - 2, @precision
           done()
 
   describe 'on Long line map', ->
@@ -304,23 +349,22 @@ describe 'Websocket API using server', ->
       map = findMap 'Long line'
 
     it 'should jump equal to the right and to the left', (done) ->
-
       tester.defineTest ->
         @expectedPlayer =
           position: initialPosition
         @addCommand ->
-          gc.move hostUser, 1, 0
+          gc.move 1, 0
         @addCommand ->
-          gc.move hostUser, 1, -1
+          gc.move 1, -1
         @addCommand ->
-          gc.move hostUser, 0, 0
+          gc.move 0, 0
         , end: 40
         @addCommand ->
-          gc.move hostUser, -1, 0
+          gc.move -1, 0
         @addCommand ->
-          gc.move hostUser, -1, -1
+          gc.move -1, -1
         @addCommand ->
-          gc.move hostUser, 0, 0
+          gc.move 0, 0
         , end: 80
         @addCommand ->
           @checkPlayer @data.players[0]
