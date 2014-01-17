@@ -26,6 +26,12 @@ class GameplayController(BasicController):
         print("move ", dx, " ", dy)
         self.game.update_v(self.user.id, dx, dy).got_action = True
 
+    def leave_game(self):
+        self.game.remove_player(self.user.id)
+
+    def join_game(self):
+        self.game.add_player(self.user.id, self.user.login)
+
 
     def tick(self):
         # print("projectiles", [proj.to_array() for proj in self.game.projectiles])

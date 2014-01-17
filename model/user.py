@@ -47,14 +47,17 @@ class User(odm.StdModel):
             raise BadGame()
 
     def join_game(self, id):
-        game = self.session.query(Game).filter(id = id)
-        if game.count() != 1:
+
+        try:
+            game = self.session.query(Game).get(id = id)
+        except:
             raise BadGame()
+
+        # if not game:
+        #     raise BadGame()
 
         if self.game:
             raise AlreadyInGame()
-
-        game = game.items()[0]
 
         if len(game.players.all()) == game.max_players:
             raise GameFull()
@@ -67,8 +70,8 @@ class User(odm.StdModel):
         if not self.game:
             raise NotInGame()
 
-        if len(self.game.players.all()) < 2:
-            self.game.delete()
+        # if len(self.game.players.all()) < 2:
+        #     self.game.delete()
 
         self.game = None
         self.save()

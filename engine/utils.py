@@ -172,14 +172,21 @@ def collision_with_point(player, v, point):
             d[i] = 0
             continue
 
-        if (v.args[i] == 0):
+        if (abs(v.args[i]) < EPS):
             return None
 
         t[i] = d[i] / v.args[i]
 
-        if (t[i] < 0 or t[i] > 1):
+        print("t:", t[i])
+        print(d, v)
+        print("d", d[i])
+
+        if (t[i] <= EPS or t[i] > 1):
             return None
 
+
+    if d == [0, 0]:
+        return None
 
     return Collision(max(t), Point(d), Segment(point, point))
 

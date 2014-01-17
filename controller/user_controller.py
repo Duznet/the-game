@@ -40,6 +40,7 @@ class UserController(BasicController):
     def signout(self):
         user = self._user_by_sid()
         user.signout()
+        self.leave_game()
         return jsonify(result="ok")
 
     def send_message(self):
@@ -50,18 +51,23 @@ class UserController(BasicController):
 
     def join_game(self):
         user = self._user_by_sid()
-        try:
-            user.join_game(id=int(self.json['game']))
-            self.current_games.game(int(self.json['game'])).add_player(user.id, user.login)
-        except ValueError:
-            raise BadGame()
+        # try:
+        user.join_game(id=int(self.json['game']))
+            # self.current_games.game(int(self.json['game'])).add_player(user.id, user.login)
+        # except ValueError:
+        #     raise BadGame()
         return jsonify(result="ok")
 
     def leave_game(self):
         user = self._user_by_sid()
         if user.game:
+            # print(self.current_games.games)
+            # print(self.current_games.game(user.game.id).players_count())
+            # print(user.game.id)
             self.current_games.game(user.game.id).remove_player(user.id)
-            if self.current_games.game(user.game.id).players_count() == 0:
+            print(len(user.game.players.all()))
+            if len(user.game.players.all()) == 1:
                 self.current_games.remove_game(user.game.id)
         user.leave_game()
+        # print(self.current_games.games)
         return jsonify(result="ok")

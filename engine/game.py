@@ -117,6 +117,10 @@ class Game:
         self.GRAVITY = gravity
         self.MAXV = maxv
         self.FRICTION = friction
+        print("accel", accel)
+        print("gravity", gravity)
+        print("friction", friction)
+        print("maxv", maxv)
 
         self.map = normalize_map(map, WALL)
 
@@ -158,10 +162,11 @@ class Game:
 
     def next_tick(self, is_sync):
         for player in self.players_.values():
-            player.respawn -= 1
-            player.respawn = max(player.respawn, 0)
             if not player.got_action and is_sync:
                 return False
+            player.respawn -= 1
+            player.respawn = max(player.respawn, 0)
+        # print(self.players())
 
         self.tick += 1
         for i in range(len(self.items)):
@@ -195,13 +200,6 @@ class Game:
         curcell = cell_coords(projectile.point)
         wall = bullet_path.closest_wall(self.map)
 
-        # for cell in cells:
-        #     cell = cell_coords(cell)
-
-        #     cellval = self.map[cell.y][cell.x]
-
-
-        #     if (cellval == WALL):
         if wall:
             if projectile.weapon == ROCKET:
                 self.burst(projectile, wall)
@@ -212,7 +210,6 @@ class Game:
             else:
                 projectile.v = Point(0, 0)
 
-            # break
 
 
         for player in self.allive_players():
@@ -237,9 +234,6 @@ class Game:
 
         if projectile.weapon != RAIL:
             projectile.point = bullet_path.p2
-        else:
-            print("rail bullet path", bullet_path)
-            print("rail proj", projectile.to_array())
 
 
     def update_players(self):
@@ -251,20 +245,21 @@ class Game:
         curcell = cell_coords(player)
 
         dir = Point(sign(v.x), sign(v.y))
-
-        cells = [curcell + Point(x, y) for x in [0, dir.x] for y in [0, dir.y] if x != 0 or y != 0]
+        cells = [curcell + Point(x, y) for x in [0, dir.x] for y in [0, dir.y]]
 
         collisions = []
         for cell in cells:
             cell = cell_coords(cell)
             cellval = self.map[cell.y][cell.x]
-            if cellval != WALL and cellval != SPACE:
+            if cellval != WALL and cellval != SPACE and cellval != SPAWN:
                 collision = collision_with_point(player, v, cell + Point(0.5, 0.5))
+                print("cell: ", self.map[cell.y][cell.x], " ", collision)
 
                 if not collision:
                     continue
 
-                if is_teleport(cellval):
+                if is_teleport(cellval) and (abs(player.x - cell.x - SIDE) >= 0.5 or abs(player.y - cell.y - SIDE) >= 0.5):
+                    print("TELEPORT")
                     collisions.append(TeleportEvent(collision.time, self.NEXT_PORTAL[cell] + Point(SIDE, SIDE)))
                 elif is_weapon(cellval):
                     collisions.append(WeaponPick(collision.time, self.items, self.item_id[cell], cellval))
@@ -313,18 +308,21 @@ class Game:
         return len(self.players_order)
 
     def add_player(self, id, login):
+        if self.players_.get(id):
+            return self.players_[id]
+
         self.players_[id] = Player(
             login,
             self.NEXT_SPAWN[self.players_[self.players_order[-1]].last_spawn] if self.players_ else self.first_spawn,
             self.NEXT_SPAWN)
 
         self.players_order.append(id)
-        print("add player: ", self.players_[id].got_action)
         return self.players_[id]
 
     def remove_player(self, id):
-        self.players_.pop(id)
-        self.players_order.remove(id)
+        if self.players_.get(id):
+            self.players_.pop(id)
+            self.players_order.remove(id)
 
     def update_v(self, id, dx, dy):
         player = self.players_[id]
@@ -383,7 +381,6 @@ class Game:
         uright = underpoint(player.point + Point(SIDE - EPS, 0))
 
         if self.map[uleft.y][uleft.x] != WALL and self.map[uright.y][uright.x] != WALL:
-            print("gravity")
             y += self.GRAVITY
 
         player.velocity = Point(player.velocity.x, y)
@@ -413,8 +410,6 @@ class Game:
             return player
 
         brake_v = player.velocity * self.DEFAULT_VELOCITY / norm
-        print("v: ", player.velocity)
-        print("brake v: ", brake_v)
 
         x = player.velocity.x
         y = player.velocity.y
@@ -456,7 +451,7 @@ class Game:
                 if t + tevent > 1:
                     break
 
-                print(event)
+                print("event: ", event)
                 event.handle(player)
 
                 if event.require_event_refresh():
@@ -464,12 +459,13 @@ class Game:
                     refresh = True
                     break
 
-            t += tevent
+            if t + tevent <= 1 + EPS:
+                t += tevent
             if not refresh:
                 events = []
 
 
-        if t < 1:
+        if t <= 1 + EPS:
             player.point = player.velocity * (1 - t) + player.point
 
         player.moved = False
