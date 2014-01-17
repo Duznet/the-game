@@ -19,7 +19,7 @@ class Psg.Game extends Backbone.Model
     t.health = data[7]
     t.respawn = data[8]
     t.status = if t.respawn is 0 then 'alive' else 'dead'
-    t.kdr = kills: data[9], deaths: data[10]
+    t.statistics = kills: data[9], deaths: data[10]
 
     if @players[t.login]?
       t.wounded = t.health < @players[t.login].health
