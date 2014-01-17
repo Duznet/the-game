@@ -61,6 +61,8 @@ class MainWSHandler(websocket.WebSocketHandler):
         self.controller = self.controller if self.controller else GameplayController(data['params'], models, games)
         self.controller.json = data['params']
 
+        self.controller.join_game()
+
         action = camel_to_underscores(str(data['action']))
         getattr(self.controller, action)()
         # except (KeyError, ValueError):
@@ -69,6 +71,7 @@ class MainWSHandler(websocket.WebSocketHandler):
 
     def on_close(self, message=None):
         print("closed")
+        self.controller.leave_game()
         self.application.websockets.remove(self)
 
 class MainHandler(web.RequestHandler):
@@ -98,15 +101,15 @@ class MainHandler(web.RequestHandler):
             self.write(BadJSON().msg())
             return
 
-        try:
-            action = camel_to_underscores(str(data['action']))
-            response = self.processer.process_action(action, data.get("params", {}))
-            print(response)
-            self.write(response)
-        except (KeyError, TypeError):
-            self.write(BadRequest().msg())
-            print("badRequest")
-            return
+        # try:
+        action = camel_to_underscores(str(data['action']))
+        response = self.processer.process_action(action, data.get("params", {}))
+        print(response)
+        self.write(response)
+        # except (KeyError, TypeError):
+        #     self.write(BadRequest().msg())
+        #     print("badRequest")
+        #     return
 
 class DemoHandler(web.RequestHandler):
 
@@ -160,7 +163,7 @@ class GameApp(web.Application):
             for game in games.games.values():
                 game.update_players()
 
-        print("tick")
+        # print("tick")
         for sock in self.websockets:
             sock.tick()
 
@@ -170,11 +173,13 @@ CLIENT_SCRIPTS_DIR = "client"
 if __name__ == '__main__':
 
     tornado.options.define("port", default=5000, type=int, help="port")
+    tornado.options.define("coffee_compile_off", default=False, type=bool, help="disable coffee script files compiling")
     tornado.options.parse_command_line()
     port = tornado.options.options.port
 
-    coffee_compiler = CoffeeCompiler(CLIENT_SCRIPTS_DIR)
-    coffee_compiler.compile()
+    if not tornado.options.options.coffee_compile_off:
+        coffee_compiler = CoffeeCompiler(CLIENT_SCRIPTS_DIR)
+        coffee_compiler.compile()
 
     application = GameApp()
 
