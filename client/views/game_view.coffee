@@ -42,10 +42,16 @@ class Psg.GameView extends Backbone.View
     @updateMovement()
 
   onKeyDown: (event) =>
-    @updateKeys event.keyCode, 'keydown'
+    if event.keyCode is 69
+      @stats.visible = true
+    else
+      @updateKeys event.keyCode, 'keydown'
 
   onKeyUp: (event) =>
-    @updateKeys event.keyCode, 'keyup'
+    if event.keyCode is 69
+      @stats.visible = false
+    else
+      @updateKeys event.keyCode, 'keyup'
 
   startGame: ->
     @drawMap()
@@ -60,6 +66,19 @@ class Psg.GameView extends Backbone.View
     $canvas.keydown @onKeyDown
     $canvas.keyup @onKeyUp
     @login = @model.get('user').get('login')
+
+    @statsRect = new Shape.Rectangle(view.bounds.scale(0.9))
+    @statsRect.style =
+      fillColor: 'black'
+      strokeColor: 'black'
+    @statsRect.fillColor = 'black'
+    @statsRect
+    @statsRect.fillColor.alpha = 0.8
+    @statsText = new PointText([@statsRect.bounds.point.x + @scale, @statsRect.bounds.point.y + @scale])
+    @statsText.fontSize = 24
+    @statsText.fillColor = 'grey'
+    @stats = new Group(@statsRect, @statsText)
+    @stats.visible = false
 
     onMouseDown = (event) =>
       @model.player.fire =
@@ -79,6 +98,7 @@ class Psg.GameView extends Backbone.View
 
     onFrame = (event) =>
       players = @model.players
+      @statsText.content = ''
       for login, p of @model.players
         if not @pViews[login]
           @pViews[login] = new Psg.PlayerView p
@@ -94,6 +114,7 @@ class Psg.GameView extends Backbone.View
           @playerPosition = pView.getPosition()
         if login is @login or config.showHealth
           pView.label.content = "#{login} (#{p.health})"
+        @statsText.content += "#{p.login}:\tkills: #{p.statistics.kills}\tdeaths: #{p.statistics.deaths}\n"
 
       if not @playerPosition then return
       view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
@@ -102,13 +123,13 @@ class Psg.GameView extends Backbone.View
           x: view.center.x + @crosshair.offset.x
           y: view.center.y + @crosshair.offset.y
         @crosshair.shape.bringToFront()
-
+      @stats.position = view.center
+      @stats.bringToFront()
 
       if @model.projectilesInvalidated
         @model.projectilesInvalidated = false
         @projectiles = []
         for p in @model.projectiles
-          # if p.velocity.x is 0 and p.velocity.y is 0 then continue
           v = new Psg.ProjectileView p
           @projectiles.push v
         for p in @animations
