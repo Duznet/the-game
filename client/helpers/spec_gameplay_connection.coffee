@@ -70,3 +70,10 @@ class Psg.GameplayConnection extends Psg.Connection
       sid: @sid,
       dx: dx,
       dy: dy
+
+  fire: (dx, dy) ->
+    @request "fire",
+      tick: @tick,
+      sid: @sid,
+      dx: dx,
+      dy: dy
