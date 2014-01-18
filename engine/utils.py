@@ -186,8 +186,6 @@ def collision_with_point(player, v, point):
         minarg = min(minarg, minarg + v.args[i])
         maxarg = max(maxarg, maxarg + v.args[i])
 
-        print("player", player, "point", point)
-
         if not (minarg < point.args[i] < maxarg):
             return None
 

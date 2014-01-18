@@ -174,9 +174,6 @@ class Game:
             self.items[i] -= 1
             self.items[i] = max(0, self.items[i])
 
-        print("Items", self.items)
-        print("projectiles size: ", self.projectiles)
-
         self.move_projectiles()
 
         self.moveall()
@@ -255,7 +252,7 @@ class Game:
             cellval = self.map[cell.y][cell.x]
             if cellval != WALL and cellval != SPACE and cellval != SPAWN:
                 collision = collision_with_point(player, v, cell + Point(0.5, 0.5))
-                print("cell: ", self.map[cell.y][cell.x], " ", collision)
+                print("cell: ", cellval, " ", collision)
 
                 if not collision:
                     continue
@@ -464,10 +461,11 @@ class Game:
                     refresh = True
                     break
 
-            if t + tevent <= 1 + EPS:
-                t += tevent
             if not refresh:
                 events = []
+                continue
+            if t + tevent <= 1 + EPS:
+                t += tevent
 
 
         if t <= 1 + EPS:
