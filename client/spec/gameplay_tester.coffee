@@ -11,14 +11,18 @@ class Psg.GameplayTester
     @users = []
   checkPlayer: (got, expected = @expectedPlayer) ->
     console.log 'checking player'
-    for prop of expected
+    for prop, expValue of expected
       console.log "#{prop}:"
       console.log '  got: ', got[prop]
-      console.log '  expected: ', expected[prop]
-      if isNaN expected[prop] and not expected[prop] instanceof Object
-        expect(got[prop]).to.eql expected[prop]
-      else
-        expect(got[prop]).to.almost.eql expected[prop], @precision
+      console.log '  expected: ', expValue
+      if typeof expValue is 'string' or typeof expValue is 'boolean'
+        expect(got[prop]).to.equal expValue
+      else if typeof expValue is 'object'
+        expect(got[prop]).to.almost.eql expValue, @precision
+      else if typeof expValue is 'number'
+        expect(got[prop]).to.almost.equal expValue, @precision
+
+
 
   condCommand: (command, cond) ->
     @commands.push
