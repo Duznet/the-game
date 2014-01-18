@@ -13,15 +13,16 @@ from current_games import CurrentGames
 from tornado import ioloop, web, autoreload, websocket
 import tornado.options
 
-games = CurrentGames()
 
 models = odm.Router('redis://127.0.0.1:6379')
 
-model_classes = [User, Message, Game, Map]
+model_classes = [User, Message, Game, Map, GameStat]
 for model in model_classes:
     models.register(model)
     if hasattr(model, "pre_commit"):
         models.pre_commit.connect(getattr(model, "pre_commit"), sender=model)
+
+games = CurrentGames()
 
 def controller_by_action_hash(controllers):
     return {key: value for value in controllers for key in dir(value) if key.find("_")}

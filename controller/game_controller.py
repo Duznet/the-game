@@ -33,8 +33,25 @@ class GameController(BasicController):
             raise BadMaxPlayers()
         return jsonify(result="ok")
 
+    def get_stats(self):
+        gameid = int(self.json["game"])
+        try:
+            game = self.games.get(gameid)
+            if game.status == "running":
+                raise BadGame()
+        except:
+            raise BadGame()
+
+        return jsonify(
+            players=[{
+                login: player.login,
+                kills: player.kills,
+                deaths: player.deaths
+            } for player in game.player_stats]
+        )
+
     def get_games(self):
-        games = self.games.all()
+        games = self.games.filter(status=str(self.json["status"])).all() if self.json.get("status") else self.games.all()
         return jsonify(
             games=[{
                 "name": game.name,
