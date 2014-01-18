@@ -35,12 +35,11 @@ class Psg.PlayerView extends Psg.ObjectView
     @eye = new Path.RegularPolygon(
       new Point(0, 0),
       3,
-      0.8 * @ribbon.size.height
+      0.14 * @scale
     )
     @eye.scale(0.5, 1)
     @eye.rotate(90)
     @eye.position = new Point @ribbon.position.x + 0.35 * @ribbon.size.width, @ribbon.position.y
-    @eye.strokeColor = 'black'
     @eye.fillColor = 'yellow'
 
     @head = new Group @ribbon, @eye
