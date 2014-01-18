@@ -14,6 +14,16 @@ class Psg.GameView extends Backbone.View
     @$el.appendTo('#content')
     @$el.html @template()
 
+  generateColor: ->
+    c = new Color
+    c.brightness = 0.5 + 0.5 * Math.random()
+    c.saturation = 0.5
+    c.hue = 100 * Math.round(18 * Math.random())
+    console.log 'saturation: ', c.saturation
+    console.log 'hue: ', c.hue
+    console.log 'brightness: ', c.brightness
+    c
+
   drawMap: ->
     console.log "drawing map"
     mapData = @model.game.map.map
@@ -101,6 +111,7 @@ class Psg.GameView extends Backbone.View
       @statsText.content = ''
       for login, p of @model.players
         if not @pViews[login]
+          p.color = @generateColor()
           @pViews[login] = new Psg.PlayerView p
         pView = @pViews[login]
         pView.moveTo

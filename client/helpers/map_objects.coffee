@@ -61,7 +61,7 @@ class Psg.PlayerView extends Psg.ObjectView
   constructor: (model) ->
     @body = new Shape.Rectangle size: new Size(@scale, @scale)
     @body.strokeColor = 'black'
-    @body.fillColor = 'red'
+    @body.fillColor = model.color
 
     @ribbon = new Shape.Rectangle(
       new Point(-0.1 * @body.size.width, 0.1 * @body.size.height),
