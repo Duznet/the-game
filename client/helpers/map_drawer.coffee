@@ -9,8 +9,10 @@ class Psg.MapDrawer
     scene = new Shape.Rectangle
       point: new Point(-0.5 * @scale, -0.5 * @scale)
       size: new Size((attrs.width + 1) * @scale, (attrs.height + 1) * @scale)
-    scene.strokeColor = 'black'
-    scene.strokeWidth = @scale
+    scene.style =
+      strokeColor: 'black'
+      fillColor: '#ffe'
+      strokeWidth: @scale
 
   drawWall: (position) ->
     shape = new Shape.Rectangle position, new Size(@scale, @scale)
