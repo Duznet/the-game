@@ -66,8 +66,13 @@ class UserController(BasicController):
             if game:
                 game.remove_player(user.id)
                 if len(user.game.players.all()) == 1:
+
+                    for player in game.players_.values():
+                        user.game.player_stats.new(login=player.login, kills=player.kills, deaths=player.deaths)
+
                     self.current_games.remove_game(user.game.id)
 
         user.leave_game()
+        print(self.games.all())
         # print(self.current_games.games)
         return jsonify(result="ok")

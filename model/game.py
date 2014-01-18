@@ -25,5 +25,6 @@ class Game(odm.StdModel):
         for player in self.players.all():
             player.game = None
 
-        self.delete()
+        self.status = "finished"
+        self.save()
 

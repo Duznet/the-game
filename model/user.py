@@ -50,6 +50,8 @@ class User(odm.StdModel):
 
         try:
             game = self.session.query(Game).get(id = id)
+            if game.status == "finished":
+                raise BadGame()
         except:
             raise BadGame()
 
@@ -72,8 +74,8 @@ class User(odm.StdModel):
             raise NotInGame()
 
         if len(self.game.players.all()) == 1:
-            print("delete")
-            self.game.delete()
+            self.game.status = "finished"
+            self.game.save()
 
         self.game = None
         self.save()
