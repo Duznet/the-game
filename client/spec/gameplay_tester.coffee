@@ -15,7 +15,7 @@ class Psg.GameplayTester
       console.log "#{prop}:"
       console.log '  got: ', got[prop]
       console.log '  expected: ', expected[prop]
-      if isNaN expected[prop]
+      if isNaN expected[prop] and not expected[prop] instanceof Object
         expect(got[prop]).to.eql expected[prop]
       else
         expect(got[prop]).to.almost.eql expected[prop], @precision
