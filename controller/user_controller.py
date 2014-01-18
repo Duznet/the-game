@@ -60,14 +60,14 @@ class UserController(BasicController):
 
     def leave_game(self):
         user = self._user_by_sid()
+
         if user.game:
-            # print(self.current_games.games)
-            # print(self.current_games.game(user.game.id).players_count())
-            # print(user.game.id)
-            self.current_games.game(user.game.id).remove_player(user.id)
-            print(len(user.game.players.all()))
-            if len(user.game.players.all()) == 1:
-                self.current_games.remove_game(user.game.id)
+            game = self.current_games.game(user.game.id)
+            if game:
+                game.remove_player(user.id)
+                if game.players_count() == 0:
+                    self.current_games.remove_game(user.game.id)
+
         user.leave_game()
         # print(self.current_games.games)
         return jsonify(result="ok")

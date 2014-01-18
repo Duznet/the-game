@@ -70,11 +70,12 @@ class User(odm.StdModel):
         if not self.game:
             raise NotInGame()
 
-        # if len(self.game.players.all()) < 2:
-        #     self.game.delete()
+        if len(self.game.players.all()) == 1:
+            self.game.delete()
 
         self.game = None
         self.save()
+
         return self
 
     def is_login_correct(login):

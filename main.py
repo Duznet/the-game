@@ -71,7 +71,8 @@ class MainWSHandler(websocket.WebSocketHandler):
 
     def on_close(self, message=None):
         print("closed")
-        self.controller.leave_game()
+        if self.controller:
+            self.controller.leave_game()
         self.application.websockets.remove(self)
 
 class MainHandler(web.RequestHandler):
