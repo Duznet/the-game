@@ -122,4 +122,38 @@ class Psg.RocketLauncherView extends Psg.WeaponView
 class Psg.RailGunView extends Psg.WeaponView
 
   constructor: (model) ->
+    @barrel = new Shape.Rectangle(
+      size: new Size(1.2 * @scale, 0.16 * @scale)
+    )
+    @barrel.strokeColor = 'black'
+    @barrel.fillColor = 'black'
+    @grip = new Shape.Rectangle(
+      [@barrel.bounds.left, @barrel.bounds.top + 0.14 * @scale],
+      [0.36 * @scale, 0.1 * @scale])
+    @grip.strokeColor = 'black'
+    @grip.fillColor = 'black'
+    @grip.rotate(100)
+
+    @s = new Path.RegularPolygon([@barrel.bounds.left, @barrel.bounds.top + 0.14 * @scale], 3, 0.3 * @scale)
+    @s.fillColor = 'black'
+    @s.scale(0.5, 1)
+    @s.rotate(80)
+
+    @n = new Shape.Rectangle(
+      [@barrel.bounds.left + 0.3 * @scale, @barrel.bounds.top - 0.02 * @scale],
+      [0.8 * @scale, 0.2 * @scale])
+    @n.style =
+      strokeColor: 'black'
+      fillColor: '#57b'
+
+    @shape = new Group @barrel, @grip, @s, @n
+    if model.onBody
+      @shapeOffset =
+        x: 0.55 * @scale
+        y: 0.15 * @scale
+    else
+      @shape.onFrame = =>
+        @shape.visible = @respawn <= 0
+    if model.position
+      @moveTo model.position
 
