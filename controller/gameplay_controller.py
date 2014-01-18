@@ -32,9 +32,10 @@ class GameplayController(BasicController):
         self.game.update_v(self.user.id, dx, dy).got_action = True
 
     def leave_game(self):
-        self.game.remove_player(self.user.id)
-        if len(self.user.game.players.all()) == 0:
-            self.current_games.remove_game(self.user.game.id)
+        pass
+        # self.game.remove_player(self.user.id)
+        # if len(self.user.game.players.all()) == 0:
+        #     self.current_games.remove_game(self.user.game.id)
 
     def join_game(self):
         self.game.add_player(self.user.id, self.user.login)
