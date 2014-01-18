@@ -11,5 +11,5 @@ class Psg.CrosshairView extends Psg.ObjectView
     @point = new Shape.Circle new Point(0, 0), 0.01 * @scale
     @shape = new Group @circle, @point
     @shape.style =
-      strokeColor: 'slategrey'
+      strokeColor: '#333'
       strokeWidth: 3
