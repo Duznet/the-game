@@ -63,6 +63,21 @@ describe 'Websocket API using server', ->
         '..............',
         '#$.#.#.#.$....',
       ]
+    },
+    {
+      name: 'respawn-map'
+      maxPlayers: 12
+      map: [
+        '........................',
+        '...$.................$..',
+        '..#####...........#####.',
+        '............$...........',
+        '..........#####.........',
+        '.$..............$......$',
+        '.######......######..###',
+        '............$...........',
+        '.......########.........',
+      ]
     }
   ]
 
@@ -430,7 +445,7 @@ describe 'Websocket API using server', ->
 
           done()
 
-    it 'shouldn\'t loose velocity while teleporting', (done) ->
+    it 'shouldn\'t lose velocity while teleporting', (done) ->
       tester.addUser gen.getUser(), game.id
       tester.defineTest ->
         @addCommand ->
@@ -543,3 +558,38 @@ describe 'Websocket API using server', ->
 
           done()
         , begin: 50
+
+  describe 'on respawn map', ->
+
+    initPos =
+      x: 3.5
+      y: 1.5
+
+    before ->
+      map = findMap 'respawn-map'
+
+    it 'should place players on correct respawns', (done) ->
+
+      for i in [0..6]
+        tester.addUser gen.getUser(), game.id
+
+      expectedPositions = [
+        { x: 3.5, y: 1.5 },
+        { x: 21.5, y: 1.5 },
+        { x: 12.5, y: 3.5 },
+        { x: 1.5, y: 5.5 },
+        { x: 16.5, y: 5.5 },
+        { x: 23.5, y: 5.5 },
+        { x: 12.5, y: 7.5 },
+        { x: 3.5, y: 1.5 }
+      ]
+
+      tester.defineTest ->
+        @addCommand ->
+          gc.move 0, 0
+          for u in @users
+            u.gc.move 0, 0
+        @addCommand ->
+          for p, i in @data.players
+            @checkPlayer p, position: expectedPositions[i]
+          done()
