@@ -6,7 +6,27 @@ class Psg.WeaponView extends Psg.ObjectView
 class Psg.KnifeView extends Psg.WeaponView
 
   constructor: (model) ->
+    @barrel = new Shape.Rectangle
+      size:
+        x: 0.6 * @scale
+        y: 0.2 * @scale
+    @barrel.fillColor = 'black'
+    @line1 = new Path.Line(
+      [@barrel.bounds.left, @barrel.bounds.top],
+      [@barrel.bounds.right + 0.2 * @scale, @barrel.bounds.top])
+    @line1.strokeColor = '#89e'
 
+    @line2 = new Path.Line(
+      [@barrel.bounds.left, @barrel.bounds.bottom],
+      [@barrel.bounds.right + 0.2 * @scale, @barrel.bounds.bottom])
+    @line2.strokeColor = '#89e'
+
+    @shape = new Group @barrel, @line1, @line2
+    if model.onBody
+      @shapeOffset =
+        x: 0.5 * @scale
+        y: 0.05 * @scale
+      @moveTo model.position
 
 class Psg.PistolView extends Psg.WeaponView
 
