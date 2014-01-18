@@ -30,8 +30,8 @@ def normalize_map(map, wall):
 
 
 def collision_time(player, segment, v):
-    minp = player - Point(SIDE, SIDE)
-    maxp = player + Point(SIDE, SIDE)
+    minp = player - Point(SIDE, SIDE) #+ Point(EPS, EPS)
+    maxp = player + Point(SIDE, SIDE) #- Point(EPS, EPS)
 
     d = [0, 0]
     is_one_point_collision = [False, False]
