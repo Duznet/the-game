@@ -44,14 +44,10 @@ class Psg.GameplayTester
       res = @joinGame(next_idx, next_idx + 1)
 
     if res
-      deferred = $.Deferred()
       res.then =>
-        @joinUser(user).then =>
-          deferred.resolve()
-
-      return deferred
+        return @joinUser(user)
     else
-      return @joinUser(user)
+      @joinUser(user)
 
 
   leaveGame: (user_idx, next_idx) ->
@@ -62,25 +58,17 @@ class Psg.GameplayTester
     if next_idx? and next_idx < @users.length
       res = @leaveGame(next_idx, next_idx + 1)
 
-    deferred = $.Deferred()
     if res
       res.then =>
-        user.leaveGame().then =>
+        return user.leaveGame().then =>
           user.gc.close()
-          deferred.resolve()
-
-      return deferred
     else
-      return user.leaveGame().then =>
+      user.leaveGame().then =>
         user.gc.close()
 
   loginUser: (user) ->
-    deferred = $.Deferred()
-    user.signup().then =>
-      user.signin().then =>
-        deferred.resolve()
-
-    return deferred
+    done = user.signup().then =>
+      return user.signin()
 
   loginUsers: (user_idx, next_idx) ->
     user = @users[user_idx]
@@ -90,14 +78,10 @@ class Psg.GameplayTester
       res = @loginUsers(next_idx, next_idx + 1)
 
     if res
-      deferred = $.Deferred()
       res.then =>
-        @loginUser(user).then =>
-          deferred.resolve()
-
-      return deferred
+        return @loginUser(user)
     else
-      return @loginUser(user)
+      @loginUser(user)
 
 
   defineTest: (callback) ->
