@@ -15,7 +15,10 @@ class Psg.GameplayTester
       console.log "#{prop}:"
       console.log '  got: ', got[prop]
       console.log '  expected: ', expected[prop]
-      expect(got[prop]).to.almost.eql expected[prop], @precision
+      if isNaN expected[prop]
+        expect(got[prop]).to.eql expected[prop]
+      else
+        expect(got[prop]).to.almost.eql expected[prop], @precision
 
   condCommand: (command, cond) ->
     @commands.push

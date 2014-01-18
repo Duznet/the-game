@@ -78,6 +78,16 @@ describe 'Websocket API using server', ->
         '............$...........',
         '.......########.........',
       ]
+    },
+    {
+      name: 'weapons-map'
+      maxPlayers: 12
+      map: [
+        '...................',
+        '...................',
+        '...................',
+        '$..A..R..M..P..K...',
+      ]
     }
   ]
 
@@ -593,3 +603,86 @@ describe 'Websocket API using server', ->
           for p, i in @data.players
             @checkPlayer p, position: expectedPositions[i]
           done()
+
+  describe 'on weapons map', ->
+      initPos =
+        x: 0.5
+        y: 3.5
+
+      before ->
+        map = findMap 'weapons-map'
+
+      it 'should allow player to pick up a rail gun', (done) ->
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'A'
+          @addCommand ->
+            gc.move 1, 0
+          , end: 12
+          @addCommand ->
+            gc.move 0, 1
+          , end: 25
+          @addCommand ->
+            @checkPlayer @data.players[0]
+            done()
+
+      it 'should allow player to pick up a rocket launcher', (done) ->
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'R'
+          @addCommand ->
+            gc.move 1, 0
+          , end: 20
+          @addCommand ->
+            gc.move 0, 1
+          , end: 40
+          @addCommand ->
+            @checkPlayer @data.players[0]
+            done()
+
+      it 'should allow player to pick up a machine gun', (done) ->
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'M'
+          @addCommand ->
+            gc.move 1, 0
+          , end: 25
+          @addCommand ->
+            gc.move 0, 1
+          , end: 45
+          @addCommand ->
+            @checkPlayer @data.players[0]
+            done()
+
+      it 'should allow player to pick up a pistol', (done) ->
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'P'
+          @addCommand ->
+            gc.move 1, 0
+          , end: 33
+          @addCommand ->
+            gc.move 0, 1
+          , end: 50
+          @addCommand ->
+            @checkPlayer @data.players[0]
+            done()
+
+      it 'should allow player to pick up a knife', (done) ->
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'K'
+          @addCommand ->
+            gc.move 1, 0
+          , end: 45
+          @addCommand ->
+            gc.move 0, 1
+          , end: 65
+          @addCommand ->
+            @checkPlayer @data.players[0]
+            done()
