@@ -17,13 +17,23 @@ class Psg.GameplayTester
       console.log '  expected: ', expected[prop]
       expect(got[prop]).to.almost.eql expected[prop], @precision
 
+  condCommand: (command, cond) ->
+    @commands.push
+      exec: command
+      cond: cond
+
   addCommand: (command, {begin, end} = {}) ->
     begin ?= if @commands.length > 0 then _.last(@commands).end + 1 else 0
     end ?= begin
+
     @commands.push
       exec: command
       begin: begin + @curTick
       end: end + @curTick
+      cond: (tick, data) ->
+        return @begin <= tick <= @end
+
+
 
   addUser: (user, gameid) ->
     user.gameid = gameid
@@ -86,7 +96,6 @@ class Psg.GameplayTester
   defineTest: (callback) ->
 
     runTest = =>
-      console.log "TEEEST"
       @expectedPlayer = null
       @execDefinition = callback
       @execDefinition()
@@ -98,8 +107,9 @@ class Psg.GameplayTester
             console.log "players[#{i}]:"
             for prop of @expectedPlayer
               console.log "  #{prop}: ", p[prop]
+
         for c in @commands
-          if c.begin <= @curTick <= c.end
+          if c.cond(@curTick, @data)
             @exec = c.exec
             @exec()
         @curTick++

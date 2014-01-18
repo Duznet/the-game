@@ -11,10 +11,14 @@ class GameplayController(BasicController):
 
     def empty(self):
         self.game.update_v(self.user.id, 0, 0).got_action = True
+        tick = int(self.json['tick'])
+        print("game tick: " + str(self.game.tick) + ", tick got: " + str(tick))
 
     def fire(self):
         dx, dy = self.json['dx'], self.json['dy']
+        tick = int(self.json['tick'])
         self.game.fire(self.user.id, dx, dy).got_action = True
+        print("game tick: " + str(self.game.tick) + ", tick got: " + str(tick))
 
     def move(self):
         tick = int(self.json['tick'])
