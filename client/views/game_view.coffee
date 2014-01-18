@@ -114,6 +114,7 @@ class Psg.GameView extends Backbone.View
           @playerPosition = pView.getPosition()
         if login is @login or config.showHealth
           pView.label.content = "#{login} (#{p.health})"
+        if p.respawn > 0 then pView.hide() else pView.show()
         @statsText.content += "#{p.login}:\tkills: #{p.statistics.kills}\tdeaths: #{p.statistics.deaths}\n"
 
       if not @playerPosition then return

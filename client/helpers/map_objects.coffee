@@ -49,6 +49,15 @@ class Psg.PlayerView extends Psg.ObjectView
     @sign *= -1
     @shape.scale(-1, 1, @body.position)
 
+  hide: ->
+    @shape.visible = false
+    @label.visible = false
+
+  show: ->
+    @shape.visible = true
+    @label.visible = true
+
+
   constructor: (model) ->
     @body = new Shape.Rectangle size: new Size(@scale, @scale)
     @body.strokeColor = 'black'
@@ -94,7 +103,7 @@ class Psg.PlayerView extends Psg.ObjectView
     @shapeOffset = new Point
       x: @shape.position.x - @body.position.x
       y: @shape.position.y - @body.position.y
-    if model then @importPosition model
+    @importPosition model
 
 
 class Psg.ProjectileView extends Psg.ObjectView
