@@ -5,7 +5,7 @@ class Psg.Game extends Backbone.Model
     @game = @get('user').game
 
   prepareForUpdate: ->
-    for p in @players
+    for login, p of @players
       p.status = 'offline'
     @projectiles = []
 
@@ -43,13 +43,15 @@ class Psg.Game extends Backbone.Model
     @player.fire = dx: 0, dy: 0
     @player.position = x: 0, y: 0
 
-    @players = []
+    @players = {}
     @projectiles = []
     @items = []
 
     @gc = new Psg.GameplayConnection sid: @get('user').get('sid')
 
     @gc.onopen = =>
+      @projectilesInvalidated = false
+      @playersLeft = false
       @gc.move @player.movement
     @gc.onmessage = (data) =>
       @prepareForUpdate()
@@ -57,7 +59,9 @@ class Psg.Game extends Backbone.Model
         @updatePlayerData p
       for login, p of @players
         if p.status is 'offline'
+          console.log 'player offline'
           delete @players[login]
+          @playersLeft = true
       @projectilesInvalidated = true
       for p in data.projectiles
         @updateProjectileData p

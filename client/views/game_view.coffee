@@ -138,6 +138,15 @@ class Psg.GameView extends Backbone.View
       @stats.position = view.center
       @stats.bringToFront()
 
+      if @model.playersLeft
+        @model.playersLeft = false
+        for login, pView of @pViews
+          if not @model.players[login]?
+            pView.shape.onFrame = null
+            pView.shape.remove()
+            pView.label.remove()
+            delete @pViews[login]
+
       if @model.projectilesInvalidated
         @model.projectilesInvalidated = false
         @projectiles = []
