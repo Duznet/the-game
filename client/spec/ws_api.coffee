@@ -380,7 +380,7 @@ describe 'Websocket API using server', ->
 
   describe 'on Long line map', ->
 
-    initialPosition =
+    initPos =
       x: 33.5
       y: 4.5
 
@@ -390,7 +390,7 @@ describe 'Websocket API using server', ->
     it 'should jump equal to the right and to the left', (done) ->
       tester.defineTest ->
         @expectedPlayer =
-          position: initialPosition
+          position: initPos
         @addCommand ->
           gc.move 1, 0
         @addCommand ->
