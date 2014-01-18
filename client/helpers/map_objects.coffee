@@ -128,6 +128,16 @@ class Psg.ProjectileView extends Psg.ObjectView
     if model.velocity.x is 0 and model.velocity.y is 0 and model.weapon isnt 'R'
       @shape = null
       return
+    if model.weapon is 'K'
+      @shape = new Path.Star
+        center: [0, 0]
+        points: 5
+        radius1: 0.1 * @scale
+        radius2: 0.2 * @scale
+      @shape.fillColor = 'black'
+      @shape.rotate(Math.round(360 * Math.random()))
+      if model then @importPosition model
+
     if model.weapon is 'A'
       @finished = false
       @shape = new Path.Line(
@@ -180,7 +190,7 @@ class Psg.ProjectileView extends Psg.ObjectView
           @count++
         else
           @finished = true
-    else
+    else if model.weapon isnt 'K'
       @shape = new Path.Circle new Point(0, 0), @SIZES[model.weapon] * @scale
       @shape.strokeColor = 'black'
       @shape.fillColor = @COLORS[model.weapon]
