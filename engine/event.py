@@ -26,7 +26,7 @@ class WallCollisionEvent(Event):
         return True
 
     def handle(self, player):
-        player.point += self.collisions[0].offset
+        player.point += player.velocity * self.collisions[0].time
         for collision in self.collisions:
             if engine.utils.is_vertical(collision.segment):
                 player.velocity.x = 0

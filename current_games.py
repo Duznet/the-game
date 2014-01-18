@@ -19,10 +19,11 @@ class CurrentGames:
         return self.games[id]
 
     def remove_game(self, id):
-        self.games.pop(id)
+        if self.game(id):
+            self.games.pop(id)
 
     def game(self, id):
-        return self.games[id]
+        return self.games.get(id)
 
     def flush(self):
         self.games.clear()

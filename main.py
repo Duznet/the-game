@@ -71,7 +71,8 @@ class MainWSHandler(websocket.WebSocketHandler):
 
     def on_close(self, message=None):
         print("closed")
-        self.controller.leave_game()
+        if self.controller:
+            self.controller.leave_game()
         self.application.websockets.remove(self)
 
 class MainHandler(web.RequestHandler):
@@ -147,9 +148,9 @@ class GameApp(web.Application):
 
 
     def tick(self):
-        for game in models.game.all():
-            if games.games.get(game.id) is None:
-                game.clear()
+        # for game in models.game.all():
+        #     if games.games.get(game.id) is None:
+        #         game.clear()
 
 
         if len(self.websockets) == 0:

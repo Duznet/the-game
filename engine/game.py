@@ -153,6 +153,7 @@ class Game:
 
         self.NEXT_SPAWN[last_spawn] = self.first_spawn
         print(self.NEXT_SPAWN)
+        self.last_spawn = last_spawn
 
         for key in last_portal.keys():
             lp = last_portal.get(key)
@@ -258,7 +259,8 @@ class Game:
                 if not collision:
                     continue
 
-                if is_teleport(cellval) and (abs(player.x - cell.x - SIDE) >= 0.5 or abs(player.y - cell.y - SIDE) >= 0.5):
+                if is_teleport(cellval) and (abs(player.x - cell.x - SIDE) >= 0.5 - EPS or
+                    abs(player.y - cell.y - SIDE) >= 0.5 - EPS):
                     print("TELEPORT")
                     collisions.append(TeleportEvent(collision.time, self.NEXT_PORTAL[cell] + Point(SIDE, SIDE)))
                 elif is_weapon(cellval):
@@ -311,9 +313,10 @@ class Game:
         if self.players_.get(id):
             return self.players_[id]
 
+        self.last_spawn = self.NEXT_SPAWN[self.last_spawn]
         self.players_[id] = Player(
             login,
-            self.NEXT_SPAWN[self.players_[self.players_order[-1]].last_spawn] if self.players_ else self.first_spawn,
+            self.last_spawn,
             self.NEXT_SPAWN)
 
         self.players_order.append(id)
@@ -384,6 +387,7 @@ class Game:
             y += self.GRAVITY
 
         player.velocity = Point(player.velocity.x, y)
+        player.normalize_v(self.MAXV)
 
         return player
 
@@ -401,19 +405,17 @@ class Game:
         if abs(player.delta.x) > EPS:
             return player
 
-        norm = abs(player.velocity)
-
         uleft = underpoint(player.point - Point(SIDE - EPS, 0))
         uright = underpoint(player.point + Point(SIDE - EPS, 0))
 
-        if norm == 0: #or self.map[uleft.y][uleft.x] != self.WALL and self.map[uright.y][uright.x] != self.WALL:
+        if abs(player.velocity.x) == 0: #or self.map[uleft.y][uleft.x] != WALL and self.map[uright.y][uright.x] != WALL:
             return player
 
-        brake_v = player.velocity * self.DEFAULT_VELOCITY / norm
-
         x = player.velocity.x
+        brake_v = (-1 if x < 0 else 1) * self.DEFAULT_VELOCITY
+
         y = player.velocity.y
-        x = 0 if abs(brake_v.x) > abs(x) else x - brake_v.x
+        x = 0 if abs(brake_v) > abs(x) else x - brake_v
         player.velocity = Point(x, y)
 
         print("result v: ", player.velocity)
@@ -454,8 +456,10 @@ class Game:
                 print("event: ", event)
                 event.handle(player)
 
+                print("player coords: ", player.point)
+
                 if event.require_event_refresh():
-                    events = self.get_events(player.point, player.velocity * (1 - t - tevent - EPS))
+                    events = self.get_events(player.point, player.velocity * (1 - t - tevent - TEPS))
                     refresh = True
                     break
 

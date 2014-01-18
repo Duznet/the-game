@@ -6,6 +6,7 @@ class GameplayController(BasicController):
 
     def __init__(self, json, models, games):
         super(GameplayController, self).__init__(json, models.user)
+        self.current_games = games
         self.game = games.game(self.user.game.id)
 
     def empty(self):
@@ -28,6 +29,8 @@ class GameplayController(BasicController):
 
     def leave_game(self):
         self.game.remove_player(self.user.id)
+        if len(self.user.game.players.all()) == 0:
+            self.current_games.remove_game(self.user.game.id)
 
     def join_game(self):
         self.game.add_player(self.user.id, self.user.login)
