@@ -148,9 +148,9 @@ class GameApp(web.Application):
 
 
     def tick(self):
-        # for game in models.game.all():
-        #     if games.games.get(game.id) is None:
-        #         game.clear()
+        for game in models.game.all():
+            if games.games.get(game.id) is None:
+                game.clear()
 
 
         if len(self.websockets) == 0:

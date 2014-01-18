@@ -39,6 +39,30 @@ describe 'Websocket API using server', ->
         '...###############################',
         '$.................................',
       ]
+    },
+    {
+      name: 'teleport-map'
+      maxPlayers: 4
+      map: [
+        '2.......$...1.',
+        '#############.',
+        '3.4#1.35.2#6.5',
+        '##############',
+        '..6......4....',
+      ]
+    },
+    {
+      name: 'hole-map'
+      maxPlayers: 4
+      map: [
+        '..............',
+        '#.####........',
+        '#.#..#........',
+        '#.#..#........',
+        '#.#..#........',
+        '..............',
+        '#$.#.#.#.$....',
+      ]
     }
   ]
 
@@ -370,3 +394,152 @@ describe 'Websocket API using server', ->
           @checkPlayer @data.players[0]
           done()
 
+  describe 'on teleport map', ->
+    initPos =
+      x: 8.5
+      y: 0.5
+
+    before ->
+      map = findMap 'teleport-map'
+
+    it 'should run to the end', (done) ->
+      tester.addUser gen.getUser(), game.id
+      tester.defineTest ->
+        @expectedPlayerRight  =
+          position:
+            x: 13.5
+            y: 4.5
+        @expectedPlayerLeft  =
+          position:
+            x: 0.5
+            y: 4.5
+        @addCommand ->
+          gc.move 0, 0
+          for user in @users
+            user.gc.move 0, 0
+        , end: 3
+
+        @addCommand ->
+          gc.move 1, 0
+          @users[0].gc.move -1, 0
+        , end: 50
+
+        @addCommand ->
+          @checkPlayer @data.players[0], @expectedPlayerRight
+          @checkPlayer @data.players[1], @expectedPlayerLeft
+
+          done()
+
+    it 'shouldn\'t loose velocity while teleporting', (done) ->
+      tester.addUser gen.getUser(), game.id
+      tester.defineTest ->
+        @addCommand ->
+          gc.move 1, 0
+          @users[0].gc.move -1, 0
+        , end: 20
+
+        @addCommand ->
+          @v = @data.players[0].velocity
+        , begin: 18
+
+        @addCommand ->
+          expect(@data.players[0].velocity.x).to.be.greaterThan @v.x
+          @checkPlayer @data.players[0],
+            position:
+              x: 4.5
+              y: 2.5
+
+          done()
+        , begin: 19
+
+    it 'should pass all teleports', (done) ->
+      tester.addUser gen.getUser(), game.id
+      tester.defineTest ->
+        @addCommand ->
+          gc.move 1, 0
+          @users[0].gc.move -1, 0
+        , end: 50
+
+        @addCommand ->
+          @checkPlayer @data.players[0],
+            position:
+              x: 4.5
+              y: 2.5
+
+        , begin: 19
+
+        @addCommand ->
+          @checkPlayer @data.players[0],
+            position:
+              x: 0.5
+              y: 2.5
+
+        , begin: 23
+
+        @addCommand ->
+          @checkPlayer @data.players[0],
+            position:
+              x: 9.5
+              y: 4.5
+
+        , begin: 27
+
+        @addCommand ->
+          @checkPlayer @data.players[1],
+            position:
+              x: 13.5
+              y: 2.5
+
+        , begin: 33
+
+
+        @addCommand ->
+          @checkPlayer @data.players[1],
+            position:
+              x: 2.5
+              y: 4.5
+
+          done()
+
+        , begin: 37
+
+  describe 'on hole map', ->
+    initPos =
+      x: 1.5
+      y: 6.5
+
+    before ->
+      map = findMap 'hole-map'
+
+    it 'should pass into the upper hole', (done) ->
+      tester.addUser gen.getUser(), game.id
+
+      tester.defineTest ->
+        @addCommand ->
+          gc.move 0, -1
+          @users[0].gc.move -1, -1
+
+        @addCommand ->
+          gc.move 0, 0
+          @users[0].gc.move -1, 0
+        , end: 20
+
+        @addCommand ->
+          gc.move 0, 0
+          @users[0].gc.move 0, 0
+        , end: 50
+
+        @addCommand ->
+          player = @data.players[0]
+          expect(player.position.x).to.almost.equal initPos.x
+          expect(player.position.y).to.be.lessThan 5
+        , begin: 8
+
+        @addCommand ->
+          @checkPlayer @data.players[1],
+            position:
+              x: 6.5
+              y: 6.5
+
+          done()
+        , begin: 50

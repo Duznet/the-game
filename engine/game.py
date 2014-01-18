@@ -175,6 +175,7 @@ class Game:
             self.items[i] = max(0, self.items[i])
 
         print("Items", self.items)
+        print("projectiles size: ", self.projectiles)
 
         self.move_projectiles()
 
