@@ -29,7 +29,7 @@ class GameplayController(BasicController):
 
     def leave_game(self):
         self.game.remove_player(self.user.id)
-        if self.game.players_count() == 0:
+        if len(self.user.game.players.all()) == 0:
             self.current_games.remove_game(self.user.game.id)
 
     def join_game(self):

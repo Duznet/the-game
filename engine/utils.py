@@ -156,23 +156,37 @@ def collision_with_point(player, v, point):
     minp = player - Point(SIDE, SIDE)
     maxp = player + Point(SIDE, SIDE)
 
+    # for i in range(2):
+    #     if v.args[i] < 0:
+    #         minp.args[i] += v.args[i]
+    #     else:
+    #         maxp.args[i] += v.args[i]
+
     d = [0, 0]
     t = [0, 0]
     is_one_point_collision = [False, False]
 
     for i in range(2):
         d1 = minp.args[i] - point.args[i]
-        d2 = point.args[i] - maxp.args[i]
 
-        if d1 > 0:
-            d[i] = -d1
-        elif d2 > 0:
-            d[i] = d2
+        d2 = point.args[i] - maxp.args[i]
+        if d1 >= 0:
+            d[i] = -d1 - EPS
+        elif d2 >= 0:
+            d[i] = d2 + EPS
         else:
             d[i] = 0
             continue
 
-        if (abs(v.args[i]) < EPS):
+        # if (abs(v.args[i]) < EPS):
+        #     return None
+
+        minarg = minp.args[i]
+        maxarg = maxp.args[i]
+        minarg = min(minarg, minarg + v.args[i])
+        maxarg = max(maxarg, maxarg + v.args[i])
+
+        if not (minarg < point.args[i] < maxarg):
             return None
 
         t[i] = d[i] / v.args[i]
@@ -181,12 +195,8 @@ def collision_with_point(player, v, point):
         print(d, v)
         print("d", d[i])
 
-        if (t[i] <= EPS or t[i] > 1):
+        if (t[i] < 0 or t[i] > 1):
             return None
-
-
-    if d == [0, 0]:
-        return None
 
     return Collision(max(t), Point(d), Segment(point, point))
 

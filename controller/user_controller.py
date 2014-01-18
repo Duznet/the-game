@@ -65,7 +65,7 @@ class UserController(BasicController):
             game = self.current_games.game(user.game.id)
             if game:
                 game.remove_player(user.id)
-                if game.players_count() == 0:
+                if len(user.game.players.all()) == 1:
                     self.current_games.remove_game(user.game.id)
 
         user.leave_game()

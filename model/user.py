@@ -67,10 +67,12 @@ class User(odm.StdModel):
         return game
 
     def leave_game(self):
+        print("game", self.game)
         if not self.game:
             raise NotInGame()
 
         if len(self.game.players.all()) == 1:
+            print("delete")
             self.game.delete()
 
         self.game = None

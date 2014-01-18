@@ -1,4 +1,5 @@
 EPS = 1e-6
+TEPS = 1e-9
 
 WALL = '#'
 SPAWN = '$'

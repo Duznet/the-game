@@ -2,14 +2,13 @@ class Psg.GameplayTester
 
   constructor: ->
     @precision = Math.round Math.abs Math.log(config.game.defaultConsts.accuracy) / Math.LN10
-    @done = null
     @users = []
 
   setup: (conn) ->
     @conn = conn
     @commands = []
     @curTick = 0
-
+    @users = []
   checkPlayer: (got, expected = @expectedPlayer) ->
     console.log 'checking player'
     for prop of expected
