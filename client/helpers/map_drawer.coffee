@@ -28,12 +28,12 @@ class Psg.MapDrawer
     rect.onFrame = ->
       @rotate(2)
 
-  drawWeapon: (type, position) ->
+  drawItem: (type, position) ->
     model = {}
     model.respawn = 0
     model.type = type
     model.position = x: position.x + 0.5, y: position.y + 0.5
-    @items.push new Psg.WeaponOnMapView model
+    @items.push new Psg.MapItemView model
 
   draw: (mapData) ->
     # paper must have been initialized
@@ -46,7 +46,7 @@ class Psg.MapDrawer
           continue
         if col is '#'
           @drawWall new Point(j * @scale, i * @scale)
-        if 'A' <= col <= 'Z'
-          @drawWeapon col, new Point(j, i)
+        if 'A' <= col <= 'Z' or 'a' <= col <= 'z'
+          @drawItem col, new Point(j, i)
         else if '1' <= col.toString() <= '9'
           @drawTeleport new Point(j * @scale, i * @scale)

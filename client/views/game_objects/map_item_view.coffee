@@ -1,4 +1,4 @@
-class Psg.WeaponOnMapView extends Psg.ObjectView
+class Psg.MapItemView extends Psg.ObjectView
 
   moveTo: (newPosition) ->
     super newPosition
