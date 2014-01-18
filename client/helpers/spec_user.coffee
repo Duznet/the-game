@@ -30,8 +30,8 @@ class window.User
   getMaps: ->
     @conn.getMaps @sid
 
-  createGame: (name, maxPlayers, mapId) ->
-    @conn.createGame @sid, name, maxPlayers, mapId
+  createGame: (name, maxPlayers, mapId, consts) ->
+    @conn.createGame @sid, name, maxPlayers, mapId, consts
 
   getGames: ->
     @conn.getGames @sid
