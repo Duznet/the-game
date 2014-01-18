@@ -9,6 +9,7 @@ window.config =
     showChat: false
     showCrosshair: true
     showHealth: true
+    showPlayersColors: false
     defaultConsts:
       tickSize: 30
       accuracy: 0.000001

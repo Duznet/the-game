@@ -19,9 +19,10 @@ class Psg.GameView extends Backbone.View
     c.brightness = 0.5 + 0.2 * Math.random()
     c.saturation = 0.5
     c.hue = 100 * Math.round(20 * Math.random())
-    console.log 'saturation: ', c.saturation
-    console.log 'hue: ', c.hue
-    console.log 'brightness: ', c.brightness
+    if config.showPlayersColors
+      console.log 'saturation: ', c.saturation
+      console.log 'hue: ', c.hue
+      console.log 'brightness: ', c.brightness
     c
 
   drawMap: ->
