@@ -20,3 +20,8 @@ class Psg.ObjectView
 
   importPosition: (model) ->
     @moveTo x: model.position.x * @scale, y: model.position.y * @scale
+
+  remove: ->
+    if @shape?
+      @shape.onFrame = null
+      @shape.remove()

@@ -16,6 +16,9 @@ class Psg.PlayerView extends Psg.ObjectView
     @shape.visible = true
     @label.visible = true
 
+  remove: ->
+    super()
+    @label.remove()
 
   constructor: (model) ->
     @body = new Shape.Rectangle size: new Size(@scale, @scale)

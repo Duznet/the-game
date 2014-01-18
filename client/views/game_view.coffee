@@ -142,9 +142,7 @@ class Psg.GameView extends Backbone.View
         @model.playersLeft = false
         for login, pView of @pViews
           if not @model.players[login]?
-            pView.shape.onFrame = null
-            pView.shape.remove()
-            pView.label.remove()
+            pView.remove()
             delete @pViews[login]
 
       if @model.projectilesInvalidated
@@ -154,9 +152,7 @@ class Psg.GameView extends Backbone.View
           v = new Psg.ProjectileView p
           @projectiles.push v
         for p in @animations
-          if p.finished and p.shape?
-            p.shape.onFrame = null
-            p.shape.remove()
+          p.remove() if p.finished
         @animations = @projectiles.concat(@animations.filter (p) -> not p.finished)
         for respawn, index in @model.items
           @items[index].respawn = respawn
