@@ -113,6 +113,8 @@ class Psg.GameplayTester
       @conn.onmessage = (data) =>
         console.log 'message got'
         @data = data
+        for u in @users
+          u.gc.onmessage(data)
         if @expectedProjectile?
           for p, i in @data.projectiles
             console.log "projectiles[#{i}]:"
