@@ -790,8 +790,8 @@ describe 'Websocket API using server', ->
           @addCommand ->
             gc.fire 1, 0
           @addCommand ->
-            @checkProjectile @data.projectiles[0]
             expect(@data.projectiles.length).to.be.equal 1
+            @checkProjectile @data.projectiles[0]
             done()
 
     describe 'on small duel arena map', ->
@@ -889,7 +889,7 @@ describe 'Websocket API using server', ->
             done()
 
 
-      it 'should allow player to injury other players with rail gun', (done) ->
+      it 'should allow player to injury other player with rail gun', (done) ->
 
         tester.addUser gen.getUser(), game.id
         tester.addUser gen.getUser(), game.id
@@ -914,7 +914,7 @@ describe 'Websocket API using server', ->
             gc.fire 1, 0
           @addCommand ->
             gc.move 0, 0
-            if @data.players[1].health < 100 and @data.players[2].health < 100
+            if @data.players[1].health < 100
               injuried = true
           , end: 60
           @addCommand ->
