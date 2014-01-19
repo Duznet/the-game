@@ -23,7 +23,7 @@ class Psg.Game extends Backbone.Model
 
     if @players[t.login]?
       t.wounded = t.health < @players[t.login].health
-
+      t.changedWeapon = t.weapon isnt @players[t.login].weapon
     @players[t.login] = t
     if t.login is @get('user').get('login')
       for prop of t

@@ -16,6 +16,22 @@ class Psg.PlayerView extends Psg.ObjectView
     @shape.visible = true
     @label.visible = true
 
+  WEAPONS:
+    K: Psg.KnifeView
+    P: Psg.PistolView
+    M: Psg.MachineGunView
+    R: Psg.RocketLauncherView
+    A: Psg.RailGunView
+
+  changeWeapon: (newWeapon) ->
+    @shape.removeChildren(3)
+    @gun.remove()
+    @gun = new @WEAPONS[newWeapon]
+      position: @body.position
+      onBody: true
+    @gun.shape.scale(-1, 1, @body.position) if @sign < 0
+    @shape.addChild(@gun.shape)
+
   remove: ->
     super()
     @label.remove()
@@ -50,7 +66,8 @@ class Psg.PlayerView extends Psg.ObjectView
     @label.justification = 'center'
     @label.content = model.login
 
-    @gun = new Psg.PistolView
+    console.log 'weapons: ', @WEAPONS
+    @gun = new @WEAPONS[model.weapon]
       position: @body.position
       onBody: true
 
@@ -60,7 +77,7 @@ class Psg.PlayerView extends Psg.ObjectView
       strokeWidth: 2
     @wound.visible = false
 
-    @shape = new Group(@body, @head, @gun.shape, @wound)
+    @shape = new Group(@body, @head, @wound, @gun.shape)
     @shapeOffset = new Point
       x: @shape.position.x - @body.position.x
       y: @shape.position.y - @body.position.y
