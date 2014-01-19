@@ -23,10 +23,11 @@ class Psg.GameList extends Backbone.Model
   fetch: ->
     @conn.getMaps().then (mapsData) =>
       if mapsData.result is 'ok'
-        maps = mapsData.maps.filter (m) -> m.status is 'running'
+        maps = mapsData.maps
         @conn.getGames().then (data) =>
           if data.result is 'ok'
-            games = data.games.map (g) ->
+            games = data.games.filter (g) -> g.status is 'running'
+            games = games.map (g) ->
               mapName = _.findWhere(maps, id: g.map).name
               g.map = mapName
               g
