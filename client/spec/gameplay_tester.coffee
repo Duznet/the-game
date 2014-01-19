@@ -9,8 +9,11 @@ class Psg.GameplayTester
     @commands = []
     @curTick = 0
     @users = []
+    @expectedPlayer = null
+    @expectedProjectile = null
+
   checkPlayer: (got, expected = @expectedPlayer) ->
-    console.log 'checking player'
+    console.log 'checking'
     for prop, expValue of expected
       console.log "#{prop}:"
       console.log '  got: ', got[prop]
@@ -22,7 +25,8 @@ class Psg.GameplayTester
       else if typeof expValue is 'number'
         expect(got[prop]).to.almost.equal expValue, @precision
 
-
+  checkProjectile: (got, expected = @expectedProjectile) ->
+    @checkPlayer got, expected
 
   condCommand: (command, cond) ->
     @commands.push
@@ -109,6 +113,11 @@ class Psg.GameplayTester
       @conn.onmessage = (data) =>
         console.log 'message got'
         @data = data
+        if @expectedProjectile?
+          for p, i in @data.projectiles
+            console.log "projectiles[#{i}]:"
+            for prop of @expectedProjectile
+              console.log "  #{prop}: ", p[prop]
         if @expectedPlayer?
           for p, i in @data.players
             console.log "players[#{i}]:"

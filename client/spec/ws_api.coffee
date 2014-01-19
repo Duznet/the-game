@@ -88,6 +88,18 @@ describe 'Websocket API using server', ->
         '...................',
         '$..A..R..M..P..K...',
       ]
+    },
+    {
+      name: 'small-duel-arena'
+      maxPlayers: 12
+      map: [
+        '.............................................',
+        '.............................................',
+        '.............................................',
+        '.............................................',
+        '.............................................',
+        '......P..M..A..R...$.h...K...$......$....$...',
+      ]
     }
   ]
 
@@ -627,6 +639,25 @@ describe 'Websocket API using server', ->
             @checkPlayer @data.players[0]
             done()
 
+      it 'should allow player to fire with rail gun', (done) ->
+
+        tester.defineTest ->
+          @expectedProjectile =
+            weapon: 'A'
+            lifeTime: 1
+          @addCommand ->
+            gc.move 1, 0
+          , end: 12
+          @addCommand ->
+            gc.move 0, 1
+          , end: 25
+          @addCommand ->
+            gc.fire 1, 0
+          @addCommand ->
+            @checkProjectile @data.projectiles[0]
+            expect(@data.projectiles.length).to.be.equal 1
+            done()
+
       it 'should allow player to pick up a rocket launcher', (done) ->
 
         tester.defineTest ->
@@ -640,6 +671,25 @@ describe 'Websocket API using server', ->
           , end: 40
           @addCommand ->
             @checkPlayer @data.players[0]
+            done()
+
+      it 'should allow player to fire with a rocket launcher', (done) ->
+
+        tester.defineTest ->
+          @expectedProjectile =
+            weapon: 'R'
+            lifeTime: 1
+          @addCommand ->
+            gc.move 1, 0
+          , end: 20
+          @addCommand ->
+            gc.move 0, 1
+          , end: 40
+          @addCommand ->
+            gc.fire 1, 0
+          @addCommand ->
+            @checkProjectile @data.projectiles[0]
+            expect(@data.projectiles.length).to.be.equal 1
             done()
 
       it 'should allow player to pick up a machine gun', (done) ->
@@ -657,6 +707,25 @@ describe 'Websocket API using server', ->
             @checkPlayer @data.players[0]
             done()
 
+      it 'should allow player to fire with machine gun', (done) ->
+
+        tester.defineTest ->
+          @expectedProjectile =
+            weapon: 'M'
+            lifeTime: 1
+          @addCommand ->
+            gc.move 1, 0
+          , end: 25
+          @addCommand ->
+            gc.move 0, 1
+          , end: 45
+          @addCommand ->
+            gc.fire 1, 0
+          @addCommand ->
+            @checkProjectile @data.projectiles[0]
+            expect(@data.projectiles.length).to.be.equal 1
+            done()
+
       it 'should allow player to pick up a pistol', (done) ->
 
         tester.defineTest ->
@@ -670,6 +739,25 @@ describe 'Websocket API using server', ->
           , end: 50
           @addCommand ->
             @checkPlayer @data.players[0]
+            done()
+
+      it 'should allow player to fire with a pistol', (done) ->
+
+        tester.defineTest ->
+          @expectedProjectile =
+            weapon: 'P'
+            lifeTime: 1
+          @addCommand ->
+            gc.move 1, 0
+          , end: 33
+          @addCommand ->
+            gc.move 0, 1
+          , end: 50
+          @addCommand ->
+            gc.fire 1, 0
+          @addCommand ->
+            @checkProjectile @data.projectiles[0]
+            expect(@data.projectiles.length).to.be.equal 1
             done()
 
       it 'should allow player to pick up a knife', (done) ->
@@ -686,3 +774,218 @@ describe 'Websocket API using server', ->
           @addCommand ->
             @checkPlayer @data.players[0]
             done()
+
+      it 'should allow player to \'fire\' with a knife', (done) ->
+
+        tester.defineTest ->
+          @expectedProjectile =
+            weapon: 'K'
+            lifeTime: 1
+          @addCommand ->
+            gc.move 1, 0
+          , end: 45
+          @addCommand ->
+            gc.move 0, 1
+          , end: 65
+          @addCommand ->
+            gc.fire 1, 0
+          @addCommand ->
+            @checkProjectile @data.projectiles[0]
+            expect(@data.projectiles.length).to.be.equal 1
+            done()
+
+    describe 'on small duel arena map', ->
+
+      @timeout 10000
+
+      initPos =
+        x: 19.5
+        y: 5.5
+
+      before ->
+        map = findMap 'small-duel-arena'
+
+
+      it 'should allow player to injury himself with rocket burst', (done) ->
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'R'
+            health: 100
+          @addCommand ->
+            gc.move -1, 0
+          , end: 15
+          @addCommand ->
+            gc.move 0, 0
+          , end: 35
+          @addCommand ->
+            gc.fire 0, 1
+          @addCommand ->
+            expect(@data.players[0].health).to.be.lessThan 100
+            done()
+
+      it 'should allow player to pick up health', (done) ->
+
+        health = 100
+        pickedUpHealth = false
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'R'
+            health: 100
+          @addCommand ->
+            gc.move -1, 0
+          , end: 15
+          @addCommand ->
+            gc.move 0, 0
+          , end: 35
+          @addCommand ->
+            gc.fire 0, 1
+          @addCommand ->
+            gc.move 0, 0
+            health = @data.players[0].health
+          , end: 80
+          @addCommand ->
+            gc.move 1, 0
+          , end: 105
+          @addCommand ->
+            gc.move 0, 0
+            if @data.players[0].health > health
+              pickedUpHealth = true
+          , end: 130
+          @addCommand ->
+            expect(pickedUpHealth).to.be.ok
+            done()
+
+      it 'should allow player to injury other player with rocket launcher', (done) ->
+
+        tester.addUser gen.getUser(), game.id
+
+        injuried = false
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'R'
+            health: 100
+          @addCommand ->
+            for user in @users
+              user.gc.move 0, 0
+          , end: 100
+          @addCommand ->
+            gc.move -1, 0
+          , begin: 0, end: 15
+          @addCommand ->
+            gc.move 0, 0
+          , end: 35
+          @addCommand ->
+            gc.fire 1, 0
+          @addCommand ->
+            gc.move 0, 0
+            if @data.players[1].health < 100
+              injuried = true
+          , end: 70
+          @addCommand ->
+            expect(injuried).to.be.ok
+            done()
+
+
+      it 'should allow player to injury other players with rail gun', (done) ->
+
+        tester.addUser gen.getUser(), game.id
+        tester.addUser gen.getUser(), game.id
+
+        injuried = false
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'A'
+            health: 100
+          @addCommand ->
+            for user in @users
+              user.gc.move 0, 0
+          , end: 100
+          @addCommand ->
+            gc.move -1, 0
+          , begin: 0, end: 20
+          @addCommand ->
+            gc.move 0, 0
+          , end: 40
+          @addCommand ->
+            gc.fire 1, 0
+          @addCommand ->
+            gc.move 0, 0
+            if @data.players[1].health < 100 and @data.players[2].health < 100
+              injuried = true
+          , end: 60
+          @addCommand ->
+            expect(injuried).to.be.ok
+            done()
+
+      it 'should allow player to injury other player with machine gun', (done) ->
+
+        tester.addUser gen.getUser(), game.id
+
+        injuried = false
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'M'
+            health: 100
+          @expectedProjectile =
+            weapon: 'M'
+          @addCommand ->
+            for user in @users
+              user.gc.move 0, 0
+          , end: 100
+          @addCommand ->
+            gc.move -1, 0
+          , begin: 0, end: 25
+          @addCommand ->
+            gc.move 0, 0
+          , end: 35
+          @addCommand ->
+            gc.fire 1, 0
+          @addCommand ->
+            gc.move 0, 0
+            if @data.players[1].health < 100
+              injuried = true
+          , end: 65
+          @addCommand ->
+            expect(injuried).to.be.ok
+            done()
+
+      it 'should allow player to injury other player with pistol', (done) ->
+
+        tester.addUser gen.getUser(), game.id
+
+        injuried = false
+
+        tester.defineTest ->
+          @expectedPlayer =
+            weapon: 'P'
+            health: 100
+          @expectedProjectile =
+            weapon: 'P'
+          @addCommand ->
+            for user in @users
+              user.gc.move 0, 0
+          , end: 100
+          @addCommand ->
+            gc.move -1, 0
+          , begin: 0, end: 35
+          @addCommand ->
+            gc.move 0, 0
+          , end: 50
+          @addCommand ->
+            gc.fire 1, 0
+          @addCommand ->
+            gc.move 0, 0
+            if @data.players[1].health < 100
+              injuried = true
+          , end: 80
+          @addCommand ->
+            expect(injuried).to.be.ok
+            done()
+
+
+
