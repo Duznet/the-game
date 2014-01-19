@@ -114,7 +114,7 @@ class Psg.GameplayTester
         console.log 'message got'
         @data = data
         for u in @users
-          u.gc.onmessage(data)
+          u.gc.tick = @data.tick
         if @expectedProjectile?
           for p, i in @data.projectiles
             console.log "projectiles[#{i}]:"

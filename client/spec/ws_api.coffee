@@ -1,6 +1,6 @@
 describe 'Websocket API using server', ->
 
-  @timeout 5000
+  @timeout 10000
 
   hostUser = null
   gc = null
