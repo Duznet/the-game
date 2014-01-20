@@ -23,10 +23,11 @@ class Psg.ProjectileView extends Psg.ObjectView
     if model.weapon is 'K'
       @shape = new Path.Star
         center: [0, 0]
-        points: 5
+        points: 8
         radius1: 0.1 * @scale
-        radius2: 0.2 * @scale
+        radius2: 0.25 * @scale
       @shape.fillColor = 'black'
+      @shape.strokeColor = '#89e'
       @shape.rotate(Math.round(360 * Math.random()))
       if model then @importPosition model
 
