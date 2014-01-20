@@ -31,6 +31,9 @@ class Psg.PlayerView extends Psg.ObjectView
       onBody: true
     @gun.shape.scale(-1, 1, @body.position) if @sign < 0
     @shape.addChild(@gun.shape)
+    @shapeOffset = new Point
+      x: (@shape.position.x - @body.position.x) * @sign
+      y: (@shape.position.y - @body.position.y) * @sign
 
   remove: ->
     super()
