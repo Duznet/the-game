@@ -52,6 +52,7 @@ class GameController(BasicController):
 
     def get_games(self):
         games = self.games.filter(status=str(self.json["status"])).all() if self.json.get("status") else self.games.all()
+
         return jsonify(
             games=[{
                 "name": game.name,

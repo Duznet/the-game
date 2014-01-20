@@ -39,8 +39,8 @@ class UserController(BasicController):
 
     def signout(self):
         user = self._user_by_sid()
-        user.signout()
         self.leave_game()
+        user.signout()
         return jsonify(result="ok")
 
     def send_message(self):
@@ -73,6 +73,5 @@ class UserController(BasicController):
                     self.current_games.remove_game(user.game.id)
 
         user.leave_game()
-        print(self.games.all())
-        # print(self.current_games.games)
+
         return jsonify(result="ok")

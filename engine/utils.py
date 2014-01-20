@@ -33,17 +33,22 @@ def collision_time(player, segment, v):
     minp = player - Point(SIDE, SIDE) #+ Point(EPS, EPS)
     maxp = player + Point(SIDE, SIDE) #- Point(EPS, EPS)
 
+    minsegp = lambda i: min(segment.p1.args[i], segment.p2.args[i])
+    maxsegp = lambda i: max(segment.p1.args[i], segment.p2.args[i])
+
     d = [0, 0]
     is_one_point_collision = [False, False]
 
+    t = [0, 0]
     for i in range(2):
-        d1 = minp.args[i] - max(segment.p1.args[i], segment.p2.args[i])
-        d2 = min(segment.p1.args[i], segment.p2.args[i]) - maxp.args[i]
+        d1 = minp.args[i] - maxsegp(i)
+        d2 = minsegp(i) - maxp.args[i]
 
 
         if (segment.p1.args[i] == segment.p2.args[i]) and d1 < -EPS and d2 < -EPS:
             return None
 
+        is_one_point_collision[i] = d1 == 0 or d2 == 0
         if d1 > 0:
             d[i] = -d1
         elif d2 > 0:
@@ -51,10 +56,8 @@ def collision_time(player, segment, v):
         else:
             d[i] = 0
 
-        is_one_point_collision[i] = d1 == 0 or d2 == 0
 
-    t = [0, 0]
-    for i in range(2):
+    # for i in range(2):
         if d[i] == 0:
             continue
 
@@ -66,6 +69,10 @@ def collision_time(player, segment, v):
         if (t[i] < 0 or t[i] > 1):
             return None
 
+        if d1 < 0 and d2 < 0:
+            t[i] = -1
+
+
     for i in range(2):
         if segment.p1.args[i] == segment.p2.args[i]:
             if (t[i] < t[(i + 1) % 2] or d[(i + 1) % 2] == 0 and
@@ -73,6 +80,9 @@ def collision_time(player, segment, v):
                 return None
             else:
                 return Collision(t[i], Point(d), segment)
+        elif t[0] == t[1] == 0 and (abs(minp.args[i] - minsegp(i)) == 1 and abs(maxp.args[i] - maxsegp(i)) == 1):
+            return None
+
 
     return Collision(t[0], Point(d), segment)
 

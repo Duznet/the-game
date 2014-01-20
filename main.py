@@ -149,7 +149,7 @@ class GameApp(web.Application):
 
 
     def tick(self):
-        for game in models.game.all():
+        for game in models.game.filter(status="running").all():
             if games.games.get(game.id) is None:
                 game.clear()
 
