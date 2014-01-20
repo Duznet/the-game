@@ -493,6 +493,9 @@ describe 'Websocket API using server', ->
       tester.addUser gen.getUser(), game.id
       tester.defineTest ->
         @addCommand ->
+          gc.move 0, 0
+          @users[0].gc.move 0, 0
+        @addCommand ->
           gc.move 1, 0
           @users[0].gc.move -1, 0
         , end: 50
@@ -503,7 +506,7 @@ describe 'Websocket API using server', ->
               x: 4.5
               y: 2.5
 
-        , begin: 19
+        , begin: 19 + 1
 
         @addCommand ->
           @checkPlayer @data.players[0],
@@ -511,7 +514,7 @@ describe 'Websocket API using server', ->
               x: 0.5
               y: 2.5
 
-        , begin: 23
+        , begin: 23 + 1
 
         @addCommand ->
           @checkPlayer @data.players[0],
@@ -519,7 +522,7 @@ describe 'Websocket API using server', ->
               x: 9.5
               y: 4.5
 
-        , begin: 27
+        , begin: 27 + 1
 
         @addCommand ->
           @checkPlayer @data.players[1],
@@ -527,7 +530,7 @@ describe 'Websocket API using server', ->
               x: 13.5
               y: 2.5
 
-        , begin: 33
+        , begin: 33 + 1
 
 
         @addCommand ->
@@ -538,7 +541,7 @@ describe 'Websocket API using server', ->
 
           done()
 
-        , begin: 37
+        , begin: 37 + 1
 
   describe 'on hole map', ->
     initPos =
@@ -788,7 +791,7 @@ describe 'Websocket API using server', ->
             gc.move 0, 1
           , end: 65
           @addCommand ->
-            gc.fire 1, 0
+            gc.fire -1, 0
           @addCommand ->
             expect(@data.projectiles.length).to.be.equal 1
             @checkProjectile @data.projectiles[0]
@@ -820,6 +823,8 @@ describe 'Websocket API using server', ->
           , end: 35
           @addCommand ->
             gc.fire 0, 1
+          @addCommand ->
+            gc.move 0, 0
           @addCommand ->
             expect(@data.players[0].health).to.be.lessThan 100
             done()
