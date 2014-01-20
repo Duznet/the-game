@@ -6,6 +6,7 @@ window.config =
   websocketMode: "sync"
   debug:
     pushingViewsInfo: false
+    showRequests: true
   game:
     scale: 30
     showChat: false

@@ -20,7 +20,7 @@ class Psg.GameplayConnection extends Psg.Connection
 
     @ws.onmessage = (event) =>
       data = JSON.parse event.data
-      @tick = data.tick
+      @tick = data.tick if data.tick > @tick
       data.players = data.players.map (p) ->
         t = {}
         t.position = x: p[0], y: p[1]
