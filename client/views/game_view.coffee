@@ -99,6 +99,8 @@ class Psg.GameView extends Backbone.View
       if config.game.showCrosshair
         @crosshair.moveTo event.point
         @crosshair.saveOffset view.center
+      if @playerView?
+        @playerView.onMouseMove(event)
     onMouseDrag = (event) =>
       onMouseMove(event)
       @model.player.fire =
@@ -122,10 +124,11 @@ class Psg.GameView extends Backbone.View
         pView.eye.fillColor = if p.wounded then 'red' else 'yellow'
         if p.changedWeapon
           pView.changeWeapon p.weapon
-        if p.velocity.x * pView.sign < 0
-          pView.flip()
         if login is @login
+          @playerView = pView
           @playerPosition = pView.getPosition()
+        else if p.velocity.x * pView.sign < 0
+          pView.flip()
         if login is @login or config.showHealth
           pView.label.content = "#{login} (#{p.health})"
         if p.respawn > 0 then pView.hide() else pView.show()

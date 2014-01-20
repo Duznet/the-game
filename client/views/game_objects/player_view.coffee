@@ -16,6 +16,17 @@ class Psg.PlayerView extends Psg.ObjectView
     @shape.visible = true
     @label.visible = true
 
+  onMouseMove: (event) ->
+    if (event.point.x - @body.position.x) * @sign < 0
+      @flip()
+      @angle *= -1
+    dx = @sign * (event.point.x - @body.position.x)
+    dy = @sign * (event.point.y - @body.position.y)
+    angle = Math.atan2(dy, dx) / Math.PI * 180
+    @head.rotate (angle - @angle) / 3, @ribbon.position
+    @gun.shape.rotate (angle - @angle), @body.position
+    @angle = angle
+
   WEAPONS:
     K: Psg.KnifeView
     P: Psg.PistolView
@@ -34,6 +45,7 @@ class Psg.PlayerView extends Psg.ObjectView
     @shapeOffset = new Point
       x: (@shape.position.x - @body.position.x) * @sign
       y: (@shape.position.y - @body.position.y) * @sign
+    @gun.shape.rotate @angle, @body.position
 
   remove: ->
     super()
@@ -43,6 +55,7 @@ class Psg.PlayerView extends Psg.ObjectView
     @body = new Shape.Rectangle size: new Size(@scale, @scale)
     @body.strokeColor = 'black'
     @body.fillColor = model.color
+    @angle = 0
 
     @ribbon = new Shape.Rectangle(
       new Point(-0.1 * @body.size.width, 0.1 * @body.size.height),
