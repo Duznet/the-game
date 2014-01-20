@@ -139,7 +139,6 @@ class Psg.GameView extends Backbone.View
           y: view.center.y + @crosshair.offset.y
         @crosshair.shape.bringToFront()
       @stats.position = view.center
-      @stats.bringToFront()
 
       if @model.playersLeft
         @model.playersLeft = false
@@ -159,6 +158,7 @@ class Psg.GameView extends Backbone.View
         @animations = @projectiles.concat(@animations.filter (p) -> not p.finished)
         for respawn, index in @model.items
           @items[index].respawn = respawn
+      @stats.bringToFront()
 
 
     tool.attach 'mousedown', onMouseDown
