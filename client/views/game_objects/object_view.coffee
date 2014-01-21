@@ -7,12 +7,13 @@ class Psg.ObjectView
   moveTo: (newPosition) ->
     @shape.position = new Point
       x: newPosition.x + @sign * @shapeOffset.x
-      y: newPosition.y + @sign * @shapeOffset.y
+      y: newPosition.y + @shapeOffset.y
+
 
   getPosition: ->
     new Point
       x: @shape.position.x - @sign * @shapeOffset.x
-      y: @shape.position.y - @sign * @shapeOffset.y
+      y: @shape.position.y - @shapeOffset.y
 
   flip: ->
     @sign *= -1

@@ -7,6 +7,7 @@ class Psg.PlayerView extends Psg.ObjectView
   flip: ->
     @sign *= -1
     @shape.scale(-1, 1, @body.position)
+    @angle *= -1
 
   hide: ->
     @shape.visible = false
@@ -19,7 +20,6 @@ class Psg.PlayerView extends Psg.ObjectView
   onMouseMove: (event) ->
     if (event.point.x - @body.position.x) * @sign < 0
       @flip()
-      @angle *= -1
     dx = @sign * (event.point.x - @body.position.x)
     dy = @sign * (event.point.y - @body.position.y)
     angle = Math.atan2(dy, dx) / Math.PI * 180
@@ -46,7 +46,7 @@ class Psg.PlayerView extends Psg.ObjectView
     @shape.addChild(@gun.shape)
     @shapeOffset = new Point
       x: (@shape.position.x - @body.position.x) * @sign
-      y: (@shape.position.y - @body.position.y) * @sign
+      y: (@shape.position.y - @body.position.y)
     @gun.shape.rotate @angle, @body.position
 
   remove: ->
