@@ -238,6 +238,7 @@ class Game:
     def update_players(self):
         for player in self.players_.values():
             player.got_action = False
+            player.angle = -1
 
 
     def get_item_collisions(self, player, v):
@@ -352,8 +353,17 @@ class Game:
         return filter(Player.is_alive, self.players_.values())
         # return [player for player in self.players_.values() if player.is_]
 
+    def angle(dx, dy):
+        res = atan2(dy, dx)
+        if res < 0:
+            res += 2 * pi
+
+        res *= 180 / pi
+
     def fire(self, id, dx, dy):
         player = self.players_[id]
+        player.angle = angle(dx, dy)
+
         if player.is_dead():
             return player
         # player.respawn = 0
