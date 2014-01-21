@@ -1,6 +1,7 @@
 from engine.geometry import *
 from engine.event import *
 from engine.constants import *
+from math import *
 
 import re
 def cell_coords(point):
@@ -14,6 +15,15 @@ def dist(first, second):
 
 def sign(x):
     return 0 if x == 0 else x / abs(x)
+
+def angle(dx, dy):
+        res = atan2(dy, dx)
+        if res < 0:
+            res += 2 * pi
+
+        res *= 180 / pi
+
+        return res
 
 def normalize_map(map, wall):
     if not map or not map[0]:
