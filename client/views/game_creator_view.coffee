@@ -24,6 +24,8 @@ class Psg.GameCreatorView extends Backbone.View
         @writeStatus 'error', 'Invalid map players number'
       when 'mapExists'
         @writeStatus 'error', 'Map with this name already exists'
+      when 'alreadyInGame'
+        @writeStatus 'error', 'You must leave game you are currently in before creating new games'
 
   onInvalid: (model, errors) ->
     console.log errors

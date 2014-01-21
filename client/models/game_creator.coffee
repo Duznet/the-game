@@ -24,8 +24,8 @@ class Psg.GameCreator extends Backbone.Model
   create: ->
     @conn.createGame(
       name: @get('name')
-      maxPlayers: @get('maxPlayers')
-      map: @get('map')
+      maxPlayers: parseInt @get('maxPlayers')
+      map: parseInt @get('map')
     ).then (data) =>
       if data.result is 'ok'
         console.log 'game created'

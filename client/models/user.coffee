@@ -41,6 +41,7 @@ class Psg.User extends Backbone.Model
       @trigger 'enteredGame', @game.id
 
   joinGame: (gameId) ->
+    gameId = parseInt gameId
     @conn.getGames().then (data) =>
       console.log 'checking if user is playing this game'
       game = @findCurGame(data.games)

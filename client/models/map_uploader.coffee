@@ -25,7 +25,7 @@ class Psg.MapUploader extends Backbone.Model
   upload: ->
     @conn.uploadMap(
       name: @get('name')
-      maxPlayers: @get('maxPlayers')
+      maxPlayers: parseInt @get('maxPlayers')
       map: @get('mapData')
     ).then (data) =>
       if data.result is 'ok'
