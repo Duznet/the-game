@@ -369,7 +369,12 @@ class Game:
 
         # player.ammo[player.weapon] -= 1
 
-        self.projectiles.append(Projectile(player, player.point, dir * PROJV[player.weapon], player.weapon))
+        self.projectiles.append(
+            Projectile(
+                player,
+                player.point,
+                dir * PROJV[player.weapon] + (player.velocity if player.weapon == KNIFE else Point(0,0)),
+                player.weapon))
         return player
 
 

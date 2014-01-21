@@ -1,10 +1,12 @@
 window.config =
   # gameUrl: "http://46.37.142.252:3000/"
   # gameplayUrl: "ws://46.37.142.252:8001/"
-  # gameUrl: "http://localhost:5000"
-  # gameplayUrl: "ws://localhost:5000/websocket"
-  gameUrl: "http://localhost:3000"
-  gameplayUrl: "ws://localhost:8001"
+  gameUrl: "http://localhost:5000"
+  gameplayUrl: "ws://localhost:5000/websocket"
+  # gameUrl: "http://localhost:5001"
+  # gameplayUrl: "ws://localhost:5001/websocket"
+  # gameUrl: "http://localhost:3000"
+  # gameplayUrl: "ws://localhost:8001"
   websocketMode: "sync"
   debug:
     pushingViewsInfo: false

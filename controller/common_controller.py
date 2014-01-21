@@ -21,4 +21,4 @@ class CommonController(BasicController):
         return jsonify(result="ok")
 
     def get_game_consts(self):
-        return jsonify(tickSize=30, accuracy=1e-6, accel=0.02, maxVelocity=0.4, gravity=0.02, friction=0.02)
+        return jsonify(result="ok", tickSize=30, accuracy=1e-6, accel=0.02, maxVelocity=0.4, gravity=0.02, friction=0.02)
