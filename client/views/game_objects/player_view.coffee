@@ -17,15 +17,30 @@ class Psg.PlayerView extends Psg.ObjectView
     @shape.visible = true
     @label.visible = true
 
+  rotateTo: (angle) ->
+    @head.rotate (angle - @angle) / 3, @ribbon.position
+    @gun.shape.rotate (angle - @angle), @body.position
+    @angle = angle
+
+  importWeaponAngle: (angle) ->
+    return if angle < 0
+    sign = 1
+    if angle >= 270
+      angle -= 360
+    if 90 <= angle < 270
+      angle -= 180
+      sign = -1
+    if @sign isnt sign
+      @flip()
+    @rotateTo angle
+
   onMouseMove: (event) ->
     if (event.point.x - @body.position.x) * @sign < 0
       @flip()
     dx = @sign * (event.point.x - @body.position.x)
     dy = @sign * (event.point.y - @body.position.y)
     angle = Math.atan2(dy, dx) / Math.PI * 180
-    @head.rotate (angle - @angle) / 3, @ribbon.position
-    @gun.shape.rotate (angle - @angle), @body.position
-    @angle = angle
+    @rotateTo angle
 
   WEAPONS:
     K: Psg.KnifeView

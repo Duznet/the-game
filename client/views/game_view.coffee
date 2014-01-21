@@ -127,8 +127,9 @@ class Psg.GameView extends Backbone.View
         if login is @login
           @playerView = pView
           @playerPosition = pView.getPosition()
-        else if p.velocity.x * pView.sign < 0
-          pView.flip()
+        else
+          if p.weaponAngle > -1
+            pView.importWeaponAngle p.weaponAngle
         if login is @login or config.showHealth
           pView.label.content = "#{login} (#{p.health})"
         if p.respawn > 0 then pView.hide() else pView.show()
