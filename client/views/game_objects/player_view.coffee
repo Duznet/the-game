@@ -35,8 +35,10 @@ class Psg.PlayerView extends Psg.ObjectView
     A: Psg.RailGunView
 
   changeWeapon: (newWeapon) ->
+    @weapon = newWeapon
     @shape.removeChildren(3)
-    @gun.remove()
+    if @gun?
+      @gun.remove()
     @gun = new @WEAPONS[newWeapon]
       position: @body.position
       onBody: true
@@ -82,19 +84,12 @@ class Psg.PlayerView extends Psg.ObjectView
     @label.justification = 'center'
     @label.content = model.login
 
-    console.log 'weapons: ', @WEAPONS
-    @gun = new @WEAPONS[model.weapon]
-      position: @body.position
-      onBody: true
-
     @wound = new Shape.Circle(@body.position, 0.8 * @scale)
     @wound.style =
       strokeColor: 'red'
       strokeWidth: 2
     @wound.visible = false
 
-    @shape = new Group(@body, @head, @wound, @gun.shape)
-    @shapeOffset = new Point
-      x: @shape.position.x - @body.position.x
-      y: @shape.position.y - @body.position.y
+    @shape = new Group(@body, @head, @wound)
     @importPosition model
+    @changeWeapon model.weapon

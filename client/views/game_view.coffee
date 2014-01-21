@@ -122,7 +122,7 @@ class Psg.GameView extends Backbone.View
           y: p.position.y * @scale
         pView.wound.visible = p.wounded
         pView.eye.fillColor = if p.wounded then 'red' else 'yellow'
-        if p.changedWeapon
+        if p.weapon isnt pView.weapon
           pView.changeWeapon p.weapon
         if login is @login
           @playerView = pView
