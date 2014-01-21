@@ -53,7 +53,9 @@ class MainWSHandler(websocket.WebSocketHandler):
 
     def tick(self):
         if self.controller:
-            self.write_message(self.controller.tick())
+            msg = self.controller.tick()
+            # print(msg)
+            self.write_message(msg)
 
     def on_message(self, message):
         # try:
@@ -149,6 +151,7 @@ class GameApp(web.Application):
 
 
     def tick(self):
+        # print("active connections: ", len(self.websockets))
         for game in models.game.filter(status="running").all():
             if games.games.get(game.id) is None:
                 game.clear()
