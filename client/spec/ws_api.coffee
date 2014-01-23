@@ -386,9 +386,9 @@ describe 'Websocket API using server', ->
           position: initPos
 
         @addCommand ->
-          gc.move 0, -1
           for user in @users
             user.gc.move 0, 0
+          gc.move 0, -1
         @addCommand ->
           gc.move 1, 0
           for user in @users
@@ -451,9 +451,9 @@ describe 'Websocket API using server', ->
             x: 0.5
             y: 4.5
         @addCommand ->
-          gc.move 0, 0
           for user in @users
             user.gc.move 0, 0
+          gc.move 0, 0
         , end: 3
 
         @addCommand ->
@@ -471,8 +471,11 @@ describe 'Websocket API using server', ->
       tester.addUser gen.getUser(), game.id
       tester.defineTest ->
         @addCommand ->
-          gc.move 1, 0
+          @users[0].gc.move 0, 0
+          gc.move 0, 0
+        @addCommand ->
           @users[0].gc.move -1, 0
+          gc.move 1, 0
         , end: 20
 
         @addCommand ->
@@ -493,8 +496,8 @@ describe 'Websocket API using server', ->
       tester.addUser gen.getUser(), game.id
       tester.defineTest ->
         @addCommand ->
-          gc.move 0, 0
           @users[0].gc.move 0, 0
+          gc.move 0, 0
         @addCommand ->
           gc.move 1, 0
           @users[0].gc.move -1, 0
@@ -556,8 +559,8 @@ describe 'Websocket API using server', ->
 
       tester.defineTest ->
         @addCommand ->
-          gc.move 0, 0
           @users[0].gc.move 0, 0
+          gc.move 0, 0
         @addCommand ->
           gc.move 0, -1
           @users[0].gc.move -1, -1
@@ -614,9 +617,9 @@ describe 'Websocket API using server', ->
 
       tester.defineTest ->
         @addCommand ->
-          gc.move 0, 0
           for u in @users
             u.gc.move 0, 0
+          gc.move 0, 0
         @addCommand ->
           for p, i in @data.players
             @checkPlayer p, position: expectedPositions[i]
