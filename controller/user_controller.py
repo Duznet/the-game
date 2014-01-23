@@ -39,7 +39,8 @@ class UserController(BasicController):
 
     def signout(self):
         user = self._user_by_sid()
-        self.leave_game()
+        if user.game:
+            self.leave_game()
         user.signout()
         return jsonify(result="ok")
 

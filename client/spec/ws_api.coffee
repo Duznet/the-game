@@ -476,11 +476,11 @@ describe 'Websocket API using server', ->
         @addCommand ->
           @users[0].gc.move -1, 0
           gc.move 1, 0
-        , end: 20
+        , end: 21
 
         @addCommand ->
           @v = @data.players[0].velocity
-        , begin: 18
+        , begin: 19
 
         @addCommand ->
           expect(@data.players[0].velocity.x).to.be.greaterThan @v.x
@@ -490,7 +490,7 @@ describe 'Websocket API using server', ->
               y: 2.5
 
           done()
-        , begin: 19
+        , begin: 20
 
     it 'should pass all teleports', (done) ->
       tester.addUser gen.getUser(), game.id

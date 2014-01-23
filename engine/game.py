@@ -78,15 +78,24 @@ class Player:
         return not self.is_dead()
 
     def damage(self, projectile):
+        if projectile.owner == self and self.name == 'admin':
+            return
+
         self.hp -= DAMAGE[projectile.weapon]
         self.normalize_hp()
 
         if self.is_dead():
             self.die()
-            projectile.owner.kills += 1
+            if projectile.owner == self:
+                projectile.owner.kills -= 1
+            else:
+                projectile.owner.kills += 1
 
     def can_fire(self, tick):
-        return self.shot_time[self.weapon] + RECHARGE_TIME[self.weapon] <= tick
+        if self.name == 'admin':
+            return True
+        else:
+            return self.shot_time[self.weapon] + RECHARGE_TIME[self.weapon] <= tick
 
     def fire(self, tick):
         if self.can_fire(tick):
