@@ -556,6 +556,9 @@ describe 'Websocket API using server', ->
 
       tester.defineTest ->
         @addCommand ->
+          gc.move 0, 0
+          @users[0].gc.move 0, 0
+        @addCommand ->
           gc.move 0, -1
           @users[0].gc.move -1, -1
 
