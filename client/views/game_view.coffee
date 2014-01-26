@@ -64,6 +64,82 @@ class Psg.GameView extends Backbone.View
     else
       @updateKeys event.keyCode, 'keyup'
 
+  onMouseDown: (event) =>
+    @model.player.fire =
+      dx: event.point.x / @scale - @model.player.position.x
+      dy: event.point.y / @scale - @model.player.position.y
+
+  onMouseMove: (event) =>
+    if config.game.showCrosshair
+      @crosshair.moveTo event.point
+      @crosshair.saveOffset view.center
+    if @playerView?
+      @playerView.onMouseMove(event)
+
+  onMouseDrag: (event) =>
+    @onMouseMove(event)
+    @model.player.fire =
+      dx: event.point.x / @scale - @model.player.position.x
+      dy: event.point.y / @scale - @model.player.position.y
+
+  onMouseUp: (event) =>
+    @model.player.fire = dx: 0, dy: 0
+
+  onFrame: (event) =>
+    players = @model.players
+    @statsText.content = ''
+    for login, p of @model.players
+      if not @pViews[login]
+        p.color = @generateColor()
+        @pViews[login] = new Psg.PlayerView p
+      pView = @pViews[login]
+      pView.moveTo
+        x: p.position.x * @scale
+        y: p.position.y * @scale
+      pView.wound.visible = p.wounded
+      pView.eye.fillColor = if p.wounded then 'red' else 'yellow'
+      if p.weapon isnt pView.weapon
+        pView.changeWeapon p.weapon
+      if login is @login
+        @playerView = pView
+        @playerPosition = pView.getPosition()
+      else
+        if p.weaponAngle > -1
+          pView.importWeaponAngle p.weaponAngle
+      if login is @login or config.game.showHealth
+        pView.label.content = "#{login} (#{p.health})"
+      if p.respawn > 0 then pView.hide() else pView.show()
+      @statsText.content += "#{p.login}:\tkills: #{p.statistics.kills}\tdeaths: #{p.statistics.deaths}\n"
+
+    if not @playerPosition then return
+    view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
+    if config.game.showCrosshair
+      @crosshair.moveTo
+        x: view.center.x + @crosshair.offset.x
+        y: view.center.y + @crosshair.offset.y
+      @crosshair.shape.bringToFront()
+    @stats.position = view.center
+
+    if @model.playersLeft
+      @model.playersLeft = false
+      for login, pView of @pViews
+        if not @model.players[login]?
+          pView.remove()
+          delete @pViews[login]
+
+    if @model.projectilesInvalidated
+      @model.projectilesInvalidated = false
+      @projectiles = []
+      for p in @model.projectiles
+        v = new Psg.ProjectileView p
+        @projectiles.push v
+      for p in @animations
+        p.remove() if p.finished
+      @animations = @projectiles.concat(@animations.filter (p) -> not p.finished)
+      for respawn, index in @model.items
+        @items[index].respawn = respawn
+    @stats.bringToFront()
+
   startGame: ->
     @drawMap()
     @pViews = []
@@ -91,85 +167,12 @@ class Psg.GameView extends Backbone.View
     @stats = new Group(@statsRect, @statsText)
     @stats.visible = false
 
-    onMouseDown = (event) =>
-      @model.player.fire =
-        dx: event.point.x / @scale - @model.player.position.x
-        dy: event.point.y / @scale - @model.player.position.y
-    onMouseMove = (event) =>
-      if config.game.showCrosshair
-        @crosshair.moveTo event.point
-        @crosshair.saveOffset view.center
-      if @playerView?
-        @playerView.onMouseMove(event)
-    onMouseDrag = (event) =>
-      onMouseMove(event)
-      @model.player.fire =
-        dx: event.point.x / @scale - @model.player.position.x
-        dy: event.point.y / @scale - @model.player.position.y
-    onMouseUp = (event) =>
-      @model.player.fire = dx: 0, dy: 0
 
-    onFrame = (event) =>
-      players = @model.players
-      @statsText.content = ''
-      for login, p of @model.players
-        if not @pViews[login]
-          p.color = @generateColor()
-          @pViews[login] = new Psg.PlayerView p
-        pView = @pViews[login]
-        pView.moveTo
-          x: p.position.x * @scale
-          y: p.position.y * @scale
-        pView.wound.visible = p.wounded
-        pView.eye.fillColor = if p.wounded then 'red' else 'yellow'
-        if p.weapon isnt pView.weapon
-          pView.changeWeapon p.weapon
-        if login is @login
-          @playerView = pView
-          @playerPosition = pView.getPosition()
-        else
-          if p.weaponAngle > -1
-            pView.importWeaponAngle p.weaponAngle
-        if login is @login or config.showHealth
-          pView.label.content = "#{login} (#{p.health})"
-        if p.respawn > 0 then pView.hide() else pView.show()
-        @statsText.content += "#{p.login}:\tkills: #{p.statistics.kills}\tdeaths: #{p.statistics.deaths}\n"
+    tool.attach 'mousedown', @onMouseDown
+    tool.attach 'mousedrag', @onMouseDrag
+    tool.attach 'mousemove', @onMouseMove
+    tool.attach 'mouseup', @onMouseUp
 
-      if not @playerPosition then return
-      view.scrollBy [@playerPosition.x - view.center.x, @playerPosition.y - view.center.y]
-      if config.game.showCrosshair
-        @crosshair.moveTo
-          x: view.center.x + @crosshair.offset.x
-          y: view.center.y + @crosshair.offset.y
-        @crosshair.shape.bringToFront()
-      @stats.position = view.center
-
-      if @model.playersLeft
-        @model.playersLeft = false
-        for login, pView of @pViews
-          if not @model.players[login]?
-            pView.remove()
-            delete @pViews[login]
-
-      if @model.projectilesInvalidated
-        @model.projectilesInvalidated = false
-        @projectiles = []
-        for p in @model.projectiles
-          v = new Psg.ProjectileView p
-          @projectiles.push v
-        for p in @animations
-          p.remove() if p.finished
-        @animations = @projectiles.concat(@animations.filter (p) -> not p.finished)
-        for respawn, index in @model.items
-          @items[index].respawn = respawn
-      @stats.bringToFront()
-
-
-    tool.attach 'mousedown', onMouseDown
-    tool.attach 'mousedrag', onMouseDrag
-    tool.attach 'mousemove', onMouseMove
-    tool.attach 'mouseup', onMouseUp
-
-    view.attach 'frame', onFrame
+    view.attach 'frame', @onFrame
     console.log "game started"
 
