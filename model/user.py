@@ -55,8 +55,8 @@ class User(odm.StdModel):
         except:
             raise BadGame()
 
-        # if not game:
-        #     raise BadGame()
+        if not game:
+            raise BadGame()
 
         if self.game:
             raise AlreadyInGame()
