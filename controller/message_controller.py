@@ -12,7 +12,7 @@ class MessageController(BasicController):
     def get_messages(self):
         self.user
         game = str(self.json.get('game', ""))
-        all_messages = self.messages.filter(game = self.user.game) if game else self.messages.all()
+        all_messages = self.messages.filter(game = self.user.game) if game else self.messages.filter(game = None)
         if str(self.json['game']):
             try:
                 game_id = int(game)
