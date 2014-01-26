@@ -1,5 +1,5 @@
 from controller.basic_controller import BasicController
-from game_exception import BadMapName, BadMaxPlayers
+from game_exception import BadMapName, BadMaxPlayers, MapExists
 from stdnet import odm
 from stdnet.utils.exceptions import CommitException
 from common import jsonify
@@ -29,7 +29,7 @@ class MapController(BasicController):
                 map = list(self.json['map']),
                 max_players = int(str(self.json['maxPlayers'])))
         except CommitException:
-            raise BadMapName()
+            raise MapExists()
         except ValueError:
             raise BadMaxPlayers()
         return jsonify(result="ok")

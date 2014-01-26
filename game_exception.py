@@ -113,17 +113,23 @@ class BadAction(GameException):
 
 
 class BadName(GameException):
-    """Name is uncorrect"""
+    """Name is incorrect"""
 
     def msg(self):
         return jsonify(result="badName")
 
 
 class BadMap(GameException):
-    """Map data is uncorrect"""
+    """Map data is incorrect"""
 
     def msg(self):
         return jsonify(result="badMap")
+
+class MapExists(GameException):
+    """Map already exists"""
+
+    def msg(self):
+        return jsonify(result="mapExists")
 
 class BadJSON(GameException):
     """JSON object is incorrect"""
