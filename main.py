@@ -58,19 +58,19 @@ class MainWSHandler(websocket.WebSocketHandler):
             self.write_message(msg)
 
     def on_message(self, message):
-        # try:
-        print(message)
-        data = json.loads(message)
-        self.controller = self.controller if self.controller else GameplayController(data['params'], models, games)
-        self.controller.json = data['params']
+        try:
+            print(message)
+            data = json.loads(message)
+            self.controller = self.controller if self.controller else GameplayController(data['params'], models, games)
+            self.controller.json = data['params']
 
-        self.controller.join_game()
+            self.controller.join_game()
 
-        action = camel_to_underscores(str(data['action']))
-        getattr(self.controller, action)()
-        # except (KeyError, ValueError):
-            # self.write_message(BadAction().msg())
-            # return
+            action = camel_to_underscores(str(data['action']))
+            getattr(self.controller, action)()
+        except (KeyError, ValueError):
+            self.write_message(BadAction().msg())
+            return
 
     def on_close(self, message=None):
         print("closed")
@@ -105,15 +105,15 @@ class MainHandler(web.RequestHandler):
             self.write(BadJSON().msg())
             return
 
-        # try:
-        action = camel_to_underscores(str(data['action']))
-        response = self.processer.process_action(action, data.get("params", {}))
-        print(response)
-        self.write(response)
-        # except (KeyError, TypeError):
-        #     self.write(BadRequest().msg())
-        #     print("badRequest")
-        #     return
+        try:
+            action = camel_to_underscores(str(data['action']))
+            response = self.processer.process_action(action, data.get("params", {}))
+            print(response)
+            self.write(response)
+        except (KeyError, TypeError):
+            self.write(BadRequest().msg())
+            print("badRequest")
+            return
 
 class DemoHandler(web.RequestHandler):
 
