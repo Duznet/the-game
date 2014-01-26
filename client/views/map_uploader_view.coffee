@@ -51,10 +51,12 @@ class Psg.MapUploaderView extends Backbone.View
 
   submit: (e) ->
     e.preventDefault()
+    $mapData = $('#input-map-data')
+    $mapData.val($mapData.val().trim())
     data = {}
     data.name = $('#input-name').val()
     data.maxPlayers = $('#input-max-players').val()
-    data.mapData = $('#input-map-data').val().split('\n')
+    data.mapData = $mapData.val().split('\n')
     console.log 'data: ', data
     @model.set data, validate: true
     @model.upload()
