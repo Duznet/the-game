@@ -42,19 +42,12 @@ class Psg.PlayerView extends Psg.ObjectView
     angle = Math.atan2(dy, dx) / Math.PI * 180
     @rotateTo angle
 
-  WEAPONS:
-    K: Psg.KnifeView
-    P: Psg.PistolView
-    M: Psg.MachineGunView
-    R: Psg.RocketLauncherView
-    A: Psg.RailGunView
-
   changeWeapon: (newWeapon) ->
     @weapon = newWeapon
     @shape.removeChildren(3)
     if @gun?
       @gun.remove()
-    @gun = new @WEAPONS[newWeapon]
+    @gun = new Psg.WEAPONS[newWeapon]
       position: @body.position
       onBody: true
     @gun.shape.scale(-1, 1, @body.position) if @sign < 0

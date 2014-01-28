@@ -177,3 +177,9 @@ class Psg.RailGunView extends Psg.WeaponView
     if model.position
       @moveTo model.position
 
+Psg.WEAPONS =
+    K: Psg.KnifeView
+    P: Psg.PistolView
+    M: Psg.MachineGunView
+    R: Psg.RocketLauncherView
+    A: Psg.RailGunView
