@@ -131,7 +131,7 @@ class Psg.GameView extends Backbone.View
       @model.projectilesInvalidated = false
       @projectiles = []
       for p in @model.projectiles
-        v = new Psg.ProjectileView p
+        v = new Psg.PROJECTILES[p.weapon] p
         @projectiles.push v
       for p in @animations
         p.remove() if p.finished
