@@ -48,7 +48,7 @@ class Psg.PlayerView extends Psg.ObjectView
     if @gun?
       @gun.remove()
     @gun = new Psg.WEAPONS[newWeapon]
-      position: @body.position
+      position: x: @body.position.x / @scale, y: @body.position.y / @scale
       onBody: true
     @gun.shape.scale(-1, 1, @body.position) if @sign < 0
     @shape.addChild(@gun.shape)

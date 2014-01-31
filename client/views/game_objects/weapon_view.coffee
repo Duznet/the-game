@@ -1,11 +1,24 @@
 class Psg.WeaponView extends Psg.ObjectView
 
-  constructor: (model) ->
+  unscaledOffset:
+    x: 0
+    y: 0
 
+  constructor: (model) ->
+    @initialize model
+    if model.onBody
+      @shapeOffset =
+        x: @unscaledOffset.x * @scale
+        y: @unscaledOffset.y * @scale
+    @importPosition model
 
 class Psg.KnifeView extends Psg.WeaponView
 
-  constructor: (model) ->
+  unscaledOffset:
+    x: 0.5
+    y: 0.05
+
+  initialize: (model) ->
     @barrel = new Shape.Rectangle
       size:
         x: 0.6 * @scale
@@ -22,15 +35,15 @@ class Psg.KnifeView extends Psg.WeaponView
     @line2.strokeColor = '#89e'
 
     @shape = new Group @barrel, @line1, @line2
-    if model.onBody
-      @shapeOffset =
-        x: 0.5 * @scale
-        y: 0.05 * @scale
-      @moveTo model.position
+
 
 class Psg.PistolView extends Psg.WeaponView
 
-  constructor: (model) ->
+  unscaledOffset:
+    x: 0.55
+    y: 0.15
+
+  initialize: (model) ->
     @barrel = new Shape.Rectangle
       size:
         x: 0.6 * @scale
@@ -58,20 +71,15 @@ class Psg.PistolView extends Psg.WeaponView
     @grip.rotate(100)
 
     @shape = new Group @barrel, @grip, @n
-    if model.onBody
-      @shapeOffset =
-        x: 0.55 * @scale
-        y: 0.15 * @scale
-    else
-      @shape.onFrame = =>
-        @shape.visible = @respawn <= 0
-    if model.position
-      @moveTo model.position
 
 
 class Psg.MachineGunView extends Psg.WeaponView
 
-  constructor: (model) ->
+  unscaledOffset:
+    x: 0.55
+    y: 0.15
+
+  initialize: (model) ->
     @barrel = new Shape.Rectangle(
       size: new Size(@scale, 0.16 * @scale)
     )
@@ -94,20 +102,15 @@ class Psg.MachineGunView extends Psg.WeaponView
     @grip2.rotate(45)
 
     @shape = new Group @barrel, @grip, @grip2
-    if model.onBody
-      @shapeOffset =
-        x: 0.55 * @scale
-        y: 0.15 * @scale
-    else
-      @shape.onFrame = =>
-        @shape.visible = @respawn <= 0
-    if model.position
-      @moveTo model.position
 
 
 class Psg.RocketLauncherView extends Psg.WeaponView
 
-  constructor: (model) ->
+  unscaledOffset:
+    x: 0.5
+    y: 0.12
+
+  initialize: (model) ->
     @barrel = new Shape.Rectangle(
       size: new Size(1.4 * @scale, 0.24 * @scale)
     )
@@ -128,20 +131,15 @@ class Psg.RocketLauncherView extends Psg.WeaponView
     @line.strokeColor = 'red'
 
     @shape = new Group @barrel, @grip, @line
-    if model.onBody
-      @shapeOffset =
-        x: 0.5 * @scale
-        y: 0.12 * @scale
-    else
-      @shape.onFrame = =>
-        @shape.visible = @respawn <= 0
-    if model.position
-      @moveTo model.position
 
 
 class Psg.RailGunView extends Psg.WeaponView
 
-  constructor: (model) ->
+  unscaledOffset:
+    x: 0.55
+    y: 0.15
+
+  initialize: (model) ->
     @barrel = new Shape.Rectangle(
       size: new Size(1.2 * @scale, 0.16 * @scale)
     )
@@ -167,15 +165,7 @@ class Psg.RailGunView extends Psg.WeaponView
       fillColor: '#57b'
 
     @shape = new Group @barrel, @grip, @s, @n
-    if model.onBody
-      @shapeOffset =
-        x: 0.55 * @scale
-        y: 0.15 * @scale
-    else
-      @shape.onFrame = =>
-        @shape.visible = @respawn <= 0
-    if model.position
-      @moveTo model.position
+
 
 Psg.WEAPONS =
     K: Psg.KnifeView
