@@ -156,6 +156,8 @@ class Psg.RailGunProjectileView extends Psg.ProjectileView
         y: (model.position.y + model.velocity.y) * @scale
       )
     )
+    if @shape.length > 1.2 * @scale
+      @shape = @shape.split(1.2 * @scale)
     @shape.strokeColor = 'blue'
     @shape.strokeWidth = 0.1 * @scale
     @shape.strokeCap = 'round'
