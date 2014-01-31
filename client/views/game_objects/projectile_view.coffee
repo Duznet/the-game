@@ -19,7 +19,6 @@ class Psg.ProjectileView extends Psg.ObjectView
     if model.velocity.x is 0 and model.velocity.y is 0
       @initExplosion model
       if @explosionFrame?
-        console.log 'explosionFrame'
         @shape.onFrame = @explosionFrame
     else
       if model.lifeTime < @minLifeTime
@@ -27,7 +26,6 @@ class Psg.ProjectileView extends Psg.ObjectView
         return
       @initFly model
       if @flyFrame?
-        console.log 'flyFrame'
         @shape.onFrame = @flyFrame
     if @shape? and @needsImportPosition
       @importPosition model
@@ -80,13 +78,26 @@ class Psg.MachineGunProjectileView extends Psg.BulletView
 
 class Psg.RocketLauncherProjectileView extends Psg.ProjectileView
 
+  minLifeTime: 3
+
   initFly: (model) ->
-    @shape = new Path.Circle
+    @body = new Path.Ellipse
       center: [0, 0]
-      radius: 0.2 * @scale
+      size: [0.5 * @scale, 0.3 * @scale]
       strokeColor: 'black'
+      fillColor: 'grey'
+    @expBack = new Path.Star
+      center: [@body.bounds.left, @body.position.y]
+      radius1: 0.1 * @scale
+      radius2: 0.3 * @scale
+      points: 2 + Math.round 6 * Math.random()
       fillColor: 'red'
+      strokeColor: 'yellow'
+    @shape = new Group @expBack, @body
     @rotate model.velocity
+    @shapeOffset =
+      x: @shape.position.x - @body.position.x
+      y: @shape.position.y - @body.position.y
 
   explosionFrame: =>
     if @count < 5
