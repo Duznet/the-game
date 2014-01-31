@@ -2,7 +2,12 @@ class Psg.ProjectileView extends Psg.ObjectView
 
   finished: true
 
+  minLifeTime: 1
+
   needsImportPosition: true
+
+  rotate: (velocity) ->
+    @shape.rotate Math.atan2(velocity.y, velocity.x) / Math.PI * 180
 
   initFly: (model) ->
     @shape = null
@@ -17,6 +22,9 @@ class Psg.ProjectileView extends Psg.ObjectView
         console.log 'explosionFrame'
         @shape.onFrame = @explosionFrame
     else
+      if model.lifeTime < @minLifeTime
+        @shape = null
+        return
       @initFly model
       if @flyFrame?
         console.log 'flyFrame'
@@ -38,24 +46,36 @@ class Psg.KnifeProjectileView extends Psg.ProjectileView
     @shape.rotate(Math.round(360 * Math.random()))
 
 
-class Psg.PistolProjectileView extends Psg.ProjectileView
+class Psg.BulletView extends Psg.ProjectileView
 
   initFly: (model) ->
-    @shape = new Path.Circle
+    @back = new Path.Star
+      center: [-0.2 * @scale, 0]
+      radius1: 0.3 * @scale
+      radius2: 0.2 * @scale
+      points: 3 + Math.round 3 * Math.random()
+      fillColor: 'grey'
+    @back.fillColor.alpha = 0.3
+    @back.scale(1, 0.6)
+    @back.smooth()
+    @front = new Path.Circle
       center: [0, 0]
-      radius: 0.1 * @scale
+      radius: 0.2 * @scale
       strokeColor: 'black'
       fillColor: 'black'
+    @front.removeSegments 0, 1
+    @front.scale 1, 0.4
+    @front.flatten(0.1 * @scale)
+    @shape = new Group(@back, @front)
+    @rotate model.velocity
 
 
-class Psg.MachineGunProjectileView extends Psg.ProjectileView
+class Psg.PistolProjectileView extends Psg.BulletView
 
-  initFly: (model) ->
-    @shape = new Path.Circle
-      center: [0, 0]
-      radius: 0.1 * @scale
-      strokeColor: 'black'
-      fillColor: 'black'
+
+class Psg.MachineGunProjectileView extends Psg.BulletView
+
+  minLifeTime: 2
 
 
 class Psg.RocketLauncherProjectileView extends Psg.ProjectileView
@@ -66,6 +86,7 @@ class Psg.RocketLauncherProjectileView extends Psg.ProjectileView
       radius: 0.2 * @scale
       strokeColor: 'black'
       fillColor: 'red'
+    @rotate model.velocity
 
   explosionFrame: =>
     if @count < 5
