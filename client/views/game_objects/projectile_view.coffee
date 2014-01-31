@@ -84,19 +84,27 @@ class Psg.RocketLauncherProjectileView extends Psg.ProjectileView
   minLifeTime: 3
 
   initFly: (model) ->
-    @body = new Path.Ellipse
-      center: [0, 0]
-      size: [0.5 * @scale, 0.3 * @scale]
+    @body = new Path
+      segments: [[0, 0], [0.4 * @scale, 0], [0.6 * @scale, 0.1 * @scale],
+                  [0.4 * @scale, 0.2 * @scale], [0, 0.2 * @scale]]
+      closed: true
+      fillColor: 'black'
       strokeColor: 'black'
-      fillColor: 'grey'
-    @expBack = new Path.Star
+    @flame = new Path.Star
       center: [@body.bounds.left, @body.position.y]
-      radius1: 0.1 * @scale
-      radius2: 0.3 * @scale
-      points: 2 + Math.round 6 * Math.random()
+      radius1: 0.2 * @scale
+      radius2: 0.4 * @scale
+      points: 2 + Math.round 4 * Math.random()
       fillColor: 'red'
       strokeColor: 'yellow'
-    @shape = new Group @expBack, @body
+    @smoke = new Path.Star
+      center: [@body.bounds.left - 0.2 * @scale, @body.position.y]
+      radius1: 0.2 * @scale + 0.2 * @scale * Math.random()
+      radius2: 0.4 * @scale
+      points: 2 + Math.round 6 * Math.random()
+      fillColor: 'grey'
+    @smoke.fillColor.alpha = 0.4
+    @shape = new Group @flame, @body, @smoke
     @rotate model.velocity
     @shapeOffset =
       x: @shape.position.x - @body.position.x
