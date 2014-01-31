@@ -66,6 +66,9 @@ class Psg.BulletView extends Psg.ProjectileView
     @front.flatten(0.1 * @scale)
     @shape = new Group(@back, @front)
     @rotate model.velocity
+    @shapeOffset =
+      x: @shape.position.x - @front.position.x
+      y: @shape.position.y - @front.position.y
 
 
 class Psg.PistolProjectileView extends Psg.BulletView
