@@ -9,32 +9,16 @@ class Psg.Game extends Backbone.Model
       p.status = 'offline'
     @projectiles = []
 
-  updatePlayerData: (data) ->
-    t = {}
-    t.position = x: data[0], y: data[1]
-    t.velocity = x: data[2], y: data[3]
-    t.weapon = data[4]
-    t.weaponAngle = data[5]
-    t.login = data[6]
-    t.health = data[7]
-    t.respawn = data[8]
-    t.status = if t.respawn is 0 then 'alive' else 'dead'
-    t.statistics = kills: data[9], deaths: data[10]
+  updatePlayerData: (playerData) ->
+    if @players[playerData.login]?
+      playerData.wounded = playerData.health < @players[playerData.login].health
+    @players[playerData.login] = playerData
+    if playerData.login is @get('user').get('login')
+      for prop of playerData
+        @player[prop] = playerData[prop]
 
-    if @players[t.login]?
-      t.wounded = t.health < @players[t.login].health
-    @players[t.login] = t
-    if t.login is @get('user').get('login')
-      for prop of t
-        @player[prop] = t[prop]
-
-  updateProjectileData: (data) ->
-    t = {}
-    t.position = x: data[0], y: data[1]
-    t.velocity = x: data[2], y: data[3]
-    t.weapon = data[4]
-    t.lifeTime = data[5]
-    @projectiles.push t
+  updateProjectileData: (projectileData) ->
+    @projectiles.push projectileData
 
   startGame: (attrs) ->
     @player = {}
