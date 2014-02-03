@@ -11,6 +11,7 @@ window.config =
     showCrosshair: true
     showHealth: true
     showPlayersColors: false
+    coloredMode: false
     defaultConsts:
       tickSize: 30
       accuracy: 0.000001

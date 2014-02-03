@@ -18,12 +18,15 @@ class Psg.MapDrawer
             return true if wall.col is j and wall.begin <= i <= wall.end
     return false
 
+  generateColor: ->
+    new Color([Math.random(), Math.random(), Math.random()])
+
   drawScene: (attrs) ->
     scene = new Shape.Rectangle
       point: new Point(-0.5 * @scale, -0.5 * @scale)
       size: new Size((attrs.width + 1) * @scale, (attrs.height + 1) * @scale)
     scene.style =
-      strokeColor: 'black'
+      strokeColor: if config.game.coloredMode then @generateColor() else 'black'
       fillColor: '#ffe'
       strokeWidth: @scale
 
@@ -47,7 +50,10 @@ class Psg.MapDrawer
       size:
         x: wallSize.x * @scale
         y: wallSize.y * @scale
-    shape.style =
+    shape.style = if config.game.coloredMode
+      strokeColor: @generateColor()
+      fillColor: @generateColor()
+    else
       strokeColor: 'black'
       fillColor: 'black'
 
